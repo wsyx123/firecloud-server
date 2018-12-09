@@ -1,0 +1,91 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style type="text/css">
+a{
+  color:#167be0;
+}
+
+.web-content{
+  margin-top:5px;
+  display:inline-block;
+  border: 1px solid #2688ea;
+}
+.component-bottom{
+  text-align:center;
+  background-color:#DDD;
+  border:1px solid #DDD;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					应用商店
+				</li>
+				<li class="active">存储层</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+				
+					<div class="col-xs-12 col-sm-3">
+						<div class="web-content">
+							<img src="/static/images/store/mysql.png" class="img-responsive center-block">
+							<div class="component-bottom">
+							  <h5>已创建<a> 0 </a>个实例 <a>新建</a> APP<a> 详情</a></h5>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-xs-12 col-sm-3">
+						<div class="web-content">
+							<img src="/static/images/store/mongodb.png" class="img-responsive center-block">
+							<div class="component-bottom">
+							  <h5>已创建<a> 0 </a>个实例 <a>新建</a> APP<a> 详情</a></h5>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-xs-12 col-sm-3">
+						<div class="web-content">
+							<img src="/static/images/store/redis.png" class="img-responsive center-block">
+							<div class="component-bottom">
+							  <h5>已创建<a> 0 </a>个实例 <a>新建</a> APP<a> 详情</a></h5>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-xs-12 col-sm-3">
+						<div class="web-content">
+							<img src="/static/images/store/memcached.png" class="img-responsive center-block">
+							<div class="component-bottom">
+							  <h5>已创建<a> 0 </a>个实例 <a>新建</a> APP<a> 详情</a></h5>
+							</div>
+						</div>
+					</div>
+					
+					<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+	</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<!-- page specific plugin scripts -->
+
+{% endblock %}

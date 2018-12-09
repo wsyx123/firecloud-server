@@ -1,0 +1,51 @@
+{% extends "base/base.html" %}
+
+
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>任务调度</li>
+				<li>
+					<a href="{% url 'ListTask' %}">任务列表</a>
+				</li>
+				<li>任务监控</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<iframe src="http://192.168.10.1:5555/dashboard" style="border:none;" id="myiframe"></iframe>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+	function changeFrameHeight(){
+		var ifm= document.getElementById("myiframe"); 
+		ifm.height=document.documentElement.clientHeight;
+		ifm.width=(document.documentElement.clientWidth*84/100);
+
+	}
+
+	window.onresize=function(){  
+		 changeFrameHeight();  
+
+	}
+</script>
+{% endblock %}
+

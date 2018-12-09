@@ -1,0 +1,160 @@
+{% extends "base/base.html" %}
+{% load menu %}
+{% block css %}
+<style>
+input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].ace.ace-checkbox-2:checked+.lbl::before {
+    background-color: #4169E1;
+    border-color: #4169E1;
+    color: #FFF;
+}
+.widget-header {
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    position: relative;
+    min-height: 38px;
+    background: repeat-x #f7f7f7;
+        background-image: none;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffeeeeee', GradientType=0);
+    color: #000000;
+    border-bottom: 1px solid #DDD;
+    padding-left: 12px;
+}
+
+</style>
+<link rel="stylesheet" href="/static/assets/css/select2.min.css" />
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					系统管理
+				</li>
+				
+				<li><a href="{% url 'RoleMgt' %}">角色管理</a></li>
+				<li>新建角色</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="row">
+						
+						<div class="col-xs-12">
+							<div class="widget-box ">
+								<div class="widget-header">
+									<h4 class="widget-title smaller">角色信息</h4>
+									<div style="float:right;margin:2px">
+									<button onclick="init_data();" class="btn btn-primary btn-sm" type="submit" form="nameform">提交</button>
+									<button class="btn btn-warning btn-sm" type="button" onclick="javascript:history.back(-1);" form="nameform">取消</button>
+									</div>
+								</div>
+								
+								<div class="widget-body">
+									<div class="widget-main padding-8">
+										<form class="form-horizontal" id="nameform" method="post">
+											
+											<div class="form-group">
+												<label class="col-sm-1 control-label">角色名称</label>
+												<div class="col-sm-11">
+												  {{form.name}}{{form.errors.name}}
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="col-sm-1 control-label">首页</label>
+												<div class="col-sm-11">
+													{{ form.home_page }}{{form.errors.home_page}}
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="col-sm-1 control-label">描述</label>
+												<div class="col-sm-11">
+												  {{form.description}}{{form.errors.description}}
+												</div>
+											</div>
+											
+											<div class="form-group">
+												<label class="col-sm-1 control-label">菜单权限</label>
+												<div class="col-sm-11">
+													<input name="menu" hidden/>
+													{% menu_perm_list %}
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+							
+							</div>
+							
+						</div>
+
+					</div>
+					
+					<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/assets/js/jquery.dataTables.min.js"></script>
+<script src="/static/assets/js/jquery.dataTables.bootstrap.min.js"></script>
+<script src="/static/assets/js/dataTables.select.min.js"></script>
+
+<script type="text/javascript">
+function init_data(){
+	var menu_all = [];
+	var all_td = $("table tr td:last-child");
+	for (var i=0;i<all_td.length;i++){
+		var temp_dict = {"level1id":null,"level2id":null,"view":0,"create":0,"update":0,"delete":0};
+		temp_dict['level1id'] = parseInt($(all_td[i]).find("input[name='level1id']").val());
+		temp_dict['level2id'] = parseInt($(all_td[i]).find("input[name='level2id']").val());
+		if($(all_td[i]).find("label input[name='view']").prop("checked")){
+			temp_dict["view"] = 1;
+		}
+		if($(all_td[i]).find("label input[name='create']").prop("checked")){
+			temp_dict["create"] = 1;
+		}
+		if($(all_td[i]).find("label input[name='update']").prop("checked")){
+			temp_dict["update"] = 1;
+		}
+		if($(all_td[i]).find("label input[name='delete']").prop("checked")){
+			temp_dict["delete"] = 1;
+		}
+		menu_all.push(temp_dict);
+	}
+	$("input[name='menu']").val(JSON.stringify(menu_all));
+	// 说明:
+	//  在菜单权限table中, 每行（即tr）对象中,最后一个td对象里都有两个隐藏的input , name分别是level1_id,level2_id,
+	//  value也即分别为一级菜单ID,二级菜单ID ,  查看,创建,编辑(update),删除 4个input 的name 分别为 view, create, update, delete
+	// 1 先获取所有tr对象，从下标为1开始遍历
+    // 2 再获取tr对象里的最后一个td对象   
+	// $("table tr td:last")取出的是整个table的最后一个td $("table tr td:last-child")取出的是每行的最后一个td , 
+    // 3 获取td对象里的所有label对象
+	// 4 判断label对象里的input checkbox是否  checked
+	// 5 把checked的 input 的name取出来，level1_id,level2_id 取出来, 
+	// 组成一个dict(json)  {'level1_id':1,'level2_id':2,'view':1,'create':1,'update':1,'delete':1},
+	// 6 最后组成一个大的list(数组)
+	/* [
+		{'level1_id':1,'level2_id':2,'view':1,'create':1,'update':1,'delete':1},
+		{'level1_id':1,'level2_id':3,'view':1,'create':0,'update':1,'delete':1},
+		]
+    */
+}
+</script>
+
+{% endblock %}
+

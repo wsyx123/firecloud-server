@@ -1,0 +1,267 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.bullhorn{
+	background-color:#d6e9c6;
+	padding:5px;
+	margin-bottom:20px;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="#">资产概览</a>
+				</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="bullhorn center">
+						
+						<i class="red fa fa-bullhorn" aria-hidden="true"></i>
+						公告(站内信) :
+						<marquee width="50%">
+						<strong class="">
+						平台将于13日23:45分进行升级 
+						</strong>
+						</marquee>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-2">
+					<div class="panel panel-info">
+					  <div class="panel-heading">
+						<div class="row">
+						  <div class="col-xs-6">
+							<i class="fa fa-dashboard bigger-230"></i>
+						  </div>
+						  <div class="col-xs-6 text-right">
+							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.serTotal }}</strong></p>
+							<p class="announcement-text">Total</p>
+						  </div>
+						</div>
+					  </div>
+					  <a href="#">
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>宿主机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+							  <i class="fa fa-arrow-right"></i>
+							</div>
+						  </div>
+						</div>
+					  </a>
+					</div>
+				</div>
+				  
+				  
+				<div class="col-lg-2">
+					<div class="panel panel-success">
+					  <div class="panel-heading">
+						<div class="row">
+						  <div class="col-xs-6">
+							<i class="fa fa-ok bigger-230"></i>
+						  </div>
+						  <div class="col-xs-6 text-right">
+							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.serRun }}</strong></p>
+							<p class="announcement-text">Connect</p>
+						  </div>
+						</div>
+					  </div>
+					  <a href="#">
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>宿主机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+							  <i class="fa fa-arrow-right"></i>
+							</div>
+						  </div>
+						</div>
+					  </a>
+					</div>
+				</div>
+				  
+				<div class="col-lg-2">
+					<div class="panel panel-danger">
+					  <div class="panel-heading">
+						<div class="row">
+						  <div class="col-xs-6">
+							<i class="icon-remove bigger-230"></i>
+						  </div>
+						  <div class="col-xs-6 text-right">
+							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.serStop }}</strong></p>
+							<p class="announcement-text">Disconnect</p>
+						  </div>
+						</div>
+					  </div>
+					  <a href="#">
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>宿主机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+							  <i class="fa fa-arrow-right"></i>
+							</div>
+						  </div>
+						</div>
+					  </a>
+					</div>
+				</div>
+				  
+				  
+				<div class="col-lg-2">
+					<div class="panel panel-info">
+					  <div class="panel-heading">
+						<div class="row">
+						  <div class="col-xs-6">
+							<i class="icon-globe bigger-230"></i>
+						  </div>
+						  <div class="col-xs-6 text-right">
+							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.vmTotal }}</strong></p>
+							<p class="announcement-text">Total</p>
+						  </div>
+						</div>
+					  </div>
+					  <a href="#">
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>虚拟主机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+							  <i class="icon-arrow-right"></i>
+							</div>
+						  </div>
+						</div>
+					  </a>
+					</div>
+				</div>
+				<div class="col-lg-2">
+					<div class="panel panel-success">
+					  <div class="panel-heading">
+						<div class="row">
+						  <div class="col-xs-6">
+							<i class="icon-play-circle bigger-230"></i>
+						  </div>
+						  <div class="col-xs-6 text-right">
+							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.vmRun }}</strong></p>
+							<p class="announcement-text">Running</p>
+						  </div>
+						</div>
+					  </div>
+					  <a href="#">
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>虚拟主机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+							  <i class="icon-arrow-right"></i>
+							</div>
+						  </div>
+						</div>
+					  </a>
+					</div>
+				</div>
+				<div class="col-lg-2">
+					<div class="panel panel-danger">
+					  <div class="panel-heading">
+						<div class="row">
+						  <div class="col-xs-6">
+							<i class="icon-stop bigger-230"></i>
+						  </div>
+						  <div class="col-xs-6 text-right">
+							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.vmStop }}</strong></p>
+							<p class="announcement-text">Stop</p>
+						  </div>
+						</div>
+					  </div>
+					  <a href="#">
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>虚拟主机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+							  <i class="icon-arrow-right"></i>
+							</div>
+						  </div>
+						</div>
+					  </a>
+					</div>
+				</div>
+			
+			
+				<div class="col-xs-12">
+					<div class="panel">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>CPU TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<p>keystone 内存使用</p>														
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+			
+				<div class="col-xs-12">
+					<div class="panel">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>内存 TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<p>keystone 内存使用</p>													
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+		
+				<div class="col-xs-12">
+					<div>
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>存储 TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<p>keystone 内存使用</p>														
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+			</div>
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+	
+</script>
+{% endblock %}

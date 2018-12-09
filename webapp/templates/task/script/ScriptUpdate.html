@@ -1,0 +1,280 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+
+<!-- custom css -->
+<link rel="stylesheet" href="/static/css/task.css" />
+
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>
+					作业中心
+				</li>
+				<li><a href="{% url 'ScriptList' %}">脚本执行</a></li>
+				<li>编辑脚本</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					
+					<div class="tabbable">
+						<div class="tab-content">
+							<form class="form-horizontal" method="POST" enctype="multipart/form-data" id="script_form">
+								<input name="script_owner" type='text' value="{{request.session.user_id}}" hidden>
+								<input type="text" name="haved_script" value="{{script_id}}" hidden >
+								<div class="form-group">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										脚本名称<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											{{form.name}}{{form.errors.name}}
+										</span>
+									</div>
+								</div>
+								<div class="form-group" hidden>
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										创建者<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											{{form.script_owner}}{{form.errors.script_owner}}
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-12 col-sm-1 control-label no-padding-right">
+										保存文件<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											{{form.script_file}}{{form.errors.script_file}}
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputError2" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										脚本来源<span class="red">*</span>
+									</label>
+									<input type="text" name="script_from" value={{script_from}} hidden />
+									<div class="col-xs-12 col-sm-4">
+										<label class="control-label no-padding-right">
+											<input type="radio" name="scriptFrom" class="ace ace-radio" checked />
+											<span class="lbl">手工录入</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right">
+											<input type="radio" name="scriptFrom" class="ace ace-radio" />
+											<span class="lbl">本地脚本</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right">
+											<input type="radio" name="scriptFrom" class="ace ace-radio" />
+											<span class="lbl">已有脚本</span>
+										</label>
+									</div>
+								</div>
+								<div class="form-group" id="manually-enter">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										脚本内容<span class="red">*</span>
+									</label>
+									<input type="text" name="script_type" value={{script_type}} hidden />
+									<div class="col-xs-12 col-sm-11" id="writeScript">
+										<div class="widget-box">
+											<div class="widget-header">
+												<label class="control-label no-padding-right">
+													<input type="radio" name="Language" class="ace ace-radio" id="shell" checked onclick="scriptTypeCheck('sh');" />
+													<span class="lbl">Shell</span>
+												</label>
+												<span>&nbsp;&nbsp;</span>
+												<label class="control-label no-padding-right">
+													<input type="radio" name="Language" class="ace ace-radio" id='python' onclick="scriptTypeCheck('py');" />
+													<span class="lbl">Python</span>
+												</label>
+												<span>&nbsp;&nbsp;</span>
+												<label class="control-label no-padding-right">
+													<input type="radio" name="Language" class="ace ace-radio" id="perl" onclick="scriptTypeCheck('pl');" />
+													<span class="lbl">Perl</span>
+												</label>
+											</div>
+											<div class="widget-body">
+												<textarea name="script_content" hidden></textarea>
+												<div class="widget-main">
+													<div id="compile-editor" class="ace_editor" style="min-height:200px"></div> 
+												</div>
+											</div>
+										</div>
+										
+									</div>
+								</div>
+								
+								<div class="center">
+									<input type="text" name="action_type" hidden />
+									<button class="btn btn-sm btn-primary" type="button" onclick="formSubmitAction('save');"><i class="fa fa-floppy-o"></i> 保存</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<!-- page specific plugin scripts -->
+<script src="/static/assets/js/jquery-ui.min.js"></script>
+<script src="/static/ace-editor/ace.js"></script>
+<script src="/static/ace-editor/ext-language_tools.js"></script>
+<script src="/static/ace-editor/theme-monokai.js"></script>
+
+<script src="/static/assets/js/jquery.dataTables.min.js"></script>
+<script src="/static/assets/js/jquery.dataTables.bootstrap.min.js"></script>
+<script src="/static/assets/js/dataTables.select.min.js"></script>
+<script type="text/javascript">
+
+var script_from = $("input[name='script_from']").val();
+var script_type = $("input[name='script_type']").val();
+if(script_from==2){
+	scriptSource('local');
+}else if(script_from==3){
+	scriptSource('saved');
+}else{
+	scriptSource('manually');
+}
+
+if(script_type==2){
+	scriptTypeCheck('py');
+}else if(script_from==3){
+	scriptTypeCheck('pl');
+}else{
+	scriptTypeCheck('sh');
+}
+
+loadFileContent();
+
+// 清除ace editor中所有内容
+function removeAllLines(editor){
+	AllLines = $(".ace_line");
+	for(var i=0;i<AllLines.length;i++){
+		editor.removeLines();
+	}
+};
+
+// 设置ace-editor 模式
+function setAceEditMode(model,content) {
+	var editor = ace.edit("compile-editor");
+	var langTools = ace.require("ace/ext/language_tools");
+	editor.setTheme("ace/theme/monokai");
+	//editor.removeLines();
+	removeAllLines(editor);
+	editor.insert(content);
+	editor.getSession().setMode("ace/mode/" + model);
+	editor.setShowPrintMargin(false);
+	editor.setOptions({
+	    enableBasicAutocompletion: true,
+	    enableSnippets: true,
+	    enableLiveAutocompletion: true
+	});
+};
+
+
+//选择脚本来源并设置input[name='script_from'] 值
+function scriptSource(type){
+	if(type=='local'){
+		$("input[name='script_from']").val(2);
+		$("input[name='scriptFrom']").eq(1).attr('checked','true');
+	}else if(type=='saved'){
+		$("input[name='script_from']").val(3);
+		$("input[name='scriptFrom']").eq(2).attr('checked','true');
+	}else{
+		$("input[name='script_from']").val(1);
+		$("input[name='scriptFrom']").eq(0).attr('checked','true');
+	}
+};
+
+//加载脚本内容
+function loadFileContent(){
+	var haved_script_id = $("input[name='haved_script']").val();
+	$.ajax({
+		type:'POST',
+		url: '/script/add/content/',
+		data:{'haved_script_id':haved_script_id},
+		success: function(data){
+			if(data['status']){
+				if(data['script_type']==1){
+					var script_type = scriptTypeCheck('sh');
+				}else if(data['script_type']==2){
+					var script_type = scriptTypeCheck('py');	
+				}else if(data['script_type']==3){
+					var script_type = scriptTypeCheck('pl');
+				}
+				setAceEditMode(script_type,data['contents']);
+			}else{
+				$(".err-msg").text(''+data['msg']);
+			}
+			
+		}
+	})
+
+}
+
+//设置脚本类型选择按钮
+function scriptTypeCheck(type){
+	if(type=='py'){
+		$("#shell").removeAttr('checked');
+		$("#python").prop('checked','true');
+		$("#perl").removeAttr('checked');
+		setAceEditMode('python','#!/usr/bin/env python');
+		$("input[name='script_type']").val(2);
+		return 'python'
+	}else if(type=='pl'){
+		$("#shell").removeAttr('checked');
+		$("#python").removeAttr('checked');
+		$("#perl").prop('checked','true');
+		setAceEditMode('perl','#!/usr/bin/perl');
+		$("input[name='script_type']").val(3);
+		return 'perl'
+	}else{
+		$("#shell").prop('checked','true');
+		$("#python").removeAttr('checked');
+		$("#perl").removeAttr('checked');
+		setAceEditMode('sh','#!/bin/bash');
+		$("input[name='script_type']").val(1);
+		return 'sh'
+	}
+}
+
+//脚本保存
+function formSubmitAction(type){
+	$("input[name='action_type']").val(type);
+	var editor = ace.edit("compile-editor");
+	var contents = editor.getSession().getValue();
+	$("textarea[name='script_content']").text(contents);
+	var task_name = $("input[name='name']").val();
+	if(task_name == ''){
+		alert('填写任务名');
+		return;
+	}
+	if(type=='save'){
+		$('#script_form').serialize()+'&script_content='+contents;
+		$("#script_form").submit();
+	}
+}
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+Q: celery run  ansible api return  none
+A: 1 在celery 的worker启动窗口设置export PYTHONOPTIMIZE=1 或打开celery这个参数-O OPTIMIZATION
+              试了，只有export PYTHONOPTIMIZE=1 生效
+   2 disable python packet multiprocessing process.py line 120 (大概就是这个位置)
+     CentOS 7.1.1503 的/usr/lib64/python2.7/multiprocessing/process.py  124,125行注释掉
+     
+    建议使用 方法1 
+    
+Q: ace editor editor.removeLines();只能移除一行内容，ace.js中找不到清楚全部行的函数，需要自己写
+   每一行内容是用div  span包裹，如下，所以只需要所有的  class="ace_line" 的div
+    <div class="ace_line">
+   		<span class="ace_comment"></span>
+    </div>
+ 
+ A： 
+ // 清除ace editor中所有内容
+function removeAllLines(editor){
+	AllLines = $(".ace_line");
+	for(var i=0;i<AllLines.length;i++){
+		editor.removeLines();
+	}
+}

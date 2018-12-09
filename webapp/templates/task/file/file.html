@@ -1,0 +1,150 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<style>
+	.table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+    
+    border-top: none;
+	padding: 5px;
+}
+	.online{
+		color:rgb(0, 204, 51);
+	}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					作业中心
+				</li>
+				<li>文件分发</li>
+				
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="col-xs-12 col-sm-3" style="border:1px solid #ddd;padding-left:3px;">
+						<table class="table">
+							
+							<tr class="center">
+								<td colspan="4"><h4>主机组 (已选主机12台)</h4></td>
+							</tr>
+							<tr>
+								<td><button class="btn btn-primary btn-minier">展开</button></td>
+								<td><button class="btn btn-primary btn-minier">收缩</button></td>
+								<td><button class="btn btn-primary btn-minier">全选</button></td>
+								<td class="hidden-xs"><button class="btn btn-primary btn-minier">取消全选</button></td>
+							</tr>
+							
+							<tbody>
+								<tr>
+									<td colspan="2">DevOps [3]</td>
+									<td class="hidden-xs"><button class="btn btn-minier">选择</button></td>
+									<td><button class="btn btn-minier">收缩</button></td>
+								</tr>
+								<tr>
+									<td><input type="checkbox"/></td><td>192.168.10.2</td><td class="hidden-xs"></td><td class="online">在线</td>
+								</tr>
+								<tr>
+									<td><input type="checkbox"/></td><td>192.168.10.2</td><td class="hidden-xs"></td><td class="red">离线</td>
+								</tr>
+								<tr>
+									<td><input type="checkbox"/></td><td>192.168.10.2</td><td class="hidden-xs"></td><td class="online">在线</td>
+								</tr>
+								
+							</tbody>
+							
+							<tbody>
+								<tr>
+									<td colspan="2">Other [3]</td>
+									<td class="hidden-xs"><button class="btn btn-minier">选择</button></td>
+									<td><button class="btn  btn-minier">收缩</button></td>
+								</tr>
+								<tr>
+									<td><input type="checkbox"/></td><td>192.168.10.2</td><td class="hidden-xs"></td><td class="online">在线</td>
+								</tr>
+								
+							</tbody>
+						</table>
+					</div>
+				
+					<div class="col-xs-12 col-sm-9">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4 class="smaller">
+									文件分发
+								</h4>
+								
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<div>
+									  <input type="file" style="border:1px solid #ddd;">
+									</div>
+									<div class="space-4"></div>
+									<div class="input-group">
+										<span class="input-group-addon">远程文件路径</span>
+										<input type="text" name="remote_path" class="form-control">
+										<span class="input-group-addon execute-button" onclick="execute_command();"><i class="glyphicon glyphicon-upload"></i>上传</span>
+									</div>
+									
+								</div>
+							</div>
+						</div>
+						<div class="">
+							<div class="widget-box">
+								<div class="widget-header">
+									<h4 class="smaller">
+										执行结果
+										<small>
+											<span class="badge">任务ID:21</span>
+											<span class="badge badge-info">总任务10</span>
+											<span class="badge badge-success">已完成7</span>
+											<span class="badge badge-danger">失败3</span>
+											<span class="badge badge-gray">收缩/展开<i class="glyphicon glyphicon-chevron-left"></i></span>
+										</small>
+									</h4>
+									
+								</div>
+
+								<div class="widget-body">
+									<div class="widget-main">
+										
+										<div id="execute-result-list">
+											<div class="execute-result-detail">
+												<i class="fa fa-caret-down" aria-hidden="true"></i>
+												<span>keystone [192.168.10.2]</span>
+												<span class="result-col">Result:</span>
+												<span class="status-col-success">success</span>
+												<pre>timed out</pre>
+											</div>
+										</div> <!-- end execute-result-list -->
+									</div>
+								</div>
+							</div>
+						</div><!-- /.col -->
+				
+					</div><!-- /.col -->
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+

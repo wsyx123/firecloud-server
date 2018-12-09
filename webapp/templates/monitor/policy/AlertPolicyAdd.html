@@ -1,0 +1,271 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].ace.ace-checkbox-2:checked+.lbl::before {
+    background-color: #4169E1;
+    border-color: #4169E1;
+    color: #FFF;
+}
+
+</style>
+<link rel="stylesheet" href="/static/assets/css/select2.min.css" />
+<link rel="stylesheet" href="/static/assets/css/bootstrap-datetimepicker.min.css" />
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>监控告警</li>
+				<li class="active">告警策略</li>
+				<li class="active">添加策略</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="row">
+						<div class="col-xs-12">
+							<form class="form-horizontal" id="must-info">
+								<div class="form-group">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">策略名称</label>
+									<div class="col-xs-12 col-sm-3">
+										<span class="block input-icon input-icon-right">
+											<input type="text" id="inputWarning" class="width-100" />
+										</span>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label  class="col-xs-12 col-sm-1 control-label no-padding-right">策略类型</label>
+
+									<div class="col-xs-12 col-sm-3">
+										<span class="block input-icon input-icon-right">
+											<select class="form-control">
+												<option value="">主机</option>
+												<option value="">应用</option>
+											</select>
+										</span>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="inputInfo" class="col-xs-12 col-sm-1 control-label no-padding-right">触发条件</label>
+
+									<div class="col-xs-12 col-sm-3">
+										<label class="control-label no-padding-right">
+											<input type="checkbox" class="ace ace-checkbox-2" />
+											<span class="lbl"></span>
+											资源告警
+										</label>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputInfo" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+
+									<div class="col-xs-12 col-sm-11">
+										<select>
+											<option value="">CPU利用率</option>
+											<option value="">内存利用率</option>
+											<option value="">磁盘利用率</option>
+										</select>
+										<select>
+											<option value="">统计周期1分钟</option>
+											<option value="">统计周期5分钟</option>
+											<option value="">统计周期10分钟</option>
+										</select>
+										<select>
+											<option value="">></option>
+										</select>
+										<span >
+											<input style="height:30px;" />%
+										</span>
+									</div>
+									
+								</div>
+								<div class="form-group">
+									<label for="inputInfo" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+
+									<div class="col-xs-12 col-sm-11">
+										<span style="color:#4169E1;">添加</span>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label for="inputInfo" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+
+									<div class="col-xs-12 col-sm-3">
+										<label class="control-label no-padding-right">
+											<input type="checkbox" class="ace ace-checkbox-2" />
+											<span class="lbl"></span>
+											接口告警
+										</label>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputInfo" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+
+									<div class="col-xs-12 col-sm-11">
+										<select>
+											<option value="">http</option>
+											<option value="">tcp</option>
+											<option value="">udp</option>
+										</select>
+										<span >
+											<input type="text" class="input-xlarge" style="height:30px;" placeholder="http://www.example.com/interface1"/>
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputInfo" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+
+									<div class="col-xs-12 col-sm-11">
+										<span style="color:#4169E1;">添加</span>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="inputError2" class="col-xs-12 col-sm-1 control-label no-padding-right">实例绑定</label>
+
+									<div class="col-xs-12 col-sm-10">
+										<span class="block input-icon input-icon-right">
+											<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
+												<option value="192.168.10.1">192.168.10.1</option>
+												<option value="192.168.10.2">192.168.10.2</option>
+												<option value="192.168.10.3">192.168.10.3</option>
+											</select>
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputError2" class="col-xs-12 col-sm-1 control-label no-padding-right">告警方式</label>
+
+									<div class="col-xs-12 col-sm-3">
+										<label class="control-label no-padding-right">
+											<input type="checkbox" class="ace ace-checkbox-2" />
+											<span class="lbl">邮件</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right">
+											<input type="checkbox" class="ace ace-checkbox-2" />
+											<span class="lbl">短信</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right">
+											<input type="checkbox" class="ace ace-checkbox-2" />
+											<span class="lbl">微信</span>
+										</label>
+									</div>
+									
+								</div>
+								
+								<div class="form-group">
+									<label for="inputError2" class="col-xs-12 col-sm-1 control-label no-padding-right">接收组</label>
+
+									<div class="col-xs-12 col-sm-10">
+										<span class="block input-icon input-icon-right">
+											<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
+												<option value="192.168.10.1">192.168.10.1</option>
+												<option value="192.168.10.2">192.168.10.2</option>
+												<option value="192.168.10.3">192.168.10.3</option>
+											</select>
+										</span>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label for="inputError2" class="col-xs-12 col-sm-1 control-label no-padding-right">有效时段</label>
+
+									<div class="col-xs-12 col-sm-6">
+										<span class="block input-icon input-icon-right">
+											<input size="16" type="text" id="start_time" placeholder="起始时间">
+											至 
+											<input size="16" type="text" id="end_time" placeholder="结束时间">
+										</span>
+										
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label for="inputError2" class="col-xs-12 col-sm-1 control-label no-padding-right">告警起停</label>
+
+									<div class="col-xs-12 col-sm-3">
+										<label class=" inline control-label no-padding-right">
+											<input id="id-button-borders" checked="" type="checkbox" class="ace ace-switch ace-switch-5" />
+											<span class="lbl middle"></span>
+										</label>
+									</div>
+								</div>
+								<hr />
+								<div class="clearfix ">
+									<div class="col-md-offset-3 col-md-9">
+										<button class="btn btn-info" type="button">
+											<i class="ace-icon fa fa-check bigger-110"></i>
+											保存
+										</button>
+
+										&nbsp; &nbsp; &nbsp;
+										<button class="btn" type="reset">
+											<i class="ace-icon fa fa-undo bigger-110"></i>
+											重置
+										</button>
+									</div>
+								</div>
+							</form>
+						</div>
+						
+					</div>
+					
+					<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+	</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/assets/js/select2.min.js"></script>
+<script src="/static/assets/js/bootstrap-multiselect.min.js"></script>
+<script src="/static/assets/js/moment.min.js"></script>
+<script src="/static/assets/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" >
+//select2
+$('.select2').css('width','100%').select2({allowClear:false})
+$('#select2-multiple-style .btn').on('click', function(e){
+	var target = $(this).find('input[type=radio]');
+	var which = parseInt(target.val());
+	if(which == 2) $('.select2').addClass('tag-input-style');
+	 else $('.select2').removeClass('tag-input-style');
+});
+
+//////////////////
+$('.multiselect').multiselect({
+ enableFiltering: true,
+ enableHTML: true,
+ buttonClass: 'btn btn-white btn-primary',
+ templates: {
+	button: '<button type="button" class="multiselect dropdown-toggle" data-toggle="dropdown"><span class="multiselect-selected-text"></span> &nbsp;<b class="fa fa-caret-down"></b></button>',
+	ul: '<ul class="multiselect-container dropdown-menu"></ul>',
+	filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="fa fa-search"></i></span><input class="form-control multiselect-search" type="text"></div></li>',
+	filterClearBtn: '<span class="input-group-btn"><button class="btn btn-default btn-white btn-grey multiselect-clear-filter" type="button"><i class="fa fa-times-circle red2"></i></button></span>',
+	li: '<li><a tabindex="0"><label></label></a></li>',
+	divider: '<li class="multiselect-item divider"></li>',
+	liGroup: '<li class="multiselect-item multiselect-group"><label></label></li>'
+ }
+});
+
+$("#start_time").datetimepicker({format: 'HH:mm'});
+$("#end_time").datetimepicker({format: 'HH:mm'});
+
+</script>
+{% endblock %}

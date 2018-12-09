@@ -1,0 +1,60 @@
+<table class="table  table-bordered">
+	<tr>
+		<th>一级菜单</th>
+		<th>二级菜单</th>
+		<th>URL</th>
+		<th>操作权限</th>
+	</tr>
+	{% for level in menu_obj_list %}
+	{% ifequal level.0.url '/' %}
+	<tr>
+		<td>{{ level.0.description }}</td>
+		<td>-</td>
+		<td>#</td>
+		<td>
+			<label class="control-label no-padding-right">
+				<input name="view" type="checkbox" class="ace ace-checkbox-2" />
+				<span class="lbl">查看</span>
+			</label>
+			<input name="level1id" value="{{level.0.id}}" hidden />
+		</td>
+	</tr>
+	{% else %}
+		{% for level2 in level.1 %}
+		<tr>
+			
+			{% if forloop.first  %}
+			<td rowspan="{{level.1|length}}">{{ level.0.description }}</td>
+			{% else %}
+			{% endif %}
+			<td>{{ level2.description }}</td>
+			<td>{{ level2.url }}</td>
+			<td>
+				<label class="control-label no-padding-right">
+					<input name="view" type="checkbox" class="ace ace-checkbox-2"/>
+					<span class="lbl">查看</span>
+				</label>
+				<span>&nbsp;&nbsp;</span>
+				<label class="control-label no-padding-right">
+					<input name="create" type="checkbox" class="ace ace-checkbox-2" />
+					<span class="lbl">创建</span>
+				</label>
+				<span>&nbsp;&nbsp;</span>
+				<label class="control-label no-padding-right">
+					<input name="edit" type="checkbox" class="ace ace-checkbox-2" />
+					<span class="lbl">编辑</span>
+				</label>
+				<span>&nbsp;&nbsp;</span>
+				<label class="control-label no-padding-right">
+					<input name="delete" type="checkbox" class="ace ace-checkbox-2" />
+					<span class="lbl">删除</span>
+				</label>
+				<input name="level1id" value="{{level.0.id}}"  hidden />
+				<input name="level2id" value="{{level2.id}}"  hidden />
+			</td>
+		</tr>	
+		{% endfor %}
+	{% endifequal %}
+	{% endfor %}
+
+</table>

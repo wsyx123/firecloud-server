@@ -1,0 +1,453 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<style>
+.hostoverview{
+	border: 1px solid  	#D3D3D3;
+	padding-top: 5px;
+}
+
+.hostoverview span{
+	font-weight: 700;
+}
+
+h3{
+	margin:40px 0px;
+	font-weight: 700;
+	color:#33CC99;
+}
+
+.table > tbody > tr > td{
+	padding:2px;
+	border-top: none;
+}
+
+.table > tbody > tr > th{
+	padding:2px;
+	border-top: none;
+}
+.widget-box {
+    margin: 0px;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>监控告警</li>
+				<li><a href="{% url 'hostmonitor' %}">主机监控</a></li>
+				<li>{{ hostname }}</li>
+				
+			</ul><!-- /.breadcrumb -->
+			<div style="float:right">
+			<span class="label label-xlg" style="background-color:#337ab7;">
+				<a href="{% url 'fullscreen' %}" target="view_window" style="color:white;"><i class="fa fa-television" aria-hidden="true"></i>
+				大屏模式
+				</a>
+			</span>
+			<span class="label label-xlg" style="background-color:#337ab7;"><i class="fa fa-refresh" aria-hidden="true"></i> 刷新</span>
+			</div>
+
+		</div>
+
+		<div class="page-content">
+			
+			<div class="row">	
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-header ">
+							<h4>运行时间</h4>
+						</div>
+						<div class="widget-body">
+							<h3>109</h3>									
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-header">
+							<h4>进程数</h4>
+						</div>
+						<div class="widget-body">
+							<h3>109</h3>									
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-header">
+							<h4>线程数</h4>
+						</div>
+						<div class="widget-body">
+							<h3>109</h3>									
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-header">
+							<h4>5分钟负载</h4>
+						</div>
+						<div class="widget-body">
+							<h3>109</h3>									
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-header">
+							<h4>10分钟负载</h4>
+						</div>
+						<div class="widget-body">
+							<h3>109</h3>									
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-header">
+							<h4>15分钟负载</h4>
+						</div>
+						<div class="widget-body">
+							<h3>109</h3>									
+						</div>
+					</div>								
+				</div>
+				
+				<div class="col-xs-12 col-sm-6">
+					<div class="space-6"></div>
+					<div class="hostoverview">
+						<div id="cpu">CPU</div>
+						<div style="padding-left:25px;">
+							<table class="table">
+								<tbody>
+									<tr>
+										<th></th><th></th><th>min</th>
+										<th>max</th><th>avg</th><th>current</th>
+									</tr>
+									<tr>
+										<td style="color:#90EE90;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_idle</td><td>91</td>
+										<td>95</td><td>93</td><td>92</td>
+									</tr>
+									<tr>
+										<td style="color:#00BFFF;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_user</td><td>1</td>
+										<td>6</td><td>4</td><td>4</td>
+									</tr>
+									<tr>
+										<td style="color:#DAA520;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_system</td><td>2</td>
+										<td>5</td><td>3</td><td>2</td>
+									</tr>
+									<tr>
+										<td style="color:#FFFF00;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_iowait</td><td>0</td>
+										<td>3</td><td>2</td><td>2</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+				</div>
+				<div class="col-xs-12 col-sm-6">
+					<div class="space-6"></div>
+					<div class="hostoverview">
+						<div id="memory">memory</div>
+						<div style="padding-left:25px;">
+							<table class="table">
+								<tbody>
+									<tr>
+										<th></th><th></th><th>min</th>
+										<th>max</th><th>avg</th><th>current</th>
+									</tr>
+									<tr>
+										<td><i class="fa fa-minus" aria-hidden="true"></i></td><td>available</td><td>N/A</td>
+										<td>N/A</td><td>N/A</td><td>N/A</td>
+									</tr>
+									<tr>
+										<td><i class="fa fa-minus" aria-hidden="true"></i></td><td>used</td><td>N/A</td>
+										<td>N/A</td><td>N/A</td><td>N/A</td>
+									</tr>
+									<tr>
+										<td><i class="fa fa-minus" aria-hidden="true"></i></td><td>swap_available</td><td>N/A</td>
+										<td>N/A</td><td>N/A</td><td>N/A</td>
+									</tr>
+									<tr>
+										<td><i class="fa fa-minus" aria-hidden="true"></i></td><td>swap_used</td><td>N/A</td>
+										<td>N/A</td><td>N/A</td><td>N/A</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-xs-12 col-sm-6">
+					<div class="space-6"></div>
+					<div class="hostoverview">
+						<div id="diskI">diskI</div>
+						<div id="diskId" style="padding-left:25px;">
+							<table class="table">
+								<tbody>
+									<tr>
+										<th></th><th></th><th>min</th>
+										<th>max</th><th>avg</th><th>current</th>
+									</tr>
+									<tr>
+										<td style="color:#90EE90;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_idle</td><td>91</td>
+										<td>95</td><td>93</td><td>92</td>
+									</tr>
+									<tr>
+										<td style="color:#00BFFF;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_user</td><td>1</td>
+										<td>6</td><td>4</td><td>4</td>
+									</tr>
+									<tr>
+										<td style="color:#DAA520;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_system</td><td>2</td>
+										<td>5</td><td>3</td><td>2</td>
+									</tr>
+									<tr>
+										<td style="color:#FFFF00;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_iowait</td><td>0</td>
+										<td>3</td><td>2</td><td>2</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-xs-12 col-sm-6">
+					<div class="space-6"></div>
+					<div class="hostoverview">
+						<div id="diskU">diskU</div>
+						<div id="diskUd" style="padding-left:25px;">
+							<table class="table">
+								<tbody>
+									<tr>
+										<th></th><th></th><th>min</th>
+										<th>max</th><th>avg</th><th>current</th>
+									</tr>
+									<tr>
+										<td style="color:#90EE90;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_idle</td><td>91</td>
+										<td>95</td><td>93</td><td>92</td>
+									</tr>
+									<tr>
+										<td style="color:#00BFFF;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_user</td><td>1</td>
+										<td>6</td><td>4</td><td>4</td>
+									</tr>
+									<tr>
+										<td style="color:#DAA520;"><i class="fa fa-minus" aria-hidden="true"></i></td><td>usage_system</td><td>2</td>
+										<td>5</td><td>3</td><td>2</td>
+									</tr>
+									
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-xs-12 col-sm-6">
+					<div class="space-6"></div>
+					<div class="hostoverview">
+						<div id="network">network</div>
+					</div>
+				</div>
+				
+				<div class="col-xs-12 col-sm-6">
+					<div class="space-6"></div>
+					<div class="hostoverview">
+						<div id="netstat">netstat</div>
+					</div>
+				</div>
+				
+				<div class="col-xs-12">
+					<div class="space-6"></div>
+					<div class="hostoverview">
+						<div id="processes">processes</div>
+					</div>
+				</div>
+				
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/js/echarts.min.js"></script>
+
+<script type="text/javascript">  	
+	function setdiskIO (id,title,height,series) {
+	$('#'+id).css({'width': '100%' , 'height': height});
+    this.chart = echarts.init(document.getElementById(id))
+    this.chart.setOption({
+    title: {
+        text: title,
+		x: 'center',
+		textStyle: {
+              fontWeight: 'normal',
+              fontSize: 16,
+        }
+    },
+    tooltip : {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            label: {
+                backgroundColor: '#6a7985'
+            }
+        }
+    },
+   
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : ['09:00','09:30','10:00','10:30','11:00','11:30','12:00']
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+        }
+    ],
+    series : series
+    });
+	return this.chart;
+    };
+$(document).ready(function(){
+	var hei = (document.documentElement.clientHeight*28/100);
+	var cpu_series =[
+        
+        {
+            name:'usage_iowait',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {}},
+			itemStyle:{
+				normal:{
+					color:'#FFFF00'
+				}
+			},
+            data:[1, 2, 1, 3, 1, 2, 4]
+        },
+        {
+            name:'usage_user',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {
+				color:'yellow',
+				},},
+			itemStyle:{
+				normal:{
+					color:'#00BFFF'
+				}
+			},
+            data:[3, 4, 5, 3, 5, 6, 1],
+        },
+        {
+            name:'usage_system',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {}},
+			itemStyle:{
+				normal:{
+					color:'#DAA520'
+				}
+			},
+            data:[5, 4, 2, 1, 3, 2, 1]
+        },
+		{
+            name:'usage_idle',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {
+				color: '#90EE90'
+			}},
+			itemStyle:{
+				normal:{
+					color:'#90EE90'
+				}
+			},
+            data:[91, 90, 92, 93, 91, 90, 94]
+        }
+    ];
+	var memory_series =[
+        
+        {
+            name:'usage_iowait',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {}},
+			itemStyle:{
+				normal:{
+					color:'#FFFF00'
+				}
+			},
+            data:[1, 2, 1, 3, 1, 2, 4]
+        },
+        {
+            name:'usage_user',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {
+				color:'yellow',
+				},},
+			itemStyle:{
+				normal:{
+					color:'#00BFFF'
+				}
+			},
+            data:[3, 4, 5, 3, 5, 6, 1],
+        },
+        
+		
+    ];
+	
+	
+	var diskI_hei_t = $("#diskId").css('height');
+	var diskU_hei_t = $("#diskUd").css('height');
+	
+	var diskI_hei = hei-(diskI_hei_t.substring(0,diskI_hei_t.length-2)) +113;
+	var diskU_hei = hei-(diskU_hei_t.substring(0,diskU_hei_t.length-2)) +113;
+	
+	console.log(hei);
+	console.log(diskI_hei);
+
+	cpuObj = setdiskIO('cpu','CPU',hei,cpu_series);
+	memoryObj = setdiskIO('memory','Memory',hei,memory_series);
+	diskIObj = setdiskIO('diskI','Disk IO',diskI_hei,memory_series);
+	diskUObj = setdiskIO('diskU','Disk Used',diskU_hei,memory_series);
+	networkObj = setdiskIO('network','Network',hei);
+	netstatObj = setdiskIO('netstat','Netstat',hei);
+	processesObj = setdiskIO('processes','Processes',hei);
+	
+	
+	
+});
+$(window).resize(function() {
+	/* var width = $(".widget-main").width();
+	draw_resource('piechart-placeholder',width,'180px','60'); */
+	cpuObj.resize();
+	memoryObj.resize();
+	diskIObj.resize();
+	diskUObj.resize();
+	networkObj.resize();
+	netstatObj.resize();
+	processesObj.resize();
+});
+  
+</script>
+{% endblock %}

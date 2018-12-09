@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+#_*_ coding:utf-8 _*_
+'''
+Created on 2018年10月29日
+
+@author: yangxu
+'''
+from django import forms
+from webapp.models import ScriptModel
+
+class ScriptModelForm(forms.ModelForm):
+    class Meta:
+        model = ScriptModel
+        fields = "__all__"
+        widgets = {'name': forms.TextInput(attrs={'class': 'form-control'}),
+                   'script_file': forms.TextInput(attrs={'class': 'form-control','readonly':'true'}),
+                   }
+
+
+        

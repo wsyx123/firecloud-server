@@ -1,0 +1,479 @@
+{% extends "base/base.html" %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="#">概览面板</a>
+				</li>
+			</ul><!-- /.breadcrumb -->
+			
+		</div>
+
+		<div class="page-content">
+			<div class="row">
+				<div class="col-xs-12">
+
+					<div class="row">
+						<div class="space-6"></div>
+
+						<div class="col-sm-7 infobox-container">
+							<div class="row">
+								<div class="col-xs-12">
+								<div class="col-sm-2"></div>
+								<div class="col-xs-12 col-sm-4">	
+									<div class="infobox infobox-green">
+										<div class="infobox-icon">
+											<img src="/static/images/elasticsearch.png" style="width:50px;"></img>
+										</div>
+
+										<div class="infobox-data">
+											<span style="color:#00DD00;">运行</span>
+											<div class="infobox-content">Elasticsearch</div>
+										</div>
+									</div>
+								</div>
+							
+								<div class="col-xs-12 col-sm-4">	
+									<div class="infobox infobox-red">
+										<div class="infobox-icon">
+											<img src="/static/images/mysql.png" style="width:50px;"></img>
+										</div>
+
+										<div class="infobox-data">
+											<span style="color:#00DD00;"> &nbsp;运行</span>
+											<div class="infobox-content"> &nbsp;Mysql</div>
+										</div>
+									</div>
+									
+								</div>
+								</div>
+							</div>
+							<div class="space-6"></div>
+							
+							<div class="infobox infobox-green">
+								<div class="infobox-icon">
+									<i class="ace-icon fa fa-skyatlas"></i>
+								</div>
+
+								<div class="infobox-data">
+									<span class="infobox-data-number">3</span>
+									<div class="infobox-content">集群</div>
+								</div>
+
+							</div>
+
+							<div class="infobox infobox-blue">
+								<div class="infobox-icon">
+									<i class="ace-icon fa fa-desktop"></i>
+								</div>
+
+								<div class="infobox-data">
+									<span class="infobox-data-number">11</span>
+									<div class="infobox-content">主机</div>
+								</div>
+
+								
+							</div>
+
+							<div class="infobox infobox-pink">
+								<div class="infobox-icon">
+									<i class="ace-icon fa fa-cube"></i>
+								</div>
+
+								<div class="infobox-data">
+									<span class="infobox-data-number">8</span>
+									<div class="infobox-content">应用</div>
+								</div>
+								
+							</div>
+
+							<div class="infobox infobox-blue2">
+								<div class="infobox-icon">
+									<i class="ace-icon fa fa-connectdevelop"></i>
+								</div>
+
+								<div class="infobox-data">
+									<span class="infobox-data-number">7</span>
+									<div class="infobox-content">容器</div>
+								</div>
+							</div>
+							
+							<div class="infobox infobox-blue2">
+								<div class="infobox-icon">
+									<i class="ace-icon fa fa-tasks"></i>
+								</div>
+
+								<div class="infobox-data">
+									<span class="infobox-data-number">7</span>
+									<div class="infobox-content">定时任务</div>
+								</div>
+							</div>
+							
+							<div class="infobox infobox-red">
+								<div class="infobox-icon">
+									<i class="ace-icon fa fa-bell-o"></i>
+								</div>
+
+								<div class="infobox-data">
+									<span class="infobox-data-number">7</span>
+									<div class="infobox-content">告警</div>
+								</div>
+							</div>
+
+							<div class="space-6"></div>
+
+							<div class="infobox infobox-green infobox-small infobox-dark">
+								<div class="infobox-progress">
+									<div class="easy-pie-chart percentage" data-percent="61" data-size="39">
+										<span class="percent">61</span>%
+									</div>
+								</div>
+
+								<div class="infobox-data">
+									<div class="infobox-content">集群</div>
+									<div class="infobox-content">健康指数</div>
+								</div>
+							</div>
+
+							<div class="infobox infobox-blue infobox-small infobox-dark">
+								<div class="infobox-progress">
+									<div class="easy-pie-chart percentage" data-percent="61" data-size="39">
+										<span class="percent">61</span>%
+									</div>
+								</div>
+
+								<div class="infobox-data">
+									<div class="infobox-content">主机</div>
+									<div class="infobox-content">健康指数</div>
+								</div>
+							</div>
+
+							<div class="infobox infobox-pink infobox-small infobox-dark">
+								<div class="infobox-progress">
+									<div class="easy-pie-chart percentage" data-percent="61" data-size="39">
+										<span class="percent">61</span>%
+									</div>
+								</div>
+
+								<div class="infobox-data">
+									<div class="infobox-content">应用</div>
+									<div class="infobox-content">健康指数</div>
+								</div>
+							</div>
+						
+						</div>
+
+						<div class="vspace-12-sm"></div>
+
+						<div class="col-sm-5">
+							<div class="widget-box">
+								<div class="widget-header widget-header-flat widget-header-small">
+									<h5 class="widget-title">
+										<i class="ace-icon fa fa-signal"></i>
+										资源情况
+									</h5>
+								</div>
+
+								<div class="widget-body">
+									<div class="widget-main">
+										<div id="piechart-placeholder"></div>
+
+										<div class="hr hr8 hr-double"></div>
+
+										<div class="clearfix">
+											<div class="grid3">
+												<span class="grey">
+													CPU：155核
+												</span>
+											</div>
+
+											<div class="grid3">
+												<span class="grey">
+													内存：255 GB
+												</span>
+											</div>
+
+											<div class="grid3">
+												<span class="grey">
+													存储：1024 GB
+												</span>
+											</div>
+										</div>
+									</div><!-- /.widget-main -->
+								</div><!-- /.widget-body -->
+							</div><!-- /.widget-box -->
+						</div><!-- /.col -->
+					</div><!-- /.row -->
+
+					<div class="hr hr32 hr-dotted"></div>
+
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="widget-box transparent">
+								<div class="widget-header widget-header-flat">
+									<h4 class="widget-title lighter">
+										<i class="ace-icon fa fa-star orange"></i>
+										最新告警
+									</h4>
+
+									<div class="widget-toolbar">
+										<a href="#" data-action="collapse">
+											<i class="ace-icon fa fa-chevron-up"></i>
+										</a>
+									</div>
+								</div>
+
+								<div class="widget-body">
+									<div class="widget-main no-padding">
+										<table class="table table-bordered table-striped">
+											<thead class="thin-border-bottom">
+												<tr>
+													<th>
+														<i class="ace-icon fa fa-caret-right blue"></i>时间
+													</th>
+
+													<th>
+														<i class="ace-icon fa fa-caret-right blue"></i>级别
+													</th>
+
+													<th class="hidden-480">
+														<i class="ace-icon fa fa-caret-right blue"></i>内容
+													</th>
+												</tr>
+											</thead>
+
+											<tbody>
+												<tr>
+													<td>15:36</td>
+
+													<td class="hidden-480">
+														<span class="label label-warning">warning</span>
+													</td>
+													
+													<td class="hidden-10">
+														<b class="green">主机192.168.10.3 (CPU)发生利用率过高告警</b>
+													</td>
+												</tr>
+												
+												<tr>
+													<td>15:36</td>
+
+													<td class="hidden-480">
+														<span class="label label-danger">danger</span>
+													</td>
+													
+													<td class="hidden-10">
+														<b class="green">主机192.168.10.3 (CPU)发生利用率过高告警</b>
+													</td>
+												</tr>
+												
+												<tr>
+													<td>15:36</td>
+
+													<td class="hidden-480">
+														<span class="label">info</span>
+													</td>
+													
+													<td class="hidden-10">
+														<b class="green">主机192.168.10.3 (CPU)发生利用率过高告警</b>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div><!-- /.widget-main -->
+								</div><!-- /.widget-body -->
+							</div><!-- /.widget-box -->
+						</div><!-- /.col -->
+
+						<div class="col-sm-6">
+							<div class="widget-box transparent">
+								<div class="widget-header widget-header-flat">
+									<h4 class="widget-title lighter">
+										<i class="ace-icon fa fa-signal"></i>
+										发布统计
+									</h4>
+									
+									<div class="widget-toolbar no-border">
+										<div class="inline dropdown-hover">
+											<button class="btn btn-minier btn-primary">
+												这个星期
+												<i class="ace-icon fa fa-angle-down icon-on-right bigger-110"></i>
+											</button>
+
+											<ul class="dropdown-menu dropdown-menu-right dropdown-125 dropdown-lighter dropdown-close dropdown-caret">
+												<li class="active">
+													<a href="#" class="blue">
+														<i class="ace-icon fa fa-caret-right bigger-110">&nbsp;</i>
+														这个星期
+													</a>
+												</li>
+
+												<li>
+													<a href="#">
+														<i class="ace-icon fa fa-caret-right bigger-110 invisible">&nbsp;</i>
+														上个星期
+													</a>
+												</li>
+
+												<li>
+													<a href="#">
+														<i class="ace-icon fa fa-caret-right bigger-110 invisible">&nbsp;</i>
+														这个月
+													</a>
+												</li>
+
+												<li>
+													<a href="#">
+														<i class="ace-icon fa fa-caret-right bigger-110 invisible">&nbsp;</i>
+														上个月
+													</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+
+									<div class="widget-toolbar">
+										<a href="#" data-action="collapse">
+											<i class="ace-icon fa fa-chevron-up"></i>
+										</a>
+									</div>
+								</div>
+
+								<div class="widget-body">
+									<div class="widget-main padding-4">
+										<div id="sales-charts"></div>
+									</div><!-- /.widget-main -->
+								</div><!-- /.widget-body -->
+							</div><!-- /.widget-box -->
+						</div><!-- /.col -->
+					</div><!-- /.row -->
+					
+
+					<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<!-- echarts js -->
+<script src="/static/js/echarts.min.js"></script>
+<script type="text/javascript">
+	function draw_resource(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		resourceChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#3398DB','#ddd'],
+			xAxis: {
+				type: 'category',
+				data: ['CPU', '内存', '存储'],
+				
+			},
+			yAxis: {
+				type: 'value',
+				axisLabel: {
+                formatter: '{value}%'
+				}
+			},
+			series: [{
+				data: [20, 22, 80],
+				type: 'bar',
+				itemStyle: {
+					normal: {
+                    color: function(params) {
+						var colorList = [
+						   '#B5C334','#FCCE10','#60C0DD'
+						];
+						return colorList[params.dataIndex]
+                        },
+					},
+				},
+				barWidth:barwidth,
+				label: {
+                normal: {
+                    show: true,
+                    position: 'top'
+					}
+				},
+			}]
+		};
+		resourceChart.setOption(option); 
+		
+	}
+	function draw_statistics(id){
+		$('#'+id).css({'width': '100%' , 'min-height': '190px'});
+		statisticsChart = echarts.init(document.getElementById(id));
+		option = {
+			
+			tooltip : {
+				trigger: 'item',
+				formatter: "{a} <br/>{b} : {c} ({d}%)"
+			},
+			color: ['#00CC33','#FF3333'],
+			legend: {
+				orient: 'vertical',
+				right: '20px',
+				top: '20px',
+				data: ['成功','失败']
+			},
+			series : [
+				{
+					name: '应用发布',
+					type: 'pie',
+					radius : '65%',
+					center: ['40%', '60%'],
+					data:[
+						{value:335, name:'成功'},
+						{value:310, name:'失败'},
+						
+					],
+					itemStyle: {
+					  normal: {label:{
+					  show:true,
+					  formatter:'{b} : {c} ({d}%)'
+					  },
+					  labelLine:{show:true}},
+						emphasis: {
+							label: {
+								show: true,
+								formatter: "{b}\n{c} ({d}%)",
+								position: 'center',
+								textStyle: {
+									fontSize: '30',
+									fontWeight: 'bold'
+								}
+							}
+						},
+						emphasis: {
+							shadowBlur: 10,
+							shadowOffsetX: 0,
+							shadowColor: 'rgba(0, 0, 0, 0.5)'
+						}
+					}
+				}
+			]
+		};
+		statisticsChart.setOption(option);
+	}
+	$(document).ready(function(){
+		draw_resource('piechart-placeholder','100%','180px','60');
+		draw_statistics('sales-charts');
+
+	});
+	$(window).resize(function() {
+		/* var width = $(".widget-main").width();
+		draw_resource('piechart-placeholder',width,'180px','60'); */
+		resourceChart.resize();
+		statisticsChart.resize();
+	});
+	
+	
+	
+</script>
+{% endblock %}

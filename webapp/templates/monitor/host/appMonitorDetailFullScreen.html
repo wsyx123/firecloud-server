@@ -1,0 +1,364 @@
+<head>
+<link rel="stylesheet" href="/static/assets/css/bootstrap.min.css" />
+<link rel="stylesheet" href="/static/assets/css/ace.min.css" class="ace-main-stylesheet"/>
+<style>
+body{
+background-color: #0d1b35;
+}
+
+
+#app-title{
+	width:480px;
+	height:60px;
+	text-align:center;
+	background:url('/static/images/fullscreentitle.png');
+	color: white;
+	padding:18px 0px 0px 20px;
+	font-weight: 600;
+	font-size: 18px;
+	margin:auto;
+}
+
+.graph,.graph1,.graph2,.graph3{
+	border: 1px solid #1FE3D2;
+	border-radius: 16px;
+	min-height: 327px;
+	color: white;
+}
+
+.graph1,.graph3{
+	height:357px;
+}
+
+</style>
+</head>
+<body style="overflow-x: hidden;" >
+<div class="row">
+	<div class="col-xs-12">
+		<div class="col-xs-12">
+			<div id="app-title" class="row">web01全景图</div>
+		</div>
+		
+		<div class="col-xs-12 col-sm-4 ">
+			<div class="graph1">
+				<div id="curve"></div>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-4">
+			<div class="space-12"></div>
+			<div class="graph2" style="height:280px;">
+				<div id="radar-graph"></div>
+			</div>
+		</div>
+		
+		<div class="col-xs-12 col-sm-4">
+			<div class="graph3">
+				<div id="curve2"></div>
+			</div>
+		</div>
+		
+		<div class="col-xs-12 ">
+			<div class="space-6"></div>
+			<div class="graph">
+				<div class="row">
+					<div class="col-xs-12 col-sm-4">
+						<div id="cpu"></div>
+					</div>
+					
+					<div class="col-xs-12 col-sm-4">
+						<div id="memory"></div>
+					</div>
+					
+					<div class="col-xs-12 col-sm-4">
+						<div id="disk"></div>
+					</div>
+				
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<script src="/static/assets/js/jquery-2.1.4.min.js"></script>
+<script src="/static/js/echarts.min.js"></script>
+
+<script type="text/javascript">
+ function sethealth (id,height) {
+	$('#'+id).css({'width': '100%' , 'height': '300px'});
+    radarObj = echarts.init(document.getElementById(id))
+    radarObj.setOption({
+        title: {
+          text: '90',
+          x: 'center',
+          y: 'center',
+          textStyle: {
+              color: 'white',
+              fontWeight: 'bolder',
+              fontSize: 48,
+          }
+        },
+       color: ['#0099FF'],
+       radar: {
+           // shape: 'circle',
+           name: {
+               textStyle: {
+                   color: '#fff',
+                   backgroundColor: '#167be0',
+                   borderRadius: 3,
+                   padding: [3, 5]
+              }
+           },
+           indicator: [
+              { name: 'CPU', max: 100},
+              { name: '内存', max: 100},
+              { name: 'IO', max: 100},
+              { name: 'Interface', max: 100}
+           ]
+       },
+       series: [{
+           name: '预算 vs 开销（Budget vs spending）',
+           type: 'radar',
+           // areaStyle: {normal: {}},
+           data : [
+               {
+                   value : [80, 90, 70, 98],
+                   name : '应用健康指数得分',
+                   label: {
+                     normal: {
+                       show: true,
+                     }
+                   },
+                   areaStyle: {
+                     normal: {
+                       opacity: 0.9,
+                       color: {
+                          type: 'radial',
+                          colorStops: [{
+                              offset: 0, color: '#B8D3E4' // 0% 处的颜色
+                          }, {
+                              offset: 1, color: '#B8D3E4' // 100% 处的颜色
+                          }],
+                          globalCoord: false // 缺省为 false
+                      }
+                     }
+                   }
+               }
+           ]
+       }]
+    })
+	return radarObj;
+  };
+  
+  function setresponse (id,height) {
+    $('#'+id).css({'width': '100%' , 'height': '300px'});
+    curveObj = echarts.init(document.getElementById(id));
+    curveObj.setOption({
+      tooltip : {
+         trigger: 'axis',
+         axisPointer: {
+             type: 'cross',
+             label: {
+                 backgroundColor: '#6a7985'
+             }
+         }
+     },
+     legend: {
+         data:['正确响应','超时响应','错误响应'],
+		 textStyle:{
+           color: 'white',
+         }
+     },
+     grid: {
+         left: '3%',
+         right: '4%',
+         bottom: '3%',
+         containLabel: true
+     },
+     toolbox: {
+         feature: {
+             saveAsImage: {}
+         }
+     },
+     xAxis: {
+         type: 'category',
+         boundaryGap: false,
+         data: ['23:10','23:12','23:14','23:16','23:18'],
+		 axisLabel:{
+           textStyle:{
+             color: 'white'
+           }
+         }
+     },
+     yAxis: {
+         type: 'value',
+		 axisLabel:{
+           textStyle:{
+             color: 'white'
+           }
+         }
+     },
+     series: [
+         {
+             name:'错误响应',
+             type:'line',
+             stack: '总量',
+             data:[1, 0, 5, 0, 0],
+			 itemStyle: {
+               normal: {
+                  color: "red",
+                  lineStyle: {
+                      color: "red"
+                  }
+                }
+              },
+         },
+         {
+             name:'超时响应',
+             type:'line',
+             stack: '总量',
+             data:[2, 1, 1, 0, 0],
+			 itemStyle: {
+               normal: {
+                  color: "yellow",
+                  lineStyle: {
+                      color: "yellow"
+                  }
+                }
+              },
+         },
+         {
+             name:'正确响应',
+             type:'line',
+             stack: '总量',
+             data:[20, 132, 101, 134, 90],
+			 itemStyle: {
+               normal: {
+                  color: "#00FF00",
+                  lineStyle: {
+                      color: "#00FF00"
+                  }
+                }
+              },
+         }
+     ]
+    })
+	return curveObj;
+	};
+	
+	function setdiskIO (id,title,height) {
+	$('#'+id).css({'width': '100%' , 'height': height});
+    this.chart = echarts.init(document.getElementById(id))
+    this.chart.setOption({
+      title: {
+            x: 'center',
+            text: title,
+			textStyle: {
+                color: 'white',
+                fontWeight: 'bolder',
+                fontSize: 18,
+            }
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            data: ['14:21','14:23','14:25','14:27','14:29','14:31','14:33','14:35','14:37','14:39'],
+			axisLabel:{
+              textStyle:{
+                color: 'white'
+              }
+            }
+        },
+        yAxis: {
+            splitLine: {
+                show: false
+            },
+			axisLabel:{
+              textStyle:{
+                color: 'white'
+              }
+            }
+        },
+        visualMap: {
+            top: 20,
+            right: 1,
+            pieces: [{
+                gt: 0,
+                lte: 50,
+                color: '#096'
+            }, {
+                gt: 50,
+                lte: 100,
+                color: '#ffde33'
+            }, {
+                gt: 100,
+                lte: 150,
+                color: '#ff9933'
+            }, {
+                gt: 150,
+                lte: 200,
+                color: '#cc0033'
+            }, {
+                gt: 200,
+                lte: 300,
+                color: '#660099'
+            }, {
+                gt: 300,
+                color: '#7e0023'
+            }],
+            outOfRange: {
+                color: '#999'
+            }
+        },
+        series: {
+            type: 'line',
+            data: ['1','11','20','11','40','81','10','11','10','11','10','11'],
+            markLine: {
+                silent: true,
+                data: [{
+                    yAxis: 50
+                }, {
+                    yAxis: 100
+                }, {
+                    yAxis: 150
+                }, {
+                    yAxis: 200
+                }, {
+                    yAxis: 300
+                }]
+            }
+        }
+    });
+	return this.chart;
+    };
+$(document).ready(function(){
+	var hei = (document.documentElement.clientHeight*45/100);
+	radarObj = sethealth('radar-graph');
+	curve1Obj = setresponse('curve');
+	curve2Obj = setresponse('curve2');
+	cpuObj = setdiskIO('cpu','CPU利用率',hei);
+	memoryObj = setdiskIO('memory','内存利用率',hei);
+	diskObj = setdiskIO('disk','磁盘IO',hei);
+
+});
+
+$(window).resize(function() {
+	/* var width = $(".widget-main").width();
+	draw_resource('piechart-placeholder',width,'180px','60'); */
+	radarObj.resize();
+	curve1Obj.resize();
+	curve2Obj.resize();
+	cpuObj.resize();
+	memoryObj.resize();
+	diskObj.resize();
+});
+  
+</script>
+
+
+</body>

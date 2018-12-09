@@ -1,0 +1,247 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/assets/css/select2.min.css" />
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					资产管理
+				</li>
+				<li>组织管理</li>
+				<li><a href="{% url 'project' %}">项目</a></li>
+				<li>创建项目</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<form class="form-horizontal">
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-1 control-label no-padding-right">项目编号</label>
+							<div class="col-xs-12 col-sm-11">
+								<span class="block input-icon input-icon-right">
+									<input type="text" class="width-100">
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-1 control-label no-padding-right">项目名称</label>
+							<div class="col-xs-12 col-sm-11">
+								<span class="block input-icon input-icon-right">
+									<input type="text" class="width-100">
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputSuccess" class="col-xs-12 col-sm-1 control-label no-padding-right">公司</label>
+							<div class="col-xs-12 col-sm-11">
+								<span class="block input-icon input-icon-right">
+									<input list="enterprise" type="text" class="width-100">
+									<datalist id="enterprise">
+										<option value="Firecloud科技有限公司">Firecloud科技有限公司</option>
+									</datalist>
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputSuccess" class="col-xs-12 col-sm-1 control-label no-padding-right">部门</label>
+							<div class="col-xs-12 col-sm-11">
+								<span class="block input-icon input-icon-right">
+									<input list="department" type="text" class="width-100">
+									<datalist id="department">
+										<option value="云计算组">云计算组</option>
+									</datalist>
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputSuccess" class="col-xs-12 col-sm-1 control-label no-padding-right">项目负责人</label>
+							<div class="col-xs-12 col-sm-11">
+								<span class="block input-icon input-icon-right">
+									<select multiple=""  class="select2" data-placeholder="Click to Choose...">
+										<option value="SAAS">SAAS</option>
+										<option value="PAAS">PAAS</option>
+										<option value="IAAS">IAAS</option>
+									</select>
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputSuccess" class="col-xs-12 col-sm-1 control-label no-padding-right">项目成员</label>
+							<div class="col-xs-12 col-sm-11">
+								<span class="block input-icon input-icon-right">
+									<select multiple=""  class="select2" data-placeholder="Click to Choose...">
+										<option value="SAAS">SAAS</option>
+										<option value="PAAS">PAAS</option>
+										<option value="IAAS">IAAS</option>
+									</select>
+								</span>
+							</div>
+						</div>
+						
+						<div class="">
+							<table class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th class="center">
+											<label class="pos-rel">
+												<input type="checkbox" class="ace" />
+												<span class="lbl"></span>
+											</label>
+										</th>
+										<th>阶段名</th>
+										<th>时间（周）</th>
+										<th>计划结束时间</th>
+										<th>负责人</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th class="center">
+											<label class="pos-rel">
+												<input type="checkbox" class="ace" />
+												<span class="lbl"></span>
+											</label>
+										</th>
+										<td>需求分析</td>
+										<td><input /></td>
+										<td><input /></td>
+										<td><input /></td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="5">
+											<button>添加阶段</button>
+											<button>删除阶段</button>
+										</td>
+										
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+						
+						<div class="clearfix form-actions">
+							<div class="col-md-offset-3 col-md-9">
+								<button class="btn btn-info" type="button">
+									<i class="ace-icon fa fa-check bigger-110"></i>
+									保存
+								</button>
+
+								&nbsp; &nbsp; &nbsp;
+								<button class="btn" type="reset">
+									<i class="ace-icon fa fa-undo bigger-110"></i>
+									重置
+								</button>
+							</div>
+						</div>
+					</form>
+				
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+
+<script src="/static/assets/js/bootstrap-multiselect.min.js"></script>
+<script src="/static/assets/js/select2.min.js"></script>
+<script src="/static/assets/js/jquery-typeahead.js"></script>
+<script type="text/javascript">
+			jQuery(function($){
+				//select2
+				$('.select2').css('width','100%').select2({allowClear:false})
+				$('#select2-multiple-style .btn').on('click', function(e){
+					var target = $(this).find('input[type=radio]');
+					var which = parseInt(target.val());
+					if(which == 2) $('.select2').addClass('tag-input-style');
+					 else $('.select2').removeClass('tag-input-style');
+				});
+				
+				//////////////////
+				$('.multiselect').multiselect({
+				 enableFiltering: true,
+				 enableHTML: true,
+				 buttonClass: 'btn btn-white btn-primary',
+				 templates: {
+					button: '<button type="button" class="multiselect dropdown-toggle" data-toggle="dropdown"><span class="multiselect-selected-text"></span> &nbsp;<b class="fa fa-caret-down"></b></button>',
+					ul: '<ul class="multiselect-container dropdown-menu"></ul>',
+					filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="fa fa-search"></i></span><input class="form-control multiselect-search" type="text"></div></li>',
+					filterClearBtn: '<span class="input-group-btn"><button class="btn btn-default btn-white btn-grey multiselect-clear-filter" type="button"><i class="fa fa-times-circle red2"></i></button></span>',
+					li: '<li><a tabindex="0"><label></label></a></li>',
+			        divider: '<li class="multiselect-item divider"></li>',
+			        liGroup: '<li class="multiselect-item multiselect-group"><label></label></li>'
+				 }
+				});
+			
+				
+				///////////////////
+					
+				//typeahead.js
+				//example taken from plugin's page at: https://twitter.github.io/typeahead.js/examples/
+				var substringMatcher = function(strs) {
+					return function findMatches(q, cb) {
+						var matches, substringRegex;
+					 
+						// an array that will be populated with substring matches
+						matches = [];
+					 
+						// regex used to determine if a string contains the substring `q`
+						substrRegex = new RegExp(q, 'i');
+					 
+						// iterate through the pool of strings and for any string that
+						// contains the substring `q`, add it to the `matches` array
+						$.each(strs, function(i, str) {
+							if (substrRegex.test(str)) {
+								// the typeahead jQuery plugin expects suggestions to a
+								// JavaScript object, refer to typeahead docs for more info
+								matches.push({ value: str });
+							}
+						});
+			
+						cb(matches);
+					}
+				 }
+			
+				 $('input.typeahead').typeahead({
+					hint: true,
+					highlight: true,
+					minLength: 1
+				 }, {
+					name: 'states',
+					displayKey: 'value',
+					source: substringMatcher(ace.vars['US_STATES']),
+					limit: 10
+				 });
+					
+					
+				///////////////
+				
+				
+				//in ajax mode, remove remaining elements before leaving page
+				$(document).one('ajaxloadstart.page', function(e) {
+					$('[class*=select2]').remove();
+					$('select[name="duallistbox_demo1[]"]').bootstrapDualListbox('destroy');
+					$('.rating').raty('destroy');
+					$('.multiselect').multiselect('destroy');
+				});
+			
+			});
+		</script>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.widget-header {
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    position: relative;
+    min-height: 38px;
+    background: repeat-x #f7f7f7;
+        background-image: none;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffeeeeee', GradientType=0);
+    color: #000000;
+    border-bottom: 1px solid #DDD;
+    padding-left: 12px;
+}
+
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					系统管理
+				</li>
+				<li class="active"><a href="{% url 'UserMgt' %}">用户管理</a></li>
+				<li class="active">新建用户</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="widget-box ">
+						<div class="widget-header">
+							<h4 class="widget-title smaller">用户信息</h4>
+							<div style="float:right;margin:2px">
+							<button class="btn btn-primary btn-sm" type="submit" form="nameform">提交</button>
+							<button class="btn btn-warning btn-sm" type="button" onclick="javascript:history.back(-1);" form="nameform">取消</button>
+							</div>
+						</div>
+						
+						<div class="widget-body">
+							<div class="widget-main padding-8">
+								<form class="form-horizontal" id="nameform" method="POST">
+									
+									<div class="form-group">
+										<label for="firstname" class="col-sm-1 control-label">用户名</label>
+										<div class="col-sm-11">
+										 {{ form.username }}{{form.errors.username}}
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="firstname" class="col-sm-1 control-label">密码</label>
+										<div class="col-sm-11">
+										  {{ form.password }} {{form.errors.password}}
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="firstname" class="col-sm-1 control-label">描述</label>
+										<div class="col-sm-11">
+										  {{ form.description }}{{form.errors.description}}
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="firstname" class="col-sm-1 control-label">手机</label>
+										<div class="col-sm-11">
+										  {{ form.tel }}{{form.errors.tel}}
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="firstname" class="col-sm-1 control-label">邮箱</label>
+										<div class="col-sm-11">
+										  {{ form.email }}
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="firstname" class="col-sm-1 control-label">角色</label>
+										<div class="col-sm-11">
+											{{ form.role }}
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="firstname" class="col-sm-1 control-label">状态</label>
+										<div class="col-sm-11">
+											{{ form.status }}
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					
+					</div>
+				<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+	</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% for level in menu2_obj_list %}
+<li class="">
+	<a href="{{ level.url }}">
+		<i class="menu-icon fa fa-caret-right"></i>
+		{{ level.description }}
+	</a>
+
+	<b class="arrow"></b>
+</li>
+{% endfor %}

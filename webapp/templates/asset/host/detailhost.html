@@ -1,0 +1,283 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.health::before{
+	color: #00AA00;
+}
+.unhealth::before{
+	color: #FF0000;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					资产管理
+				</li>
+				<li>
+					<a href="{% url 'HostList' %}">主机列表</a>
+				</li>
+				<li>{{detailhost.private_ip}}</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+			<h3 class="header smaller lighter blue">
+			<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+			{{detailhost.private_ip}}详细信息</h3>
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="tabbable">
+						<ul class="nav nav-tabs" id="myTab4">
+							<li class="active">
+								<a data-toggle="tab" href="#manager">管理信息</a>
+							</li>
+							
+							<li>
+								<a data-toggle="tab" href="#specification">规格信息</a>
+							</li>
+
+							<li>
+								<a data-toggle="tab" href="#agent">代理信息</a>
+							</li>
+							<li>
+								<a data-toggle="tab" href="#event">事件查看</a>
+							</li>
+						</ul>
+
+						<div class="tab-content">
+							<div id="manager" class="tab-pane in active">
+								<div class="profile-user-info profile-user-info-striped">
+									<div class="profile-info-row">
+										<div class="profile-info-name">序列号</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.serial}}</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">主机名</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.hostname}}</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">管理IP</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.private_ip}}</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">公网IP</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.public_ip}}</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">SSH端口</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.port}}</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">管理用户</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.remote_user}}</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">用户密码</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.remote_passwd}}</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">主机状态</div>
+										<div class="profile-info-value">
+											<span class="editable">
+												{% if detailhost.host_status == 1 %}
+													 <span class="label label-success arrowed">在线</span>
+												{% else %}
+													 <span class="label label-danger arrowed-in">离线</span>
+												{% endif %}														
+											</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">运营状态</div>
+										<div class="profile-info-value">
+											<span class="editable">
+												{% if detailhost.operate_status == 1 %}
+													 <span class="label label-success arrowed">运营中</span>
+												{% else %}
+													 <span class="label label-default arrowed">未知</span>
+												{% endif %}														
+											</span>
+										</div>
+									</div>
+										
+									<div class="profile-info-row">
+										<div class="profile-info-name">位置信息</div>
+										<div class="profile-info-value">
+											<i class="fa fa-map-marker light-orange bigger-110"></i>
+											<span>{{detailhost.position}}</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">主机组</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.group}}</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">使用部门</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.department}}</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<div id="specification" class="tab-pane">
+								<div class="profile-user-info profile-user-info-striped">
+									<div class="profile-info-row">
+										<div class="profile-info-name">CPU核数</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.cpu_no}}</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">CPU型号</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.cpu_model}}</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">物理内存</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.memory}} MB</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">磁盘容量</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.disk}} GB</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">操作系统</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.os}}</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">内核版本</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.kernel}}</span>
+										</div>
+									</div>
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">机器型号</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.machine_model}}</span>
+										</div>
+									</div>								
+								</div>
+							</div>
+							
+							<div id="agent" class="tab-pane">
+								{% if detailhost.agent_is_install %}
+								<div class="profile-user-info profile-user-info-striped">
+									
+									<div class="profile-info-row">
+										<div class="profile-info-name">部署目录</div>
+										<div class="profile-info-value">
+											<span>{{detailhost.hostname}}</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">代理端口</div>
+										<div class="profile-info-value">
+											<span>7000</span>
+										</div>
+									</div>
+
+									<div class="profile-info-row">
+										<div class="profile-info-name">代理状态</div>
+										<div class="profile-info-value">
+											<span></span>
+										</div>
+									</div>					
+								</div>
+								{% else %}
+								<div class="center">代理未安装</div>
+								{% endif %}
+							</div>
+							
+							<div id="event" class="tab-pane">
+								<table class="table">
+									<thead>
+										<tr>
+											<th>结果</th>
+											<th>状态</th>
+											<th>类型</th>
+											<th>时间</th>
+											<th>详细信息</th>
+										</tr>
+									</thead>
+									<tbody>
+										
+										{% for event in EventQuerySet %}
+										<tr>
+											{% if event.is_succeeded %}
+											<td>成功</td>
+											<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+											{% else %}
+											<td>失败</td>
+											<td><span class="glyphicon glyphicon-remove-sign unhealth"></span></td>
+											{% endif %}
+											<td>{{event.get_action_display}}</td>
+											<td>{{event.time|date:"Y-m-d H:i:s"}}</td>
+											<td>{{event.content|default:'-------'}}</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+
+						</div>
+					</div>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+

@@ -1,0 +1,360 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<style>
+#description{
+  padding: 60px 10px 0px 10px;
+  width: 140px;
+  color: 	#AAAAAA;
+
+  font-size: 12px;
+}
+.appoverview{
+	border: 1px solid #ddd;
+	
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>监控告警</li>
+				<li><a href="{% url 'appmonitor' %}">应用监控</a></li>
+				<li>{{ appname }}</li>
+				
+			</ul><!-- /.breadcrumb -->
+			<div style="float:right">
+			<span class="label label-xlg" style="background-color:#337ab7;">
+				<a href="{% url 'fullscreen' %}" target="view_window" style="color:white;"><i class="fa fa-television" aria-hidden="true"></i>
+				大屏模式
+				</a>
+			</span>
+			<span class="label label-xlg" style="background-color:#337ab7;"><i class="fa fa-refresh" aria-hidden="true"></i> 刷新</span>
+			</div>
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+					
+				<div class="col-xs-12 col-sm-6">
+					<div class="appoverview">
+						<div class="space-4"></div>
+						<div class="center">
+							<span style="font-size:18px;font-weight:600;">健康得分</span>
+						</div>
+						<div class="space-4"></div>
+						<div class="row">
+							<div class="col-xs-12 col-sm-2">
+								<div id="description">
+								  <p>10分钟内,</p>
+								  <p>CPU使用率,</p>
+								  <p>内存使用率,</p>
+								  <p>网络IO使用率,</p>
+								  <p>应用接口响应率,</p>
+								  <p>四个方面评估。</p>
+								</div>
+																
+							</div>
+							
+							<div class="col-xs-12 col-sm-10">
+								<div id="radar-graph"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+					
+				<div class="col-xs-12 col-sm-6">
+					<div class="appoverview">
+						<div class="space-6"></div>
+						<div class="center">
+							<span class="label label-info">10分钟内请求</span>
+							<span class="label">20分钟内请求</span>
+						</div>
+						<div class="space-4"></div>
+						<div class="row">
+							<div class="col-xs-12 col-sm-2">
+								<div class="space-24"></div>
+								<div class="col-xs-4 col-sm-12">
+									<p>正确率:</p>
+									<p><h4>99%<h4></p>
+								</div>
+								
+								<div class="col-xs-4 col-sm-12">
+									<p>超时率:</p>
+									<p><h4>1%<h4></p>
+								</div>
+								
+								<div class="col-xs-4 col-sm-12">
+									<p>错误率:</p>
+									<p><h4>0%<h4></p>
+								</div>
+																
+							</div>
+							
+							<div class="col-xs-12 col-sm-10">
+								<div id="curve"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+					
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="col-xs-12 col-sm-4">
+							<div class="space-4"></div>
+							<div id="cpu" class="appoverview"></div>
+						</div>
+						<div class="col-xs-12 col-sm-4">
+							<div class="space-4"></div>
+							<div id="memory" class="appoverview"></div>
+						</div>
+						<div class="col-xs-12 col-sm-4">
+							<div class="space-4"></div>
+							<div id="disk" class="appoverview"></div>
+						</div>
+					</div>
+				</div>
+				  
+				
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/js/echarts.min.js"></script>
+
+<script type="text/javascript">
+ function sethealth (id,height) {
+	$('#'+id).css({'width': '100%' , 'height': '300px'});
+    radarObj = echarts.init(document.getElementById(id))
+    radarObj.setOption({
+        title: {
+          text: '90',
+          x: 'center',
+          y: 'center',
+          textStyle: {
+              color: 'white',
+              fontWeight: 'bolder',
+              fontSize: 48,
+          }
+        },
+       color: ['#0099FF'],
+       radar: {
+           // shape: 'circle',
+           name: {
+               textStyle: {
+                   color: '#fff',
+                   backgroundColor: '#167be0',
+                   borderRadius: 3,
+                   padding: [3, 5]
+              }
+           },
+           indicator: [
+              { name: 'CPU', max: 100},
+              { name: '内存', max: 100},
+              { name: 'IO', max: 100},
+              { name: 'Interface', max: 100}
+           ]
+       },
+       series: [{
+           name: '预算 vs 开销（Budget vs spending）',
+           type: 'radar',
+           // areaStyle: {normal: {}},
+           data : [
+               {
+                   value : [80, 90, 70, 98],
+                   name : '应用健康指数得分',
+                   label: {
+                     normal: {
+                       show: true,
+                     }
+                   },
+                   areaStyle: {
+                     normal: {
+                       opacity: 0.9,
+                       color: {
+                          type: 'radial',
+                          colorStops: [{
+                              offset: 0, color: '#B8D3E4' // 0% 处的颜色
+                          }, {
+                              offset: 1, color: '#B8D3E4' // 100% 处的颜色
+                          }],
+                          globalCoord: false // 缺省为 false
+                      }
+                     }
+                   }
+               }
+           ]
+       }]
+    })
+  };
+  
+  function setresponse (id,height) {
+    $('#'+id).css({'width': '100%' , 'height': '300px'});
+    curveObj = echarts.init(document.getElementById(id));
+    curveObj.setOption({
+      tooltip : {
+         trigger: 'axis',
+         axisPointer: {
+             type: 'cross',
+             label: {
+                 backgroundColor: '#6a7985'
+             }
+         }
+     },
+     legend: {
+         data:['正确响应','超时响应','错误响应']
+     },
+     grid: {
+         left: '3%',
+         right: '4%',
+         bottom: '3%',
+         containLabel: true
+     },
+     toolbox: {
+         feature: {
+             saveAsImage: {}
+         }
+     },
+     xAxis: {
+         type: 'category',
+         boundaryGap: false,
+         data: ['23:10','23:12','23:14','23:16','23:18']
+     },
+     yAxis: {
+         type: 'value'
+     },
+     series: [
+         {
+             name:'错误响应',
+             type:'line',
+             stack: '总量',
+             data:[1, 0, 5, 0, 0]
+         },
+         {
+             name:'超时响应',
+             type:'line',
+             stack: '总量',
+             data:[2, 1, 1, 0, 0]
+         },
+         {
+             name:'正确响应',
+             type:'line',
+             stack: '总量',
+             data:[20, 132, 101, 134, 90]
+         }
+     ]
+    })};
+	
+	function setdiskIO (id,title,height) {
+	$('#'+id).css({'width': '100%' , 'height': height});
+    this.chart = echarts.init(document.getElementById(id))
+    this.chart.setOption({
+      title: {
+            x: 'center',
+            text: title,
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            data: ['14:21','14:23','14:25','14:27','14:29','14:31','14:33','14:35','14:37','14:39'],
+        },
+        yAxis: {
+            splitLine: {
+                show: false
+            }
+        },
+        visualMap: {
+            top: 20,
+            right: 1,
+            pieces: [{
+                gt: 0,
+                lte: 50,
+                color: '#096'
+            }, {
+                gt: 50,
+                lte: 100,
+                color: '#ffde33'
+            }, {
+                gt: 100,
+                lte: 150,
+                color: '#ff9933'
+            }, {
+                gt: 150,
+                lte: 200,
+                color: '#cc0033'
+            }, {
+                gt: 200,
+                lte: 300,
+                color: '#660099'
+            }, {
+                gt: 300,
+                color: '#7e0023'
+            }],
+            outOfRange: {
+                color: '#999'
+            }
+        },
+        series: {
+            type: 'line',
+            data: ['1','11','20','11','40','81','10','11','10','11','10','11'],
+            markLine: {
+                silent: true,
+                data: [{
+                    yAxis: 50
+                }, {
+                    yAxis: 100
+                }, {
+                    yAxis: 150
+                }, {
+                    yAxis: 200
+                }, {
+                    yAxis: 300
+                }]
+            }
+        }
+    });
+	return this.chart;
+    };
+$(document).ready(function(){
+	var hei = (document.documentElement.clientHeight*42/100);
+	sethealth('radar-graph');
+	setresponse('curve');
+	cpuObj = setdiskIO('cpu','CPU利用率',hei);
+	memoryObj = setdiskIO('memory','内存利用率',hei);
+	diskObj = setdiskIO('disk','磁盘IO',hei);
+	
+	
+	
+});
+$(window).resize(function() {
+	/* var width = $(".widget-main").width();
+	draw_resource('piechart-placeholder',width,'180px','60'); */
+	radarObj.resize();
+	curveObj.resize();
+	cpuObj.resize();
+	memoryObj.resize();
+	diskObj.resize();
+});
+  
+</script>
+{% endblock %}

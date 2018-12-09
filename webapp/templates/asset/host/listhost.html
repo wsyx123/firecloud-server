@@ -1,0 +1,390 @@
+{% extends "base/base.html" %}
+{% load menu %}
+{% block css %}
+<style type="text/css">
+	#mySuccessAlert{
+		display:none;
+		position:absolute;
+		margin:5px 500px;
+		width:300px;
+		height:60px;
+	}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					资产管理
+				</li>
+				<li class="active">主机列表</li>
+			</ul>
+
+			
+		</div> <!-- /.breadcrumb -->
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+				
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="clearfix">
+								{% ctl_button roleid path %}
+								<div class="pull-right tableTools-container"></div>
+							</div>
+							
+
+							<!-- div.table-responsive -->
+
+							<!-- div.dataTables_borderWrap -->
+							<div>
+								<table id="dynamic-table" class="table table-striped table-bordered table-hover">
+									<thead>
+										<tr>
+											<th class="hidden-xs">ID</th>
+											<th>主机名</th>
+											<th>私网IP</th>
+											<th>端口</th>
+											<th>主机组</th>
+											<th>创建者</th>
+											<th>状态</th>
+											<th>Agent</th>
+											<th class="hidden-xs">
+												<i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i>
+												更新时间
+											</th>
+											<th>操作</th>
+										</tr>
+									</thead>
+
+									<tbody>
+										{% for host in host_list %}
+										<tr>
+											<td class="hidden-xs">{{ host.id }}</td>
+											<td>{{ host.hostname }}</td>
+											<td><a href="{% url 'HostDetail' pk=host.id %}">{{ host.private_ip }}</a></td>
+											<td>{{ host.port }}</td>
+											<td>{{ host.group }}</td>
+											<td>{{ host.owner }}</td>
+											{% ifequal host.host_status 1 %}
+											<td>
+												<span class="label label-sm label-success">在线</span>
+											</td>
+											{% else %}
+											<td>
+												<span class="label label-sm label-danger">离线</span>
+											</td>
+											{% endifequal %}
+											
+											{% ifequal host.agent_is_install 1 %}
+											<td>
+												<span>已安装</span> |
+												<span class="badge" style="cursor:pointer;" onclick="uninstall_agent(this);">卸载</span>
+											</td>
+											{% else %}
+											<td>
+												<span>未安装</span> |
+												<span class="badge badge-info" style="cursor:pointer;" onclick="install_agent(this);">安装</span>
+											</td>
+											{% endifequal %}
+											
+											<td class="hidden-xs">{{ host.update_time|date:"Y-m-d H:i:s" }}</td>
+											<td>
+												<div class="action-buttons">
+													<a class="green" href="#" onclick="HostRefresh(this);">
+														<i class="ace-icon fa fa-refresh bigger-130" title="刷新" data-toggle="modal" data-target="#myrefresh"></i>
+													</a>
+
+													<a class="blue" href="{% url 'HostUpdate' pk=host.id %}">
+														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
+													</a>
+
+													<a class="red" href="#" onclick="HostDelete(this);">
+														<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
+													</a>
+													<a class="bigger-130" href="{% url 'HostLogin' %}" target="_blan">
+														<i class="fa fa-terminal fa-lg" aria-hidden="true" title="连接"></i>
+													</a>
+												</div>
+											</td>
+										</tr>
+										{% endfor %}
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 删除模态框（Modal） -->
+					<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+										&times;
+									</button>
+									<h4>
+										<span>确认窗口</span>
+									</h4>
+								</div>
+								<div class="modal-body">
+									<div style="padding-left:80px;">
+										<label>是否卸载代理并删除主机: <span style="font-size:18px;font-weight:700;" id="del_name"></span> ?</label>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="HostDeleteAck();">删除</button>
+									<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+								</div>
+							</div><!-- /.modal-content -->
+						</div><!-- /.modal -->
+					</div>
+					
+					<!-- 刷新模态框（Modal） -->
+					<div class="modal fade" id="myrefresh" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+										&times;
+									</button>
+									<h4>
+										<span>确认窗口</span>
+									</h4>
+								</div>
+								<div class="modal-body">
+									<div style="padding-left:80px;">
+										<label>是否刷新主机: <span style="font-size:18px;font-weight:700;" id="refresh_name"></span> ?</label>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-primary" data-dismiss="modal"onclick="HostRefreshAck();">刷新</button>
+									<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+								</div>
+							</div><!-- /.modal-content -->
+						</div><!-- /.modal -->
+					</div>
+
+
+					<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+	<!-- 刷新结果（Alert） -->	
+	<div id="mySuccessAlert" class="alert alert-success">
+		<button type="button" class="close" data-dismiss="alert"
+			aria-hidden="true">
+			&times;
+		</button>
+		<strong>刷新成功！</strong>
+	</div>
+</div><!-- /.main-content -->
+
+{% endblock %}
+
+{% block js %}
+<!-- page specific plugin scripts -->
+
+<script src="/static/assets/js/jquery.dataTables.min.js"></script>
+<script src="/static/assets/js/jquery.dataTables.bootstrap.min.js"></script>
+<script src="/static/assets/js/dataTables.buttons.min.js"></script>
+<script src="/static/assets/js/buttons.flash.min.js"></script>
+<script src="/static/assets/js/buttons.html5.min.js"></script>
+<script src="/static/assets/js/buttons.print.min.js"></script>
+<script src="/static/assets/js/buttons.colVis.min.js"></script>
+<script src="/static/assets/js/dataTables.select.min.js"></script>
+
+<script type="text/javascript">
+	function HostDelete(obj){
+		host_id = $($(obj).parent().parent()).siblings().eq(0).text();
+		var host_name = $($(obj).parent().parent()).siblings().eq(2).text();
+		$("#del_name").text(host_name);
+	};
+	function HostDeleteAck(){
+		$.ajax({
+			type: "POST",
+			url: "/host/delete/"+host_id,
+			data: {"pk":host_id},
+			success: function(){
+				window.location.reload();
+				}
+		});
+		
+	};
+	
+	function HostRefresh(obj){
+		host_id = $($(obj).parent().parent()).siblings().eq(0).text();
+		var host_name = $($(obj).parent().parent()).siblings().eq(2).text();
+		$("#refresh_name").text(host_name);
+	};
+	function HostRefreshAck(){
+		$.ajax({
+			method: "POST",
+			url: "/host/refresh/",
+			data: {"pk":host_id},
+			success: function(data){
+				if(data['status']){
+					$("#mySuccessAlert").css('display','block');
+				}
+			}
+		});
+		
+	};
+	
+	function change_install_status(obj){
+		$(obj).prev().text('已安装');
+		$(obj).text('卸载');
+		$(obj).removeClass("badge-info");
+		$(obj).attr('onclick','uninstall_agent(this)');
+	};
+	function change_uninstall_status(obj){
+		$(obj).prev().text('未安装');
+		$(obj).text('安装');
+		$(obj).addClass("badge-info");
+		$(obj).attr('onclick','install_agent(this)');
+	};
+	function install_agent(tdobject){
+		var result = confirm('安装代理?');
+		if( result == true ){
+			$(tdobject).attr('onclick','');
+			$(tdobject).text('正在安装代理...');
+			change_install_status(tdobject);
+		}
+	};
+	function uninstall_agent(tdobject){
+		var result = confirm('卸载代理?');
+		if( result == true ){
+			$(tdobject).attr('onclick','');
+			$(tdobject).text('正在卸载代理...');
+			change_uninstall_status(tdobject);
+		}
+	};
+	jQuery(function($) {
+		//initiate dataTables plugin
+		var myTable = 
+		$('#dynamic-table')
+		//.wrap("<div class='dataTables_borderWrap' />")   //if you are applying horizontal scrolling (sScrollX)
+		.DataTable( {
+			bAutoWidth: false,
+			"aoColumns": [
+			  { "bSortable": false },
+			  null, null,null, null, null,null,null,null,
+			  { "bSortable": false }
+			],
+			"aaSorting": [],
+			"oLanguage": {
+			  "sLengthMenu": "显示 _MENU_ 条",
+			  "sSearch": "查找",
+			  "sInfo": "共 _TOTAL_ , 显示 (_START_ - _END_)",
+			  "oPaginate": {
+                       "sFirst":    "第一页",  
+                       "sPrevious": " 上一页 ",  
+                       "sNext":     " 下一页 ",  
+                       "sLast":     " 最后一页 "  
+                }  
+			},
+			
+			//"bProcessing": true,
+			//"bServerSide": true,
+			//"sAjaxSource": "http://127.0.0.1/table.php"	,
+	
+			//,
+			//"sScrollY": "200px",
+			//"bPaginate": false,
+	
+			//"sScrollX": "100%",
+			//"sScrollXInner": "120%",
+			//"bScrollCollapse": true,
+			//Note: if you are applying horizontal scrolling (sScrollX) on a ".table-bordered"
+			//you may want to wrap the table inside a "div.dataTables_borderWrap" element
+	
+			//"iDisplayLength": 50
+	
+	
+			/*select: {
+				style: 'multi'
+			}*/
+		} );
+	
+		
+		
+		$.fn.dataTable.Buttons.defaults.dom.container.className = 'dt-buttons btn-overlap btn-group btn-overlap';
+		
+		new $.fn.dataTable.Buttons( myTable, {
+			buttons: [
+			  {
+				"extend": "colvis",
+				"text": "<i class='fa fa-search bigger-110 blue'></i> <span class='hidden'>Show/hide columns</span>",
+				"className": "btn btn-white btn-primary btn-bold",
+				columns: ':not(:first):not(:last)'
+			  },
+			  {
+				"extend": "copy",
+				"text": "<i class='fa fa-copy bigger-110 pink'></i> <span class='hidden'>Copy to clipboard</span>",
+				"className": "btn btn-white btn-primary btn-bold"
+			  },
+			  {
+				"extend": "csv",
+				"text": "<i class='fa fa-file-excel-o bigger-110 green'></i> <span class='hidden'>Export to CSV</span>",
+				"className": "btn btn-white btn-primary btn-bold"
+			  },
+			  
+			  
+			  {
+				"extend": "print",
+				"text": "<i class='fa fa-print bigger-110 grey'></i> <span class='hidden'>Print</span>",
+				"className": "btn btn-white btn-primary btn-bold",
+				autoPrint: false,
+				message: 'This print was produced using the Print button for DataTables'
+			  }		  
+			]
+		} );
+		myTable.buttons().container().appendTo( $('.tableTools-container') );
+		
+		//style the message box
+		var defaultCopyAction = myTable.button(1).action();
+		myTable.button(1).action(function (e, dt, button, config) {
+			defaultCopyAction(e, dt, button, config);
+			$('.dt-button-info').addClass('gritter-item-wrapper gritter-info gritter-center white');
+		});
+		
+		
+		var defaultColvisAction = myTable.button(0).action();
+		myTable.button(0).action(function (e, dt, button, config) {
+			
+			defaultColvisAction(e, dt, button, config);
+			
+			
+			if($('.dt-button-collection > .dropdown-menu').length == 0) {
+				$('.dt-button-collection')
+				.wrapInner('<ul class="dropdown-menu dropdown-light dropdown-caret dropdown-caret" />')
+				.find('a').attr('href', '#').wrap("<li />")
+			}
+			$('.dt-button-collection').appendTo('.tableTools-container .dt-buttons')
+		});
+	
+		////
+	
+		setTimeout(function() {
+			$($('.tableTools-container')).find('a.dt-button').each(function() {
+				var div = $(this).find(' > div').first();
+				if(div.length == 1) div.tooltip({container: 'body', title: div.parent().text()});
+				else $(this).tooltip({container: 'body', title: $(this).text()});
+			});
+		}, 500);
+		
+
+	});
+</script>
+{% endblock %}

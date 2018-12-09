@@ -1,0 +1,13 @@
+/__init__.pyc
+/aix.pyc
+/base.pyc
+/darwin.pyc
+/dragonfly.pyc
+/freebsd.pyc
+/generic_bsd.pyc
+/hpux.pyc
+/hurd.pyc
+/linux.pyc
+/netbsd.pyc
+/openbsd.pyc
+/sunos.pyc

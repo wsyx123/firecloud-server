@@ -1,0 +1,320 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<style>
+.widget-header {
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    position: relative;
+    min-height: 38px;
+    background: repeat-x #68BD68;
+        background-image: none;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffeeeeee', GradientType=0);
+    color: #000000;
+    border-bottom: 1px solid #DDD;
+    padding-left: 12px;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>
+					作业中心
+				</li>
+				<li><a href="{% url 'AnsibleList' %}">Ansible</a></li>
+				<li>新建剧本</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="tabbable">
+						<div class="tab-content">
+							<form class="form-horizontal" method="POST" enctype="multipart/form-data">
+								<input name="script_ower" type='text' value="{{request.session.user_id}}" hidden>
+								<div class="form-group">
+									<label class="col-xs-12 col-sm-1 no-padding-right">
+										<span style="font-size:18px;">剧本名称</span><span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<input class="form-control" />
+										</span>
+									</div>
+								</div>
+								
+								<div class="widget-box">
+									<div class="widget-header">
+										<div style="padding-top:5px;display:inline-block;">
+											<span class="white">步骤名称 </span><input type="text" style="line-height:15px;" />
+										</div>
+										<div class="widget-toolbar">
+											<label class="white">
+												<i class="fa fa-times"></i>
+											</label>
+										</div>
+										<div class="widget-toolbar">
+											<label class="white">
+												<i class="fa fa-angle-double-up" onclick="switchUpDown(this);"></i>
+											</label>
+										</div>
+										<div class="widget-toolbar">
+											<label class="white">
+												<i class="fa fa-plus" aria-hidden="true"></i>
+												<b>选择服务器</b>
+											</label>
+										</div>
+									</div>
+									<div class="widget-body">
+										<div class="widget-main">
+											<div class="tabbable">
+												<ul class="nav nav-tabs" id="myTab4">
+													<li class="active">
+														<a data-toggle="tab" href="#tasks">tasks</a>
+													</li>
+													<li>
+														<a data-toggle="tab" href="#handlers">handlers</a>
+													</li>
+													<li>
+														<a data-toggle="tab" href="#vars">vars</a>
+													</li>
+													<li>
+														<a data-toggle="tab" href="#templates">templates</a>
+													</li>
+													<li>
+														<a data-toggle="tab" href="#files">files</a>
+													</li>
+													<li>
+														<a data-toggle="tab" href="#hosts">hosts(已选服务器)
+														<span class="badge badge-danger">1</span>
+														</a>
+													</li>
+													
+												</ul>
+
+												<div class="tab-content">
+													<div id="tasks" class="tab-pane in active">
+														备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> tasks </strong>目录下的main.yml文件中</span>
+														<p></p>
+														<div id="compile-editor" class="ace_editor" style="min-height:200px"></div> 
+													</div>
+													
+													<div id="handlers" class="tab-pane">
+														备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> handlers </strong>目录下的main.yml文件中</span>
+														<p></p>
+														<div id="handlers-editor" class="ace_editor" style="min-height:200px"></div> 
+													</div>
+													
+													<div id="vars" class="tab-pane">
+														备注:<span class="smaller green">这里所编写内容会保存在此步骤（角色）下的<strong class="red"> vars </strong>目录下的main.yml文件中</span>
+														<p></p>
+														<div id="vars-editor" class="ace_editor" style="min-height:200px"></div>
+													</div>
+													
+													<div id="templates" class="tab-pane">
+														备注:<span class="smaller green">这里所上传的文件会保存在此步骤（角色）下的<strong class="red"> templates </strong>目录下</span>
+														<p></p>
+														<div class="widget-box">
+															<div class="widget-body">
+																<table class="table">
+																	<thead>
+																		<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
+																	</thead>
+																	<tbody id="filelist">
+																		
+																	</tbody>
+																</table>
+															</div>
+															<div class="widget-footer">
+																<div id="container" class="center">
+																	<a id="pickfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
+																	<a id="uploadfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
+																</div>
+															</div>
+														</div>														
+													</div>
+													
+													<div id="files" class="tab-pane">
+														备注:<span class="smaller green">这里所上传的文件会保存在此步骤（角色）下的<strong class="red"> files </strong>目录下</span>
+														<p></p>
+														<div class="widget-box">
+															<div class="widget-body">
+																<table class="table">
+																	<thead>
+																		<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
+																	</thead>
+																	<tbody id="filelist">
+																		
+																	</tbody>
+																</table>
+															</div>
+															<div class="widget-footer">
+																<div id="container" class="center">
+																	<a id="pickfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
+																	<a id="uploadfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
+																</div>
+															</div>
+														</div>	
+													</div>
+													
+													<div id="hosts" class="tab-pane">
+														备注:<span class="smaller green">以下列表的主机会被保存在<strong class="red"> roles </strong>同级目录的<strong class="red"> hosts </strong>文件里，组名为步骤名</span>
+														<p></p>
+														<div class="widget-box">
+															<div class="widget-body">
+														<table class="table">
+															<tr>
+																<th>主机名</th>
+																<th>状态</th>
+																<th>帐号</th>
+																<th>IP</th>
+																<th>动作</th>
+															</tr>
+															
+															<tr>
+																<td>keystone</td>
+																<td><span class="label label-sm label-danger">离线</span></td>
+																<td>root</td>
+																<td>192.168.10.3</td>
+																<td><span class="label label-sm label-danger">删除</span></td>
+															</tr>
+														</table>
+														</div>
+														</div>
+													</div>
+
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<div>
+									<button class="btn btn-sm btn-success" type="button"><i class="fa fa-plus"></i> 添加步骤</button>
+								</div>
+									
+								<div class="center">
+									<input type="text" name="action_type" hidden />
+									<button class="btn btn-sm btn-primary" type="button" onclick="formSubmitAction('save');"><i class="fa fa-check"></i> 保存</button>
+									<button class="btn btn-sm btn-danger" type="button"><i class="fa fa-close"></i> 取消</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<!-- page specific plugin scripts -->
+<script src="/static/ace-editor/ace.js"></script>
+<script src="/static/ace-editor/ext-language_tools.js"></script>
+<script src="/static/ace-editor/theme-monokai.js"></script>
+<script src="/static/plupload-2.3.6/js/plupload.full.min.js"></script>
+
+<script type="text/javascript">
+
+// 清除ace editor中所有内容
+function removeAllLines(editor){
+	AllLines = $(".ace_line");
+	for(var i=0;i<AllLines.length;i++){
+		editor.removeLines();
+	}
+}
+
+// 设置ace-editor 模式
+function setAceEditMode(id,model,content) {
+	var editor = ace.edit(id);
+	var langTools = ace.require("ace/ext/language_tools");
+	editor.setTheme("ace/theme/monokai");
+	//editor.removeLines();
+	removeAllLines(editor);
+	editor.insert(content);
+	editor.getSession().setMode("ace/mode/" + model);
+	editor.setShowPrintMargin(false);
+	editor.setOptions({
+	    enableBasicAutocompletion: true,
+	    enableSnippets: true,
+	    enableLiveAutocompletion: true
+	});
+};
+setAceEditMode('compile-editor','yaml','--');
+setAceEditMode('handlers-editor','yaml','--');
+setAceEditMode('vars-editor','yaml','--');
+
+function switchUpDown(obj){
+	classStr = $(obj).attr('class');
+	if(classStr.indexOf("fa-angle-double-up") !=-1){
+		$(obj).removeClass('fa-angle-double-up');
+		$(obj).addClass('fa-angle-double-down');
+		$(obj).parent().parent().parent().next().css('display','none');
+	}else{
+		$(obj).removeClass('fa-angle-double-down');
+		$(obj).addClass('fa-angle-double-up');
+		$(obj).parent().parent().parent().next().css('display','block');
+	}
+}
+
+//plupload
+var uploader = new plupload.Uploader({
+	runtimes : 'html5,flash,silverlight,html4',
+	browse_button : 'pickfiles', // you can pass an id...
+	container: document.getElementById('container'), // ... or DOM Element itself
+	url : 'upload.php',
+	flash_swf_url : '/static/plupload-2.3.6/js/Moxie.swf',
+	silverlight_xap_url : '/static/plupload-2.3.6/js/Moxie.xap',
+	
+	filters : {
+		max_file_size : '10mb',
+		mime_types: [
+			{title : "Image files", extensions : "jpg,gif,png"},
+			{title : "Zip files", extensions : "zip"}
+		]
+	},
+
+	init: {
+		PostInit: function() {
+			document.getElementById('filelist').innerHTML = '';
+
+			document.getElementById('uploadfiles').onclick = function() {
+				uploader.start();
+				return false;
+			};
+		},
+
+		FilesAdded: function(up, files) {
+			plupload.each(files, function(file) {
+				var txt = '<tr><td>' + file.name + '</td><td>0%</td><td>' + plupload.formatSize(file.size) + '</td><td><button class="btn btn-minier btn-danger">删除</button></td></tr>';
+				document.getElementById('filelist').innerHTML += txt;
+			});
+		},
+
+		UploadProgress: function(up, file) {
+			document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+		},
+
+		Error: function(up, err) {
+			document.getElementById('console').appendChild(document.createTextNode("\nError #" + err.code + ": " + err.message));
+		}
+	}
+});
+
+uploader.init();
+
+</script>
+{% endblock %}

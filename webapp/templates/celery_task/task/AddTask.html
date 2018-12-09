@@ -1,0 +1,243 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+#div_crontab,#div_interval{
+	display:none;
+}
+input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].ace.ace-checkbox-2:checked+.lbl::before {
+    background-color: #4169E1;
+    border-color: #4169E1;
+    color: #FFF;
+}
+.errorlist{
+	color:red;
+	margin:0px;
+}
+<link rel="stylesheet" href="/static/assets/css/bootstrap-datetimepicker.min.css" />
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					任务调度
+				</li>
+				<li>
+					<a href="{% url 'ListTask' %}">任务列表</a>
+				</li>
+				<li>添加任务</li>
+		
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat">
+							<h4>Tips</h4>
+						</div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<ul class="list-unstyled spaced2">
+									<li>
+										<i class="fa fa-circle green"></i>
+											基于Celery的定时任务。
+									</li>
+				
+									<li class="muted">
+										<i class="fa fa-exclamation-triangle orange" aria-hidden="true"></i>
+										 配置时注意事项：									
+									</li>
+									<li>
+										<ul class="list-unstyled">
+											<li>
+												<i class="fa fa-caret-right blue"></i>
+												先添加任务调度方式<ins><strong>Crontab</strong></ins> or <ins><strong>Interval</strong></ins>
+											</li>
+											
+											<li>
+												<i class="fa fa-caret-right blue"></i>
+												<ins><strong>Crontab</strong></ins> 是类Linux Crontab风格计划任务 
+											</li>
+										</ul>
+									</li>																																																																																																														
+								</ul>													
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-9">
+					<form class="form-horizontal" method="POST">
+														
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">任务名*</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.name}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.name}}
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">函数*</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.task}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.task}}
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">参数列表</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.args}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.args}}
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">参数字典</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.kwargs}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.kwargs}}
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">队列</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.queue}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.queue}}
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">过期时间</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									<input name="expires" type="text" id="id_expires" class="form-control">
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.expires}}
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">调度类型*</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									<select id="schetype" class="form-control" onchange="javascript:oBtTaskTypeSelect();">
+										<option value="">选择一个类型</option>
+											<option value="select_crontab">Crontab</option>
+											<option value="select_nterval">Interval</option>																																								
+									</select>	
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors}}
+							</div>
+						</div>
+						<div class="form-group" id="div_crontab">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">计划类型</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.crontab}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.crontab}}
+							</div>
+						</div>
+						<div class="form-group" id="div_interval">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">间隔类型</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.interval}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.interval}}
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-xs-12 col-sm-2 control-label no-padding-right">是否激活</label>
+							<div class="col-xs-12 col-sm-5">
+								<label class="control-label no-padding-right">
+									{{form.enabled}}
+									<span class="lbl"></span>
+								</label>
+							</div>
+						</div>
+						<hr />
+						<div class="clearfix ">
+							<div class="col-md-offset-3 col-md-9">
+								<button class="btn btn-info" type="submit">
+									<i class="ace-icon fa fa-check bigger-110"></i>
+									保存
+								</button>
+
+								&nbsp; &nbsp; &nbsp;
+								<button class="btn" type="button" onclick="javascript:history.back(-1);">
+									<i class="ace-icon fa fa-undo bigger-110"></i>
+									取消
+								</button>
+							</div>
+						</div>	
+					</form>	
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/assets/js/moment.min.js"></script>
+<script src="/static/assets/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript">
+$("#id_expires").datetimepicker({format: 'YYYY-MM-DD HH:mm:SS'});
+window.onload=function(){
+	$("#id_task").addClass('form-control');
+}
+function oBtTaskTypeSelect() {
+   var obj = document.getElementById("schetype"); 
+   var index = obj.selectedIndex;
+   var value = obj.options[index].value;
+   if (value=="select_crontab"){
+	   $("#div_interval").find("option").attr("selected",false);
+	   $("#div_crontab").css('display','block');
+	   $("#div_interval").css('display','none');
+   }
+   else if (value=="select_nterval"){
+	   $("#div_crontab").find("option").attr("selected",false);
+	   $("#div_crontab").css('display','none');
+	   $("#div_interval").css('display','block');
+   }			   
+}
+</script>
+{% endblock %}

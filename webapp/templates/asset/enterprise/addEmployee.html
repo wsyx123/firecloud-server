@@ -1,0 +1,192 @@
+{% extends "base/base.html" %}
+
+
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					资产管理
+				</li>
+				<li>
+					<a href="{% url 'enterprise' %}">组织列表</a>
+				</li>
+				<li>添加成员</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div id="user-profile-1" class="user-profile row">
+						<div class="col-xs-12 col-sm-3 center">
+							<div class="space-12"></div>
+							<div>
+								<div>点击图片上传头像</div>
+								<div class="space-4"></div>
+								<span class="profile-picture">
+									<img id="avatar" class="editable img-responsive" alt="添加头像" src="/static/assets/images/avatars/profile-pic.jpg" />
+								</span>
+
+								<div class="space-4"></div>
+
+								<div class="width-80 label label-info label-xlg arrowed-in arrowed-in-right">
+									<div class="inline position-relative">
+										<a href="#" class="user-title-label dropdown-toggle" data-toggle="dropdown">
+											<i class="ace-icon fa fa-circle light-green"></i>
+											&nbsp;
+											<span class="white"></span>
+										</a>
+
+										<ul class="align-left dropdown-menu dropdown-caret dropdown-lighter">
+											<li class="dropdown-header"> Change Status </li>
+
+											<li>
+												<a href="#">
+													<i class="ace-icon fa fa-circle green"></i>
+													&nbsp;
+													<span class="green">试用期</span>
+												</a>
+											</li>
+
+											<li>
+												<a href="#">
+													<i class="ace-icon fa fa-circle red"></i>
+													&nbsp;
+													<span class="red">正式</span>
+												</a>
+											</li>
+
+											<li>
+												<a href="#">
+													<i class="ace-icon fa fa-circle grey"></i>
+													&nbsp;
+													<span class="grey">外包</span>
+												</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+
+						
+						</div>
+
+						<div class="col-xs-12 col-sm-9">
+							
+
+							<div class="space-12"></div>
+
+							<div class="profile-user-info profile-user-info-striped">
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 公司 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">Firecloud科技有限公司</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 直属 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">研发中心</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 部门或组 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">云计算组</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 工号 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">105</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 姓名 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">杨旭</span>
+									</div>
+								</div>
+
+								<div class="profile-info-row">
+									<div class="profile-info-name"> Location </div>
+
+									<div class="profile-info-value">
+										<i class="fa fa-map-marker light-orange bigger-110"></i>
+										<span class="editable" id="country">Netherlands</span>
+										<span class="editable" id="city">Amsterdam</span>
+									</div>
+								</div>
+
+								<div class="profile-info-row">
+									<div class="profile-info-name"> Age </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="age">38</span>
+									</div>
+								</div>
+
+								<div class="profile-info-row">
+									<div class="profile-info-name"> Joined </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="signup">2010/06/20</span>
+									</div>
+								</div>
+
+								<div class="profile-info-row">
+									<div class="profile-info-name"> Last Online </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="login">3 hours ago</span>
+									</div>
+								</div>
+
+								<div class="profile-info-row">
+									<div class="profile-info-name"> About Me </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="about">Editable as WYSIWYG</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				 <div class="clearfix form-actions">
+					<div class="col-md-offset-3 col-md-9">
+						<button class="btn btn-info" type="button">
+							<i class="ace-icon fa fa-check bigger-110"></i>
+							Submit
+						</button>
+
+						&nbsp; &nbsp; &nbsp;
+						<button class="btn" type="reset">
+							<i class="ace-icon fa fa-undo bigger-110"></i>
+							Reset
+						</button>
+					</div>
+				</div>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+

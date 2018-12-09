@@ -1,0 +1,120 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style type="text/css">
+.fullname{
+	color:black;
+}
+
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					作业中心
+				</li>
+				<li><a href="{% url 'OptList' %}">操作记录</a></li>
+				<li class="active">审计</li>
+			</ul><!-- /.breadcrumb -->
+			
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<h4 class="header smaller lighter blue">
+					<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+					任务摘要
+					</h4>
+					<div class="col-xs-12">
+						<table class="table table-bordered">
+							<tr>
+								<th>任务ID</th>
+								<th>任务名称</th>
+								<th>执行用户</th>
+								<th>执行时间</th>
+							</tr>
+							<tr>
+								<td>{{object.task_id}}</td>
+								<td>{{object.task_name}}</td>
+								<td>{{object.execute_owner}}</td>
+								<td>{{object.execute_time|date:"Y-m-d H:i:s"}}</td>
+							</tr>
+							<tr>
+								<th>任务类型</th>
+								<th>总任务</th>
+								<th>成功</th>
+								<th>失败</th>
+							</tr>
+							<tr>
+								<td>{{object.get_task_type_display}}</td>
+								<td>{{object.host_no}}</td>
+								<td>{{object.finish_no}}</td>
+								<td>{{object.failure_no}}</td>
+							</tr>
+							<tbody id="checked-tbody">
+							</tbody>
+						</table>
+					</div>
+					
+					<h4 class="header smaller lighter blue">
+					<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+					主机执行详情
+					</h4>
+					<div class="col-xs-12">
+						<table class="table table-bordered">
+							<tr>
+								<th>IP地址</th>
+								<th>用户</th>
+								<th>执行结果</th>
+							</tr>
+							{% for host in task_hosts %}
+							<tr>
+								<td>{{host.host_ip}}</td>
+								{% ifequal host.host_account 'root' %}
+								<td><span class="label label-warning">{{host.host_account}}</span></td>
+								{% else %}
+								<td>{{host.host_account}}</td>
+								{% endifequal %}
+								{% ifequal host.execute_status 1 %}
+								<td><span class="label label-success">成功</span></td>
+								{% else %}
+								<td><span class="label label-danger">失败</span></td>
+								{% endifequal %}
+							</tr>
+							{% endfor %}
+						</table>
+					</div>
+					
+					<h4 class="header smaller lighter blue">
+					<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+					执行内容
+					<span class="fullname">  ({{script.fullname}})</span>
+					</h4>
+					<div class="col-xs-12">
+						{% if script.status %}
+						<pre>{{script.contents}}</pre>
+						{% else %}
+						<span class="red">{{script.contents}}</span>
+						{% endif %}
+					</div>
+
+					<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+	</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<!-- page specific plugin scripts -->
+{% endblock %}

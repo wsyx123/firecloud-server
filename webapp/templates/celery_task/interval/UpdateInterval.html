@@ -1,0 +1,110 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.errorlist{
+	color:red;
+	margin:0px;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					任务调度
+				</li>
+				<li>
+					<a href="{% url 'ListInterval' %}">Interval调度</a>
+				</li>
+				<li>编辑Interval</li>
+		
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat">
+							<h4>Tips</h4>
+						</div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<ul class="list-unstyled spaced2">
+									<li>
+										<i class="fa fa-circle green"></i>
+											基于Celery的定时任务。
+									</li>
+				
+									<li class="muted">
+										<i class="fa fa-caret-right blue"></i>
+										Interval是间隔性的执行										 
+									</li>									
+								</ul>													
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-9">
+					<form class="form-horizontal" method="POST">
+														
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">间隔</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.every}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.every}}
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-2 control-label no-padding-right">单位</label>
+							<div class="col-xs-12 col-sm-5">
+								<span class="block input-icon input-icon-right">
+									{{form.period}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.period}}
+							</div>
+						</div>
+						<hr />
+						<div class="clearfix ">
+							<div class="col-md-offset-2 col-md-9">
+								<button class="btn btn-info" type="submit">
+									<i class="ace-icon fa fa-check bigger-110"></i>
+									保存
+								</button>
+
+								&nbsp; &nbsp; &nbsp;
+								<button class="btn" type="button" onclick="javascript:history.back(-1);">
+									<i class="ace-icon fa fa-undo bigger-110"></i>
+									取消
+								</button>
+							</div>
+						</div>	
+					</form>	
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+</script>
+{% endblock %}

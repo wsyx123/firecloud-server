@@ -1,0 +1,183 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<style>
+.acc-label{
+	color:#8B959C;
+}
+.banner{
+  width:100%;
+  padding: 10px;
+  font-size: 14px;
+  background: #f7fafc;
+  border: 1px solid #8bd1d6;
+  color: #34495E;
+  margin:10px 1px 20px 1px;
+}
+.banner>.vertical-middle,.banner>.vertical-middle-right {
+  width:30%;
+  text-align: center;
+  border-right: solid 2px #78C9CF;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.status-banner{
+  margin-top:30px;
+  width: 100%;
+  padding: 0px;
+}
+.status-banner div{
+  float: left;
+}
+.status-banner-icon{
+  width: 20%;
+  height: 37px;
+  background: #9be8bc;
+  color: #196c3c;
+  text-align: center;
+  padding-top:7px;
+}
+.status-banner-message{
+  width: 80%;
+  background: #eefbf4;
+  border: 1px solid #9be8bc;
+  border-left: none;
+  padding:5px 10px 0px;
+}
+
+
+.nav-background{
+	background: #9be8bc;
+	text-align: center;
+	padding: 8px;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					PAAS中心
+				</li>
+				<li><a href="{% url 'kubernetes' %}">kubernetes</a></li>
+				<li>{{ clsinfo.clsname }}</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+				
+					<div class='banner row'>
+						<div class='vertical-middle'>
+						  <label class='acc-label'>供应商</label> {{ clsinfo.provide}}
+						</div>
+						<div class='vertical-middle'>
+						  <label class='acc-label'>版本</label> {{ clsinfo.version }}
+						</div>
+						<div class='vertical-middle'>
+						  <label class='acc-label'>节点</label> {{ clsinfo.node }}
+						</div>
+						<span><a href="{% url 'k8sdetail' clsname=clsname %}">查看集群配置</a></span>
+					</div>
+				 
+					
+					
+					<div class="row">
+						<div class="col-xs-12 col-sm-4 center">
+							<div class="easy-pie-chart percentage" data-percent="20" data-color="#3497da">
+								<span class="percent">
+									<span>CPU </span>
+									<span style="font-size:50px;">20</span>%
+								</span>
+							</div>
+						</div><!-- /.col -->
+						
+						<div class="col-xs-12 col-sm-4 center">
+							<div class="easy-pie-chart percentage" data-percent="20" data-color="#3497da">
+								<span>Memory </span>
+								<span style="font-size:50px;">20</span>%
+							</div>
+						</div><!-- /.col -->
+						
+						<div class="col-xs-12 col-sm-4 center">
+							<div class="easy-pie-chart percentage" data-percent="20" data-color="#3497da">
+								<span>Pods </span>
+								<span style="font-size:50px;">20</span>%
+							</div>
+						</div><!-- /.col -->
+
+						
+					</div><!-- /.row -->
+					
+
+					<div class='status-banner row'>
+						<div class="col-xs-12 col-sm-3">
+						  <div class="status-banner-icon"><i class="glyphicon glyphicon-ok"></i></div>
+						  <div class="status-banner-message"><p>etcd<span></span></p></div>
+						</div>
+						
+						<div class="col-xs-12 col-sm-3">
+						  <div class="status-banner-icon"><i class="glyphicon glyphicon-ok"></i></div>
+						  <div class="status-banner-message"><p>controller</p></div>
+						</div>
+						
+						<div class="col-xs-12 col-sm-3">
+						  <div class="status-banner-icon"><i class="glyphicon glyphicon-ok"></i></div>
+						  <div class="status-banner-message"><p>apiserver</p></div>
+						</div>
+						
+						<div class="col-xs-12 col-sm-3">
+						  <div class="status-banner-icon"><i class="glyphicon glyphicon-ok"></i></div>
+						  <div class="status-banner-message"><p>kubelet</p></div>
+						</div>
+					</div>
+					
+					
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/assets/js/jquery.easypiechart.min.js"></script>
+<script type="text/javascript">
+	function draw_percent(){
+		$('.easy-pie-chart.percentage').each(function(){
+			$(this).easyPieChart({
+				barColor: $(this).data('color'),
+				trackColor: '#DDDDDD',
+				scaleColor: false,
+				lineCap: 'butt',
+				lineWidth: 20,
+				animate: ace.vars['old_ie'] ? false : 1000,
+				size:($('.easy-pie-chart').parent().width())*85/100
+			});
+		});
+
+	};
+	$(document).ready(function(){
+		draw_percent();
+	});
+
+	$(window).resize(function(){
+		//$('.easy-pie-chart.percentage').data('easyPieChart').update(90);
+		
+	});
+</script>
+{% endblock %}

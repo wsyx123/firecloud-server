@@ -1,0 +1,77 @@
+/*  common css  */
+
+.modal{
+	margin-top:60px;
+}
+
+.errorlist{
+	color:red;
+	margin:0px;
+}
+
+.tabbable{
+	border:1px solid #C5D0DC;
+}
+.tab-content{
+	border:none;
+}
+
+
+/*  ScriptAdd.html css   */
+ 
+#myselect .modal-content{
+	min-height:200px;
+	min-width:720px;
+}
+#myselect .modal-body{
+	max-height:380px;
+	overflow-y:scroll;
+}
+
+#writeScript .widget-header {
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    position: relative;
+    min-height: 38px;
+    background: repeat-x #FFFFFF;
+        background-image: none;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffeeeeee', GradientType=0);
+    color: #000000;
+    border-bottom: 1px solid #DDD;
+    padding-left: 12px;
+}
+
+#checked-div,#local-script,#saved-script{
+	display:none;
+}
+#delButton,.oneResult,#switchDisplay{
+	cursor:pointer;
+}
+
+.ui-progressbar {
+    background-color: #cad7d0;
+	border-radius:10px;
+}
+
+.progress-bar-striped, .progress-striped .progress-bar, .progress-striped .progress-bar-success{
+	background-image:none;
+}
+
+.resultData,#progressbar-div{
+	display:none;
+}
+
+
+/*  ScriptList.html css */
+
+#mydisplay .modal-content{
+	min-height:200px;
+	min-width:720px;
+}
+#mydisplay .modal-body{
+	max-height:380px;
+	overflow-y:scroll;
+}
+ 
+ 

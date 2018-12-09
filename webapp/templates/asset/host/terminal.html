@@ -1,0 +1,31 @@
+<!--  
+<link href="/static/webssh/img/favicon.png" rel="icon" type="image/png">
+<link href="/static/webssh/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>-->
+<link href="/static/webssh/css/xterm.min.css" rel="stylesheet" type="text/css"/>
+<link href="/static/webssh/css/fullscreen.min.css" rel="stylesheet" type="text/css"/>
+<link href="/static/webssh/css/asset.css" rel="stylesheet" />
+
+<script src="/static/webssh/js/jquery.min.js"></script>
+<script src="/static/webssh/js/popper.min.js"></script>
+<script src="/static/webssh/js/bootstrap.min.js"></script>
+<script src="/static/webssh/js/xterm.min.js"></script>
+<script src="/static/webssh/js/fullscreen.min.js"></script>
+<script src="/static/webssh/js/main.js"></script>
+
+
+
+<div class="col-md-10" id="describe-head">
+	<div>
+		<div id="image-detail">
+			
+		</div>
+	</div>
+</div>
+<script>
+function close_connect(){
+	socket.close();
+	$("#connect-notify").html('<span>{{address}}已断开连接!!!</span>');
+	$("#connect-button").html('<button onclick="reconnect();" class="btn btn-success">重新连接</button>');
+}
+</script>
+

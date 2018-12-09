@@ -1,0 +1,9 @@
+/__init__.pyc
+/ansible_collector.pyc
+/collector.pyc
+/compat.pyc
+/default_collectors.pyc
+/namespace.pyc
+/sysctl.pyc
+/timeout.pyc
+/utils.pyc

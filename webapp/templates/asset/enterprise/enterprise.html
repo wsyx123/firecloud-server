@@ -1,0 +1,389 @@
+{% extends "base/base.html" %}
+
+{% block css%}
+<style type="text/css">
+.widget-header{
+	max-height: 21px;
+	min-height: 21px;
+	padding-left:5px;
+}
+.widget-header > .widget-title{
+	line-height: 20px;
+}
+
+.widget-body{
+	width: 100%;
+	padding:0px;
+	margin:0px;
+}
+h4.smaller{
+	font-size: 14px;
+}
+#member,#project{
+	max-height:80px; 
+	overflow:auto;
+}
+#member .table,#project .table{
+	margin-bottom:0px;
+}
+#member td,#project td{
+	padding:3px;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					组织管理
+				</li>
+				
+				<li>组织</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<div class="widget-box widget-color-blue">
+						<div class="widget-header">
+							<h4 class="widget-title lighter smaller">企业组织树</h4>
+						</div>
+
+						<div class="widget-body">
+							<div class="widget-main padding-8">
+								<ul id="tree1"></ul>
+							</div>
+						</div>
+					</div>
+				  
+				</div><!-- /.col -->
+				
+				<div class="col-xs-12 col-sm-9">
+					<table id="simple-table" class="table  table-bordered table-hover">
+						<thead>
+							<tr>
+								<th class="center">
+									<label class="pos-rel">
+										<input type="checkbox" class="ace" />
+										<span class="lbl"></span>
+									</label>
+								</th>
+								<th>部门或组</th>
+								<th>直属</th>
+								<th>职能范围</th>
+								<th>负责人</th>
+								<th>项目数</th>
+								<th>人数</th>
+								<th class="center"><a href="{% url 'addDepartment' %}"><i class="glyphicon glyphicon-plus blue"></i></a></th>
+
+								
+							</tr>
+						</thead>
+
+						<tbody>
+							<tr>
+								<td class="center">
+									<label class="pos-rel">
+										<input type="checkbox" class="ace" />
+										<span class="lbl"></span>
+									</label>
+								</td>
+
+
+								<td>云计算组</td>
+								<td>研发中心</td>
+								<td>公司云产品研发（IAAS、PAAS）</td>
+								<td>杨旭</td>
+								<td>3</td>
+								<td>4</td>
+								<td class="center">
+									<div class="action-buttons">
+										<a href="#" class="green bigger-140 show-details-btn" title="Show Details">
+											<i class="ace-icon fa fa-angle-double-down"></i>
+											<span class="sr-only">Details</span>
+										</a>
+									</div>
+								</td>
+
+								
+							</tr>
+
+							<tr class="detail-row">
+								<td colspan="8">
+									<div class="table-detail">
+										<div class="row">
+											<div class="col-xs-12 col-sm-2">
+												<div class="text-center">
+													<img height="150" class="thumbnail inline no-margin-bottom" alt="Domain Owner's Avatar" src="/static/assets/images/avatars/profile-pic.jpg" />
+													<br />
+													<div class="width-100 label label-info label-xlg arrowed-in arrowed-in-right">
+														<div class="inline position-relative">
+															<a class="user-title-label" href="#">
+																<i class="ace-icon fa fa-circle light-green"></i>
+																&nbsp;
+																<span class="white">杨旭</span>
+															</a>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-6">
+												<div class="space visible-xs"></div>
+
+												<div class="profile-user-info profile-user-info-striped">
+													<div class="profile-info-row">
+														<div class="profile-info-name"> 姓名 </div>
+
+														<div class="profile-info-value">
+															<span>杨旭</span>
+														</div>
+													</div>
+
+													<div class="profile-info-row">
+														<div class="profile-info-name"> 办公地址 </div>
+
+														<div class="profile-info-value">
+															<i class="fa fa-map-marker light-orange bigger-110"></i>
+															<span>贵州省贵阳市观山湖区观山西路139号移动枢纽大楼</span>
+														</div>
+													</div>
+
+													<div class="profile-info-row">
+														<div class="profile-info-name"> 年龄 </div>
+
+														<div class="profile-info-value">
+															<span>26</span>
+														</div>
+													</div>
+
+													<div class="profile-info-row">
+														<div class="profile-info-name"> 入职时间 </div>
+
+														<div class="profile-info-value">
+															<span>2018/06/07</span>
+														</div>
+													</div>
+
+													<div class="profile-info-row">
+														<div class="profile-info-name"> 电话 </div>
+
+														<div class="profile-info-value">
+															<span>18508503875</span>
+														</div>
+													</div>
+
+													<div class="profile-info-row">
+														<div class="profile-info-name"> 邮箱 </div>
+
+														<div class="profile-info-value">
+															<span>690943136@qq.com</span>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-4">
+										
+												<div class="clearfix">
+													<div class="widget-box ">
+														<div class="widget-header">
+															<h4 class="col-sm-4 widget-title lighter smaller">工号</h4>
+															<h4 class="col-sm-5 widget-title lighter smaller">成员(4)</h4>
+															
+														</div>
+														
+
+														<div class="widget-body"  id="member">
+															<table class="table  table-bordered">
+																
+																<tbody>
+																	<tr>
+																		<td class="col-sm-4">101</td><td class="col-sm-8">Andy</td>
+																	</tr>
+																	<tr>
+																		<td>102</td><td>David</td>
+																	</tr>
+																	<tr>
+																		<td>103</td><td>Jack</td>
+																	</tr>
+																	<tr>
+																		<td>104</td><td>Tom</td>
+																	</tr>
+																	
+																</tbody>
+															</table>
+														</div>
+													</div>
+													<div class="widget-box">
+														<div class="widget-header">
+															<h4 class="col-sm-4 widget-title lighter smaller">编号</h4>
+															<h4 class="col-sm-5 widget-title lighter smaller">项目(3)</h4>
+															
+														</div>
+
+														<div class="widget-body"  id="project">
+															<table class="table  table-bordered">
+																
+																<tbody>
+																	<tr>
+																		<td class="col-sm-4">11</td><td class="col-sm-8">saas</td>
+																	</tr>
+																	<tr>
+																		<td>12</td><td>paas</td>
+																	</tr>
+																	<tr>
+																		<td>13</td><td>iaas</td>
+																	</tr>
+																	
+																</tbody>
+															</table>
+														</div>
+													</div>
+													
+												</div>
+											
+											</div>
+										</div>
+									</div>
+								</td>
+							</tr>
+
+						
+						</tbody>
+					</table>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/assets/js/tree.min.js"></script>
+<script src="/static/assets/js/jquery.dataTables.min.js"></script>
+<script src="/static/assets/js/jquery.dataTables.bootstrap.min.js"></script>
+<script src="/static/assets/js/dataTables.select.min.js"></script>
+<script type="text/javascript">
+	jQuery(function($){
+	var sampleData = initiateDemoData();//see below
+
+
+	$('#tree1').ace_tree({
+		dataSource: sampleData['dataSource2'] ,
+		loadingHTML:'<div class="tree-loading"><i class="ace-icon fa fa-refresh fa-spin blue"></i></div>',
+		'open-icon' : 'ace-icon fa fa-folder-open',
+		'close-icon' : 'ace-icon fa fa-folder',
+		'itemSelect' : true,
+		'ExpendLevel' : 1,
+		'folderSelect': true,
+		'multiSelect': true,
+		'selected-icon' : null,
+		'unselected-icon' : null,
+		'folder-open-icon' : 'ace-icon tree-plus',
+		'folder-close-icon' : 'ace-icon tree-minus'
+	});
+	
+	function initiateDemoData(){
+
+		var tree_data_2 = {
+			'pictures' : {text: 'Firecloud科技有限公司', type: 'folder', 'icon-class':'red'}	
+			
+		}
+		tree_data_2['pictures']['additionalParameters'] = {
+			'children' : {
+				'wallpapers' : {text: '运维中心', type: 'folder', 'icon-class':'pink'},
+				'camera' : {text: '产品中心', type: 'folder', 'icon-class':'pink'}
+			}
+		}
+		tree_data_2['pictures']['additionalParameters']['children']['wallpapers']['additionalParameters'] = {
+			'children' : [
+				{text: '<i class="ace-icon fa fa-building-o green"></i> 主机组', type: 'item'},
+				{text: '<i class="ace-icon fa fa-sitemap green"></i> 网络组', type: 'item'},
+				{text: '<i class="ace-icon fa fa-cube green"></i> 应用组', type: 'item'}
+			]
+		}
+		tree_data_2['pictures']['additionalParameters']['children']['camera']['additionalParameters'] = {
+			'children' : [
+				{text: '<i class="ace-icon fa fa-picture-o green"></i> photo1.jpg', type: 'item'},
+				{text: '<i class="ace-icon fa fa-picture-o green"></i> photo2.jpg', type: 'item'},
+				{text: '<i class="ace-icon fa fa-picture-o green"></i> photo3.jpg', type: 'item'},
+				{text: '<i class="ace-icon fa fa-picture-o green"></i> photo4.jpg', type: 'item'},
+				{text: '<i class="ace-icon fa fa-picture-o green"></i> photo5.jpg', type: 'item'},
+				{text: '<i class="ace-icon fa fa-picture-o green"></i> photo6.jpg', type: 'item'}
+			]
+		}
+
+
+		var dataSource2 = function(options, callback){
+			var $data = null
+			if(!("text" in options) && !("type" in options)){
+				$data = tree_data_2;//the root tree
+				callback({ data: $data });
+				return;
+			}
+			else if("type" in options && options.type == "folder") {
+				if("additionalParameters" in options && "children" in options.additionalParameters)
+					$data = options.additionalParameters.children || {};
+				else $data = {}//no data
+			}
+			
+			if($data != null)//this setTimeout is only for mimicking some random delay
+				setTimeout(function(){callback({ data: $data });} , parseInt(Math.random() * 500) + 200);
+
+			//we have used static data here
+			//but you can retrieve your data dynamically from a server using ajax call
+			//checkout examples/treeview.html and examples/treeview.js for more info
+		}
+
+		
+		return { 'dataSource2' : dataSource2}
+	}
+	
+	//And for the first simple table, which doesn't have TableTools or dataTables
+	//select/deselect all rows according to table header checkbox
+	var active_class = 'active';
+	$('#simple-table > thead > tr > th input[type=checkbox]').eq(0).on('click', function(){
+		var th_checked = this.checked;//checkbox inside "TH" table header
+		
+		$(this).closest('table').find('tbody > tr').each(function(){
+			var row = this;
+			if(th_checked) $(row).addClass(active_class).find('input[type=checkbox]').eq(0).prop('checked', true);
+			else $(row).removeClass(active_class).find('input[type=checkbox]').eq(0).prop('checked', false);
+		});
+	});
+	
+	//select/deselect a row when the checkbox is checked/unchecked
+	$('#simple-table').on('click', 'td input[type=checkbox]' , function(){
+		var $row = $(this).closest('tr');
+		if($row.is('.detail-row ')) return;
+		if(this.checked) $row.addClass(active_class);
+		else $row.removeClass(active_class);
+	});
+	
+	/***************/
+	$('.show-details-btn').on('click', function(e) {
+		e.preventDefault();
+		$(this).closest('tr').next().toggleClass('open');
+		$(this).find(ace.vars['.icon']).toggleClass('fa-angle-double-down').toggleClass('fa-angle-double-up');
+	});
+	/***************/
+
+});
+</script>
+
+{% endblock %}
+

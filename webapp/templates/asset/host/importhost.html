@@ -1,0 +1,175 @@
+{% extends "base/base.html" %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					资产管理
+				</li>
+				<li>
+					<a href="{% url 'HostList' %}">主机</a>
+				</li>
+				<li>导入主机</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat">
+							<h4>导入进度</h4>
+						</div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div class="row">
+								<div class="col-xs-12 col-sm-6">
+									<p><i class="fa fa-circle green"></i>状态:<strong id="importStatus"> --</strong></p>
+									<div id="errMsg" class="red"></div>
+									<div id="importDetail">
+										<p><i class="fa fa-circle blue"></i>总条数: <strong id="TotalLine">N/A</strong></p>
+										<p><i class="fa fa-circle green"></i>处理成功: <strong id="SucceededLine">N/A</strong></p>
+										<p><i class="fa fa-circle red"></i>处理失败: <strong id="FailureLine">N/A</strong></p>
+									</div>
+								</div>
+								<div class="col-xs-12 col-sm-6">
+									<div class="easy-pie-chart percentage" data-percent="0" data-color="#87CEEB">
+										<span class="percent">0</span>%
+									</div>
+								</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="space-2"></div>
+				<div class="col-xs-12 col-sm-9">
+				
+					<div class='alert alert-block alert-info'>
+					  <p>
+						上传一个 excel 文件，批量导入主机信息，请从这里下载 <a href="/static/download/asset.xlsx" style="text-decoration: underline;">示例文件</a>。
+					  </p>
+					  <p>
+						注：带星号（<span style="color:red;">*</span>）的是必填，<span style="color:red;">主机组必须先创建！</span>
+					  </p>
+					</div>
+					<form id="importfile" method="POST"  enctype="multipart/form-data"> 
+						<div class="import-file">
+							<input name="file" type="file"/>
+						</div>
+						<div class="space-6"></div>
+						<div class="clearfix ">
+							<button class="btn btn-info" type="submit" id="submit">
+								<i class="ace-icon fa fa-check bigger-110"></i>
+								导入
+							</button>
+
+							&nbsp; &nbsp; &nbsp;
+							<button class="btn" type="button" onclick="javascript:history.back(-1);" id="cancel">
+								<i class="ace-icon fa fa-undo bigger-110"></i>
+								取消
+							</button>
+						</div>
+					</form>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<script src="/static/assets/js/jquery.easypiechart.min.js"></script>
+<script src="/static/js/jquery.form.min.js"></script>
+<script>
+$('.easy-pie-chart.percentage').each(function(){
+	$(this).easyPieChart({
+		barColor: $(this).data('color'),
+		trackColor: '#EEEEEE',
+		scaleColor: false,
+		lineCap: 'butt',
+		lineWidth: 8,
+		animate: ace.vars['old_ie'] ? false : 1000,
+		size:110
+	}).css('color', $(this).data('color'));
+});
+function checkFileSuffix(){
+	console.log('开始导入');
+}
+function setStatus(data){
+	pk = data['import_id'];
+	if(data['status'] && data['import_id'].length !=0 ){
+		$("#submit").attr('disabled','disabled');
+		$("#cancel").attr('disabled','disabled');
+		$("#importStatus").text("正在导入");
+		$("#TotalLine").text(data['total_line']);
+		$("#SucceededLine").text(data['succeeded_line']);
+		$("#FailureLine").text(data['failure_line']);
+		$("#errMsg").css('display','block');
+		$("#importDetail").css('display','block');
+	}else{
+		$("#importStatus").text("导入失败");
+		$("#importDetail").css('display','None');
+		$("#errMsg").text(data['err_msg']);
+	}
+}
+function updateStatus(data){
+	$.ajax({
+		type: 'POST',
+		url: '/host/import/result/',
+		data: {'pk':pk},
+		success: function(dat){
+			if(dat['is_finished']){
+				$("#submit").removeAttr('disabled');
+				$("#cancel").removeAttr('disabled');
+				$("#importStatus").text("导入完成");
+				$("#TotalLine").text(dat['total_line']);
+				$("#SucceededLine").text(dat['succeeded_line']);
+				$("#FailureLine").text(dat['failure_line']);
+				var perVal = (dat['failure_line']+dat['succeeded_line'])/dat['total_line']*100;
+				$('.easy-pie-chart').data('easyPieChart').update(perVal.toFixed(2));
+				$('span', $('.easy-pie-chart')).text(perVal.toFixed(2));
+				clearInterval(wait);
+			}else{
+				$("#TotalLine").text(dat['total_line']);
+				$("#SucceededLine").text(dat['succeeded_line']);
+				$("#FailureLine").text(dat['failure_line']);
+				$('.easy-pie-chart').data('easyPieChart').update((dat['failure_line']+dat['succeeded_line'])/dat['total_line']*100);
+				$('span', $('.easy-pie-chart')).text((dat['failure_line']+dat['succeeded_line'])/dat['total_line']*100);
+			}
+		}
+	})
+}
+function showResponse(data){
+	setStatus(data);
+	wait = setInterval(updateStatus,3000);
+}
+var options = {
+  //target: '#output1',
+  // 从服务传过来的数据显示在这个div内部
+  //也就是ajax局部刷新
+  beforeSubmit: checkFileSuffix,
+ // ajax提交之前的处理
+  success:  showResponse
+ // 处理之后的处理
+ };
+$('#importfile').submit(function(){
+  $(this).ajaxSubmit(options);
+  return false; 
+  //非常重要，如果是false，则表明是不跳转
+  //在本页上处理，也就是ajax，如果是非false，则传统的form跳转。
+ });
+
+</script>
+{% endblock %}
