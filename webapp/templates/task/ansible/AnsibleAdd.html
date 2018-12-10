@@ -55,7 +55,7 @@
 									</div>
 								</div>
 								
-								<div class="widget-box">
+								<div class="widget-box" id='step1'>
 									<div class="widget-header">
 										<div style="padding-top:5px;display:inline-block;">
 											<span class="white">步骤名称 </span><input type="text" style="line-height:15px;" />
@@ -80,50 +80,49 @@
 									<div class="widget-body">
 										<div class="widget-main">
 											<div class="tabbable">
-												<ul class="nav nav-tabs" id="myTab4">
+												<ul class="nav nav-tabs">
 													<li class="active">
-														<a data-toggle="tab" href="#tasks">tasks</a>
+														<a data-toggle="tab" href="#task1">tasks</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#handlers">handlers</a>
+														<a data-toggle="tab" href="#handler1">handlers</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#vars">vars</a>
+														<a data-toggle="tab" href="#var1">vars</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#templates">templates</a>
+														<a data-toggle="tab" href="#template1">templates</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#files">files</a>
+														<a data-toggle="tab" href="#file1">files</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#hosts">hosts(已选服务器)
+														<a data-toggle="tab" href="#host1">hosts(已选服务器)
 														<span class="badge badge-danger">1</span>
 														</a>
 													</li>
-													
 												</ul>
 
 												<div class="tab-content">
-													<div id="tasks" class="tab-pane in active">
+													<div id="task1" class="tab-pane in active">
 														备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> tasks </strong>目录下的main.yml文件中</span>
 														<p></p>
-														<div id="compile-editor" class="ace_editor" style="min-height:200px"></div> 
+														<div id="task-editor1" class="ace_editor" style="min-height:200px"></div> 
 													</div>
 													
-													<div id="handlers" class="tab-pane">
+													<div id="handler1" class="tab-pane">
 														备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> handlers </strong>目录下的main.yml文件中</span>
 														<p></p>
-														<div id="handlers-editor" class="ace_editor" style="min-height:200px"></div> 
+														<div id="handler-editor1" class="ace_editor" style="min-height:200px"></div> 
 													</div>
 													
-													<div id="vars" class="tab-pane">
+													<div id="var1" class="tab-pane">
 														备注:<span class="smaller green">这里所编写内容会保存在此步骤（角色）下的<strong class="red"> vars </strong>目录下的main.yml文件中</span>
 														<p></p>
-														<div id="vars-editor" class="ace_editor" style="min-height:200px"></div>
+														<div id="var-editor1" class="ace_editor" style="min-height:200px"></div>
 													</div>
 													
-													<div id="templates" class="tab-pane">
+													<div id="template1" class="tab-pane">
 														备注:<span class="smaller green">这里所上传的文件会保存在此步骤（角色）下的<strong class="red"> templates </strong>目录下</span>
 														<p></p>
 														<div class="widget-box">
@@ -132,21 +131,21 @@
 																	<thead>
 																		<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
 																	</thead>
-																	<tbody id="filelist">
+																	<tbody id="templatefilelist1">
 																		
 																	</tbody>
 																</table>
 															</div>
 															<div class="widget-footer">
-																<div id="container" class="center">
-																	<a id="pickfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
-																	<a id="uploadfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
+																<div id="templatecontainer1" class="center">
+																	<a id="templatepickfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
+																	<a id="templateuploadfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
 																</div>
 															</div>
 														</div>														
 													</div>
 													
-													<div id="files" class="tab-pane">
+													<div id="file1" class="tab-pane">
 														备注:<span class="smaller green">这里所上传的文件会保存在此步骤（角色）下的<strong class="red"> files </strong>目录下</span>
 														<p></p>
 														<div class="widget-box">
@@ -155,15 +154,15 @@
 																	<thead>
 																		<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
 																	</thead>
-																	<tbody id="filelist">
+																	<tbody id="filefilelist1">
 																		
 																	</tbody>
 																</table>
 															</div>
 															<div class="widget-footer">
-																<div id="container" class="center">
-																	<a id="pickfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
-																	<a id="uploadfiles" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
+																<div id="filecontainer1" class="center">
+																	<a id="filepickfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
+																	<a id="fileuploadfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
 																</div>
 															</div>
 														</div>	
@@ -194,15 +193,14 @@
 														</div>
 														</div>
 													</div>
-
 												</div>
-											</div>
-										</div>
-									</div>
-								</div>
+											</div> <!-- tabbable -->
+										</div><!-- widget-main -->
+									</div><!-- widget-body -->
+								</div><!-- widget-box -->
 								
 								<div>
-									<button class="btn btn-sm btn-success" type="button"><i class="fa fa-plus"></i> 添加步骤</button>
+									<button class="btn btn-sm" type="button" onclick="addStep(this);"><i class="fa fa-plus"></i> 添加步骤</button>
 								</div>
 									
 								<div class="center">
@@ -227,35 +225,18 @@
 <script src="/static/ace-editor/theme-monokai.js"></script>
 <script src="/static/plupload-2.3.6/js/plupload.full.min.js"></script>
 
+<script src="/static/js/ansible.js"></script>
+
 <script type="text/javascript">
 
-// 清除ace editor中所有内容
-function removeAllLines(editor){
-	AllLines = $(".ace_line");
-	for(var i=0;i<AllLines.length;i++){
-		editor.removeLines();
-	}
-}
+div_id = 1;
 
-// 设置ace-editor 模式
-function setAceEditMode(id,model,content) {
-	var editor = ace.edit(id);
-	var langTools = ace.require("ace/ext/language_tools");
-	editor.setTheme("ace/theme/monokai");
-	//editor.removeLines();
-	removeAllLines(editor);
-	editor.insert(content);
-	editor.getSession().setMode("ace/mode/" + model);
-	editor.setShowPrintMargin(false);
-	editor.setOptions({
-	    enableBasicAutocompletion: true,
-	    enableSnippets: true,
-	    enableLiveAutocompletion: true
-	});
-};
-setAceEditMode('compile-editor','yaml','--');
-setAceEditMode('handlers-editor','yaml','--');
-setAceEditMode('vars-editor','yaml','--');
+
+setAceEditMode('task-editor1','yaml','--');
+setAceEditMode('handler-editor1','yaml','--');
+setAceEditMode('var-editor1','yaml','--');
+InitFileUpload('templatepickfile1','templatecontainer1','templatefilelist1','templateuploadfile1');
+InitFileUpload('filepickfile1','filecontainer1','filefilelist1','fileuploadfile1');
 
 function switchUpDown(obj){
 	classStr = $(obj).attr('class');
@@ -271,50 +252,7 @@ function switchUpDown(obj){
 }
 
 //plupload
-var uploader = new plupload.Uploader({
-	runtimes : 'html5,flash,silverlight,html4',
-	browse_button : 'pickfiles', // you can pass an id...
-	container: document.getElementById('container'), // ... or DOM Element itself
-	url : 'upload.php',
-	flash_swf_url : '/static/plupload-2.3.6/js/Moxie.swf',
-	silverlight_xap_url : '/static/plupload-2.3.6/js/Moxie.xap',
-	
-	filters : {
-		max_file_size : '10mb',
-		mime_types: [
-			{title : "Image files", extensions : "jpg,gif,png"},
-			{title : "Zip files", extensions : "zip"}
-		]
-	},
 
-	init: {
-		PostInit: function() {
-			document.getElementById('filelist').innerHTML = '';
-
-			document.getElementById('uploadfiles').onclick = function() {
-				uploader.start();
-				return false;
-			};
-		},
-
-		FilesAdded: function(up, files) {
-			plupload.each(files, function(file) {
-				var txt = '<tr><td>' + file.name + '</td><td>0%</td><td>' + plupload.formatSize(file.size) + '</td><td><button class="btn btn-minier btn-danger">删除</button></td></tr>';
-				document.getElementById('filelist').innerHTML += txt;
-			});
-		},
-
-		UploadProgress: function(up, file) {
-			document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
-		},
-
-		Error: function(up, err) {
-			document.getElementById('console').appendChild(document.createTextNode("\nError #" + err.code + ": " + err.message));
-		}
-	}
-});
-
-uploader.init();
 
 </script>
 {% endblock %}
