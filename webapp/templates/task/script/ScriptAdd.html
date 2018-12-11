@@ -531,7 +531,6 @@ function formSubmitAction(type){
 		return;
 	}
 	if(type=='save'){
-		$('#script_form').serialize()+'&script_content='+contents;
 		$("#script_form").submit();
 	}else if(type=='execute'){
 		checked_host_array = new Array();
@@ -544,7 +543,7 @@ function formSubmitAction(type){
 			})
 		}else{
 			$("#progressbar-div").css('display','block');//显示进度条
-			var script_form_str = $('#script_form').serialize()+'&checked_host_array='+checked_host_array+'&script_content='+contents;
+			var script_form_str = $('#script_form').serialize()+'&checked_host_array='+checked_host_array;
 			ScriptExecuteProgressBar(50);
 			$.ajax({
 				type: 'POST',

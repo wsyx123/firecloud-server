@@ -354,6 +354,24 @@ class AnsibleList(TemplateView):
     
 class AnsibleAdd(TemplateView):
     template_name = 'task/ansible/AnsibleAdd.html'
+    def get_context_data(self, **kwargs):
+        context = super(AnsibleAdd, self).get_context_data(**kwargs)
+        if self.request.session.get('_user_id') == 1:
+            assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
+        else:
+            assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
+        context['hosts'] = generate_host_list(assetHostQuerySet)
+        context['total_host_count'] = len(context['hosts'])
+        return context
+
+
+def ansible_upload_file(request):
+    if request.method == 'POST':
+        print request.FILES
+        print request.POST.get('playbook_name')
+        print request.POST.get('role_name')
+        print request.POST.get('file_type')
+    return JsonResponse({'status':200})
     
 class FileSend(TemplateView):
     template_name = 'task/file/file.html'

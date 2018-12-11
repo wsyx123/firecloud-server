@@ -11,3 +11,5 @@ ASSET_IMPORT_PATH=root_dir+'/static/upload'
 SCRIPT_SAVE_PATH=root_dir+'/static/upload/scripts'
 
 SCRIPT_PICKLE_PATH=root_dir+'/static/upload/pickle'
+
+ANSIBLE_PROJECT_PATH=root_dir+'/static/upload/ansible'

@@ -1,9 +1,10 @@
+//添加步骤
 function addStep(obj){
 	div_id = div_id + 1;
 	var id = div_id;
 	var ul_str='<ul class="nav nav-tabs">\
 					<li class="active">\
-						<a data-toggle="tab" href="#task'+id+'">tasks</a>\
+						<a data-toggle="tab" href="#task'+id+'"><span class="red"> *</span>tasks</a>\
 					</li>\
 					<li>\
 						<a data-toggle="tab" href="#handler'+id+'">handlers</a>\
@@ -18,7 +19,7 @@ function addStep(obj){
 						<a data-toggle="tab" href="#file'+id+'">files</a>\
 					</li>\
 					<li>\
-						<a data-toggle="tab" href="#host'+id+'">hosts(已选服务器)<span class="badge badge-danger">0</span></a>\
+						<a data-toggle="tab" href="#host'+id+'"><span class="red"> *</span>hosts(已选服务器) <span class="badge badge-danger">0</span></a>\
 					</li>\
 				</ul>'
 	var task_div_str='<div id="task'+id+'" class="tab-pane in active">\
@@ -91,7 +92,7 @@ function addStep(obj){
 						</div>'
 	var widget_header_str='<div class="widget-header">\
 								<div style="padding-top:5px;display:inline-block;">\
-									<span class="white">步骤名称 </span><input type="text" style="line-height:15px;" />\
+									<span class="white">步骤名称<span class="red"> *</span></span><input name="step'+id+'" type="text" style="line-height:15px;" />\
 								</div>\
 								<div class="widget-toolbar" onclick="delStep(this);">\
 									<label class="white">\
@@ -103,10 +104,10 @@ function addStep(obj){
 										<i class="fa fa-angle-double-up" onclick="switchUpDown(this);"></i>\
 									</label>\
 								</div>\
-								<div class="widget-toolbar">\
+								<div class="widget-toolbar" onclick="setModalRelID(this);">\
 									<label class="white">\
 										<i class="fa fa-plus" aria-hidden="true"></i>\
-										<b>选择服务器</b>\
+										<b data-toggle="modal" data-target="#myselect">选择服务器</b>\
 									</label>\
 								</div>\
 							</div>'
@@ -120,12 +121,17 @@ function addStep(obj){
 	var widget_box_str='<div class="widget-box" id="step'+id+'">'+widget_header_str+widget_body_str+'</div>'
 	
 	$(obj).parent().before(widget_box_str);
-	setAceEditMode('task-editor'+id,'yaml','--');
-	setAceEditMode('handler-editor'+id,'yaml','--');
-	setAceEditMode('var-editor'+id,'yaml','--');
+	setAceEditMode('task-editor'+id,'yaml','');
+	setAceEditMode('handler-editor'+id,'yaml','');
+	setAceEditMode('var-editor'+id,'yaml','');
 	InitFileUpload('templatepickfile'+id,'templatecontainer'+id,'templatefilelist'+id,'templateuploadfile'+id);
 	InitFileUpload('filepickfile'+id,'filecontainer'+id,'filefilelist'+id,'fileuploadfile'+id);
 	
+}
+
+//删除步骤
+function delStep(obj){
+	$(obj).parent().parent().remove();
 }
 
 // 清除ace editor中所有内容
@@ -153,16 +159,14 @@ function setAceEditMode(id,model,content) {
 	});
 };
 
-function delStep(obj){
-	$(obj).parent().parent().remove();
-}
 
+//文件上传初始化
 function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 	var uploader = new plupload.Uploader({
 	runtimes : 'html5,flash,silverlight,html4',
 	browse_button : pickfileID, // you can pass an id...
 	container: document.getElementById(containerID), // ... or DOM Element itself
-	url : 'upload.php',
+	url : '/ansible/add/file/?ansible_id=',
 	flash_swf_url : '/static/plupload-2.3.6/js/Moxie.swf',
 	silverlight_xap_url : '/static/plupload-2.3.6/js/Moxie.xap',
 	
@@ -177,7 +181,6 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 	init: {
 		PostInit: function() {
 			document.getElementById(filelistID).innerHTML = '';
-
 			document.getElementById(uploadfileID).onclick = function() {
 				uploader.start();
 				return false;
@@ -186,13 +189,31 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 
 		FilesAdded: function(up, files) {
 			plupload.each(files, function(file) {
-				var txt = '<tr><td>' + file.name + '</td><td>0%</td><td>' + plupload.formatSize(file.size) + '</td><td><button class="btn btn-minier btn-danger">删除</button></td></tr>';
+				var txt = '<tr><td>' + file.name + '</td><td id="'+file.id+'">0%</td><td>' + plupload.formatSize(file.size) + '</td><td><button class="btn btn-minier btn-danger">删除</button></td></tr>';
 				document.getElementById(filelistID).innerHTML += txt;
 			});
 		},
+		
+		BeforeUpload: function(up,file){
+			var TmpStepNum = uploadfileID.charAt(uploadfileID.length-1);
+			var playbook_name = $("input[name='playbook_name']").val();
+			var role_name = $("input[name='step"+TmpStepNum+"']").val();
+			var file_type =  "";
+			if(containerID.indexOf("template") != -1){
+				var file_type = 'template';
+			}else if(containerID.indexOf("file") != -1){
+				var file_type = 'file';
+			}
+			if(playbook_name==''|| role_name==''){
+				uploader.stop();
+				alert("请输入剧本名称和步骤名称!");
+				
+			}
+			uploader.setOption("multipart_params",{"playbook_name":playbook_name,"role_name":role_name,"file_type":file_type});
+		},
 
 		UploadProgress: function(up, file) {
-			document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+			document.getElementById(file.id).innerHTML = '<span>' + file.percent + "%</span>";
 		},
 
 		Error: function(up, err) {
@@ -203,4 +224,108 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 
 uploader.init();
 	
+}
+
+//expand or collapse step input feild
+function switchUpDown(obj){
+	classStr = $(obj).attr('class');
+	if(classStr.indexOf("fa-angle-double-up") !=-1){
+		$(obj).removeClass('fa-angle-double-up');
+		$(obj).addClass('fa-angle-double-down');
+		$(obj).parent().parent().parent().next().css('display','none');
+	}else{
+		$(obj).removeClass('fa-angle-double-down');
+		$(obj).addClass('fa-angle-double-up');
+		$(obj).parent().parent().parent().next().css('display','block');
+	}
+}
+
+//保存提交ansible, 提交给后台的数据格式为：
+/*  templates 和files 通过上传先提交了
+	{
+		"playbook_name":"lamp",
+		"step1":{
+			"role_name":"install_db",
+			"tasks": "contents",
+			"handlers": "contents",
+			"vars": "contents",
+			"hosts": "192.168.10.3:root,192.168.10.4:clouder"
+		}
+	}
+*/
+function saveAnsible(){
+	var playbook_data = {}
+	var playbook_name = $("input[name='playbook_name']").val();
+	playbook_data["playbook_name"] = playbook_name;
+	var allStep = $(".widget-box[id^='step']");
+	for(var i=0;i<allStep.length;i++){
+		var oneStepID = $(allStep[i]).attr('id');
+		playbook_data[oneStepID] = {};
+		var oneStepNum = oneStepID.charAt(oneStepID.length-1);
+		var role_name = $("input[name='step"+oneStepNum+"']").val();
+		playbook_data[oneStepID]["role_name"] = role_name;
+		var task_editor = ace.edit("task-editor"+oneStepNum);
+		var contents = task_editor.getSession().getValue();
+		playbook_data[oneStepID]["tasks"] = contents;
+		var checked_host_array = getHostAccount("host"+oneStepNum);
+		console.log(checked_host_array);
+		console.log(playbook_data);
+	}
+}
+
+//获取已选择的主机和帐号,返回一个数组['192.168.10.3:root','192.168.10.4:clouder']
+function getHostAccount(hostId){
+	var checked_host_array = new Array();
+	var checkedHostTrObj = $(hostId+" table tr");
+	for(var i=1;i<checkedHostTrObj.length;i++){
+		var ip = $(checkedHostTrObj[i]).children().eq(3).text();
+		var accountObj = $(checkedHostTrObj[i]).children().eq(2);
+		var account = $(accountObj).children("select").find('option:selected').text();
+		checked_host_array.push(ip+':'+account);
+	}
+	return checked_host_array;
+}
+
+//当“选择服务器”时, 获取当前步骤StepNum,以便从主机列表modal 选择主机添加时知道添加到哪个步骤中
+function setModalRelID(obj){
+	var stepID = $(obj).parent().parent().attr('id');
+	StepNum = stepID.charAt(stepID.length-1);	
+}
+
+//服务器全选，取消全选
+//备注：easysearch过滤的原理是使不匹配的元素不可见，所有在全选时需要先过滤掉不可见的元素
+function allChecked(obj){
+	if($(obj).is(':checked')){
+		var visible_tr = $(".tr-select-modal:visible");
+		for(var i=0;i<visible_tr.length;i++){
+			$(visible_tr[i]).find("input[type='checkbox']").prop('checked','true');
+		}
+	}else{
+		$(obj).find("input[type='checkbox']").removeAttr('checked','true');
+		$(".tr-select-modal input[type='checkbox']").removeAttr("checked");
+	}
+	
+}
+
+// 添加已选择服务器
+function addHost(){
+	var checked = $(".tr-select-modal:visible input[type='checkbox']:checked");
+	var hostTabObj = $("a[href='#host"+StepNum+"']");
+	var currCheckedHostNum = $(hostTabObj).children().eq(1).text();
+	$(hostTabObj).children().eq(1).text(checked.length+parseInt(currCheckedHostNum));
+	for(var i=0;i<checked.length;i++){
+		var checkTempObj = $($(checked[i]).parent().parent()).clone();
+		$(checkTempObj).children().eq(0).remove();
+		var del_txt="<td id='delButton' onclick='delChecked(this);'>删除</td>";
+		$(checkTempObj).append(del_txt);
+		$(checkTempObj).appendTo("#host"+StepNum+" table");
+	}
+}
+
+// 删除已选择服务器
+function delChecked(obj){
+	$(obj).parent().remove();
+	var hostTabObj = $("a[href='#host"+StepNum+"']");
+	var currCheckedHostNum = $(hostTabObj).children().eq(1).text();
+	$(hostTabObj).children().eq(1).text(parseInt(currCheckedHostNum)-1);
 }

@@ -15,6 +15,17 @@
     border-bottom: 1px solid #DDD;
     padding-left: 12px;
 }
+.widget-toolbar label{
+	cursor:pointer;
+}
+
+.modal{
+	margin-top:60px;
+}
+
+#delButton{
+	cursor:pointer;
+}
 
 </style>
 {% endblock %}
@@ -44,13 +55,14 @@
 						<div class="tab-content">
 							<form class="form-horizontal" method="POST" enctype="multipart/form-data">
 								<input name="script_ower" type='text' value="{{request.session.user_id}}" hidden>
+								<input name="ansible_id" type='text' value="{{ansible_id}}" hidden>
 								<div class="form-group">
 									<label class="col-xs-12 col-sm-1 no-padding-right">
 										<span style="font-size:18px;">剧本名称</span><span class="red">*</span>
 									</label>
 									<div class="col-xs-12 col-sm-11">
 										<span class="block input-icon input-icon-right">
-											<input class="form-control" />
+											<input name="playbook_name" class="form-control" placeholder="只能使用英文字母、数字、连接符、下划线, 如：lamp, lamp_1," />
 										</span>
 									</div>
 								</div>
@@ -58,7 +70,7 @@
 								<div class="widget-box" id='step1'>
 									<div class="widget-header">
 										<div style="padding-top:5px;display:inline-block;">
-											<span class="white">步骤名称 </span><input type="text" style="line-height:15px;" />
+											<span class="white">步骤名称<span class="red"> *</span></span><input name="step1" type="text" style="line-height:15px;" />
 										</div>
 										<div class="widget-toolbar">
 											<label class="white">
@@ -70,10 +82,10 @@
 												<i class="fa fa-angle-double-up" onclick="switchUpDown(this);"></i>
 											</label>
 										</div>
-										<div class="widget-toolbar">
+										<div class="widget-toolbar" onclick="setModalRelID(this);">
 											<label class="white">
 												<i class="fa fa-plus" aria-hidden="true"></i>
-												<b>选择服务器</b>
+												<b data-toggle="modal" data-target="#myselect">选择服务器</b>
 											</label>
 										</div>
 									</div>
@@ -82,7 +94,7 @@
 											<div class="tabbable">
 												<ul class="nav nav-tabs">
 													<li class="active">
-														<a data-toggle="tab" href="#task1">tasks</a>
+														<a data-toggle="tab" href="#task1"><span class="red"> *</span>tasks</a>
 													</li>
 													<li>
 														<a data-toggle="tab" href="#handler1">handlers</a>
@@ -97,8 +109,8 @@
 														<a data-toggle="tab" href="#file1">files</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#host1">hosts(已选服务器)
-														<span class="badge badge-danger">1</span>
+														<a data-toggle="tab" href="#host1"><span class="red"> *</span>hosts(已选服务器)
+														<span class="badge badge-danger">0</span>
 														</a>
 													</li>
 												</ul>
@@ -168,7 +180,7 @@
 														</div>	
 													</div>
 													
-													<div id="hosts" class="tab-pane">
+													<div id="host1" class="tab-pane">
 														备注:<span class="smaller green">以下列表的主机会被保存在<strong class="red"> roles </strong>同级目录的<strong class="red"> hosts </strong>文件里，组名为步骤名</span>
 														<p></p>
 														<div class="widget-box">
@@ -180,14 +192,6 @@
 																<th>帐号</th>
 																<th>IP</th>
 																<th>动作</th>
-															</tr>
-															
-															<tr>
-																<td>keystone</td>
-																<td><span class="label label-sm label-danger">离线</span></td>
-																<td>root</td>
-																<td>192.168.10.3</td>
-																<td><span class="label label-sm label-danger">删除</span></td>
 															</tr>
 														</table>
 														</div>
@@ -205,7 +209,7 @@
 									
 								<div class="center">
 									<input type="text" name="action_type" hidden />
-									<button class="btn btn-sm btn-primary" type="button" onclick="formSubmitAction('save');"><i class="fa fa-check"></i> 保存</button>
+									<button class="btn btn-sm btn-primary" type="button" onclick="saveAnsible();"><i class="fa fa-check"></i> 保存</button>
 									<button class="btn btn-sm btn-danger" type="button"><i class="fa fa-close"></i> 取消</button>
 								</div>
 							</form>
@@ -214,6 +218,61 @@
 				  
 				</div><!-- /.col -->
 			</div><!-- /.row -->
+			
+			<!-- 服务器选择模态框（Modal） -->
+			<div class="modal fade" id="myselect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<div><h4>选择服务器 - 共 <span style="font-weight:700;">{{total_host_count}}</span> 台</h4></div>
+						</div>
+						<div class="modal-body">
+							<div class="input-group">
+								<span class="input-group-btn">
+									<input type="text" class="form-control search-query" id="hostFilter" placeholder="通过IP过滤搜索" />
+								</span>
+							</div>
+							<div class="space-4"></div>
+							<div>
+								<table class="table" id="table">
+									<tr>
+										<th><input type="checkbox" onclick="allChecked(this);" /></th>
+										<th>主机名</th>
+										<th>状态</th>
+										<th>帐号</th>
+										<th>IP</th>
+									</tr>
+									{% for host in hosts %}
+									<tr class="tr-select-modal">
+										<td><input type="checkbox" /></td>
+										<td>{{ host.hostname }}</td>
+										{% ifequal host.host_status 1 %}
+										<td><span class="label label-sm label-success">在线</span></td>
+										{% else %}
+										<td><span class="label label-sm label-danger">离线</span></td>
+										{% endifequal %}
+										<td>
+											<select name="accounts" style="width:80px;">
+												{% for account in host.accounts %}
+												<option>{{account.account}}</option>
+												{% endfor %}
+											</select>
+										</td>
+										<td>{{host.private_ip}}</td>
+									</tr>
+									{% endfor %}
+								</table>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<div class="center">
+								<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="addHost();">添加</button>
+							</div>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal -->
+			</div>
 		</div><!-- /.page-content -->
 	</div>
 </div><!-- /.main-content -->
@@ -224,35 +283,45 @@
 <script src="/static/ace-editor/ext-language_tools.js"></script>
 <script src="/static/ace-editor/theme-monokai.js"></script>
 <script src="/static/plupload-2.3.6/js/plupload.full.min.js"></script>
+<script src="/static/js/jquery.easysearch.js"></script>
 
 <script src="/static/js/ansible.js"></script>
 
 <script type="text/javascript">
 
+//定义全局变量div_id, 作为步骤ID递增值
 div_id = 1;
 
+//定义StepNum 变量，选择服务器时,获取当前step  ID，截取数字存入StepNum，当添加主机时，再读取StepNum值找到对应 ID=host+StepNum的元素
+StepNum = 1;
 
-setAceEditMode('task-editor1','yaml','--');
-setAceEditMode('handler-editor1','yaml','--');
-setAceEditMode('var-editor1','yaml','--');
+
+setAceEditMode('task-editor1','yaml','');
+setAceEditMode('handler-editor1','yaml','');
+setAceEditMode('var-editor1','yaml','');
 InitFileUpload('templatepickfile1','templatecontainer1','templatefilelist1','templateuploadfile1');
 InitFileUpload('filepickfile1','filecontainer1','filefilelist1','fileuploadfile1');
 
-function switchUpDown(obj){
-	classStr = $(obj).attr('class');
-	if(classStr.indexOf("fa-angle-double-up") !=-1){
-		$(obj).removeClass('fa-angle-double-up');
-		$(obj).addClass('fa-angle-double-down');
-		$(obj).parent().parent().parent().next().css('display','none');
-	}else{
-		$(obj).removeClass('fa-angle-double-down');
-		$(obj).addClass('fa-angle-double-up');
-		$(obj).parent().parent().parent().next().css('display','block');
-	}
-}
-
-//plupload
-
+//使用easysearch 进行主机过滤
+$('#hostFilter').jSearch({ 
+    selector  : '#table',
+    child : 'tr > td',
+    minValLength: 0,
+    Before: function(){
+        $('#table tr').data('find','');
+    },
+    Found : function(elem){
+        $(elem).parent().data('find','true');
+        $(elem).parent().show();
+    },
+    NotFound : function(elem){
+        if (!$(elem).parent().data('find'));
+        $(elem).parent().hide();
+    },
+    After : function(t){
+        if (!t.val().length) $('#table tr').show();
+    }
+});
 
 </script>
 {% endblock %}
