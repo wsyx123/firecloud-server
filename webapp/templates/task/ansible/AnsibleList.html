@@ -65,16 +65,16 @@
 									</thead>
 
 									<tbody>
-										
+										{% for ansible in ansibles %}
 										<tr>
-											<td>21</td>
-											<td>install docker</td>
-											<td>2</td>
-											<td>5</td>
-											<td>lamp</td>
-											<td>admin</td>
-											<td>2018-11-22 15:12:42</td>
-											<td><span class="badge badge-warning">0</span></td>
+											<td>{{ ansible.id }}</td>
+											<td>{{ ansible.name }}</td>
+											<td>{{ ansible.total_role_count }}</td>
+											<td>{{ ansible.total_task_count }}</td>
+											<td>{{ ansible.dir_name }}</td>
+											<td>{{ ansible.owner }}</td>
+											<td>{{ ansible.create_time|date:"Y-m-d H:i:s" }}</td>
+											<td><span class="badge badge-warning">{{ ansible.total_run_count }}</span></td>
 											<td>
 												<div class="action-buttons">
 													<a class="green" href="#">
@@ -89,7 +89,7 @@
 												</div>
 											</td>
 										</tr>
-
+										{% endfor %}
 									</tbody>
 								</table>
 							</div>

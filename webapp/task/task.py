@@ -7,16 +7,19 @@ Created on 2018年8月6日
 '''
 from django.views.generic import TemplateView,FormView,ListView,DeleteView,UpdateView,DetailView
 from django.urls import reverse_lazy
-from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost
+from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel
 from forms import ScriptModelForm
-from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH
+from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH
 import os,uuid
 from django.http import JsonResponse
 from utils.ansibleAdHoc import myadhoc
 from utils.callback import ScriptExecuteCallback,FileCopyCallback
 from utils.log_task_execute import log_task_execute
 import pickle
+import json
 import sys
+import io,yaml
+from gevent.monkey import saved
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -346,10 +349,9 @@ class ScriptUpdate(UpdateView):
             f.write(contents)
         return UpdateView.post(self, request, *args, **kwargs)
     
-class AnsibleExecute(TemplateView):
-    template_name = 'task/ansible/AnsibleExecute.html'
-    
-class AnsibleList(TemplateView):
+class AnsibleList(ListView):
+    model = AnsibleModel
+    context_object_name = 'ansibles'
     template_name = 'task/ansible/AnsibleList.html'
     
 class AnsibleAdd(TemplateView):
@@ -364,14 +366,134 @@ class AnsibleAdd(TemplateView):
         context['total_host_count'] = len(context['hosts'])
         return context
 
+def save_upload_file(playbook_name,role_name,file_type,f):
+    full_play_dir = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name)
+    full_role_dir = os.path.join(full_play_dir+'/roles',role_name)
+    full_type_dir = os.path.join(full_role_dir,file_type) # lamp/install_db/templates
+    full_name = os.path.join(full_type_dir,f.name) #l lamp/install_db/templates/my.cnf.j2
+    if not os.path.exists(full_type_dir):
+        os.makedirs(full_type_dir, 0755)
+    
+    destination = open(full_name, 'wb+')
+    for chunk in f.chunks():
+        destination.write(chunk)
+    destination.close()
 
 def ansible_upload_file(request):
     if request.method == 'POST':
-        print request.FILES
-        print request.POST.get('playbook_name')
-        print request.POST.get('role_name')
-        print request.POST.get('file_type')
+        f = request.FILES['file']
+        playbook_name = request.POST.get('playbook_name')
+        role_name = request.POST.get('role_name')
+        file_type = request.POST.get('file_type')
+        save_upload_file(playbook_name, role_name, file_type, f)
     return JsonResponse({'status':200})
+
+def gen_main_yaml_and_hosts_file(playbook_data_dict):
+    keys = playbook_data_dict.keys()
+    keys.sort()
+    host_data_list = []
+    main_data_list = []
+    total_role_count = 0
+    for key in keys:
+        host_data_dict_tmp = {}
+        main_data_dict_tmp = {}
+        if 'step' in key:
+            host_data_dict_tmp['group'] = str(playbook_data_dict[key]['role_name'])
+            host_data_dict_tmp['hosts'] = playbook_data_dict[key]['hosts']
+            main_data_dict_tmp['name'] = str(playbook_data_dict[key]['role_name'])
+            main_data_dict_tmp['hosts'] = str(playbook_data_dict[key]['role_name'])
+            main_data_dict_tmp['roles'] = []
+            main_data_dict_tmp['roles'].append(str(playbook_data_dict[key]['role_name']))
+            total_role_count = total_role_count + 1
+            host_data_list.append(host_data_dict_tmp)
+            main_data_list.append(main_data_dict_tmp)
+    full_play_dir = os.path.join(ANSIBLE_PROJECT_PATH,playbook_data_dict['playbook_name'])
+    full_filename = os.path.join(full_play_dir,'main.yml')
+    with io.open(full_filename,'w',encoding='utf8') as f:
+        yaml.dump(main_data_list, f, default_flow_style=False, allow_unicode=True)
+    
+    host_full_filename = os.path.join(full_play_dir,'hosts')    
+    with open(host_full_filename,'w') as hf:
+        for host in host_data_list:
+            group_name = host['group']
+            hf.write('['+group_name+']')
+            hf.write('\n')
+            for one_host in generate_host(host['hosts']):
+                hf.write(one_host)
+                hf.write('\n')
+            hf.write('\n')
+            
+def generate_host(host_list):
+    '''
+    generate host  list,  eg: 
+    [
+        '192.168.10.3 ansible_ssh_user=root ansible_ssh_port = 22',
+        '192.168.10.4 ansible_ssh_user=root ansible_ssh_port = 22',
+    ]
+    '''
+    data_list = []
+    for item in host_list:
+        var_dict = ''
+        host_ip = item.split(':')[0]
+        var_dict = var_dict+host_ip
+        host_account = item.split(':')[1]
+        if len(host_account.strip()) ==0:
+            var_dict = var_dict+' ansible_ssh_user=root'
+        else:
+            var_dict = var_dict+' ansible_ssh_user='+host_account
+        data_list.append(var_dict)
+    return data_list            
+       
+def save_task_handler_var(playbook_data_dict):
+    tasks = 0
+    keys = playbook_data_dict.keys()
+    full_play_dir = os.path.join(ANSIBLE_PROJECT_PATH,playbook_data_dict['playbook_name'])
+    for key in keys:
+        if 'step' in key:
+            role_dir = os.path.join(full_play_dir+'/roles',playbook_data_dict[key]['role_name'])
+            task_content = playbook_data_dict[key]['tasks']
+            handler_content = playbook_data_dict[key]['handlers']
+            var_content = playbook_data_dict[key]['vars']
+            if len(task_content.strip()) !=0:
+                x=yaml.load(task_content)
+                tasks = tasks + len(x)
+                task_dir = os.path.join(role_dir,'tasks')
+                os.makedirs(task_dir, 0755)
+                with open(task_dir+'/main.yml','w') as f:
+                    f.write(task_content)
+            if len(handler_content.strip()) !=0:
+                handler_dir = os.path.join(role_dir,'handlers')
+                os.makedirs(handler_dir, 0755)
+                with open(handler_dir+'/main.yml','w') as f:
+                    f.write(handler_content)
+            if len(var_content.strip()) !=0:
+                var_dir = os.path.join(role_dir,'vars')
+                os.makedirs(var_dir, 0755)
+                with open(var_dir+'/main.yml','w') as f:
+                    f.write(var_content)
+    return tasks
+
+def ansible_save(request):
+    if request.method == 'POST':
+        save_dict = {}
+        playbook_data_str = str(request.POST.get('playbook_data'))
+        playbook_data_dict = json.loads(playbook_data_str)
+        total_role_count = playbook_data_dict.keys()
+        owner_id = int(request.session.get('_user_id'))
+        total_task_count = save_task_handler_var(playbook_data_dict)
+        save_dict['name'] = playbook_data_dict['playbook_name']
+        save_dict['owner_id'] = owner_id
+        save_dict['total_run_count'] = 0
+        save_dict['dir_name'] = playbook_data_dict['playbook_name']
+        save_dict['total_role_count'] = len(total_role_count) - 1
+        save_dict['total_task_count'] = total_task_count
+        gen_main_yaml_and_hosts_file(playbook_data_dict)
+        AnsibleModel.objects.create(**save_dict)
+        
+    return JsonResponse({'status':200})
+
+class AnsibleExecute(TemplateView):
+    template_name = 'task/ansible/AnsibleExecute.html'
     
 class FileSend(TemplateView):
     template_name = 'task/file/file.html'

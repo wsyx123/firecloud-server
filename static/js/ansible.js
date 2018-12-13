@@ -33,7 +33,7 @@ function addStep(obj){
 						<div id="handler-editor'+id+'" class="ace_editor" style="min-height:200px"></div>\
 					</div>'
 	var var_div_str='<div id="var'+id+'" class="tab-pane">\
-						备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> handlers </strong>目录下的main.yml文件中</span>\
+						备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> vars </strong>目录下的main.yml文件中</span>\
 						<p></p>\
 						<div id="var-editor'+id+'" class="ace_editor" style="min-height:200px"></div>\
 					</div>'
@@ -166,15 +166,14 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 	runtimes : 'html5,flash,silverlight,html4',
 	browse_button : pickfileID, // you can pass an id...
 	container: document.getElementById(containerID), // ... or DOM Element itself
-	url : '/ansible/add/file/?ansible_id=',
+	url : '/ansible/add/file/',
 	flash_swf_url : '/static/plupload-2.3.6/js/Moxie.swf',
 	silverlight_xap_url : '/static/plupload-2.3.6/js/Moxie.xap',
 	
 	filters : {
 		max_file_size : '10mb',
 		mime_types: [
-			{title : "Image files", extensions : "jpg,gif,png"},
-			{title : "Zip files", extensions : "zip"}
+			{title : "Template files", extensions : "*"},
 		]
 	},
 
@@ -200,9 +199,9 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 			var role_name = $("input[name='step"+TmpStepNum+"']").val();
 			var file_type =  "";
 			if(containerID.indexOf("template") != -1){
-				var file_type = 'template';
+				var file_type = 'templates';
 			}else if(containerID.indexOf("file") != -1){
-				var file_type = 'file';
+				var file_type = 'files';
 			}
 			if(playbook_name==''|| role_name==''){
 				uploader.stop();
@@ -256,6 +255,10 @@ function switchUpDown(obj){
 function saveAnsible(){
 	var playbook_data = {}
 	var playbook_name = $("input[name='playbook_name']").val();
+	if(playbook_name.trim().length==0){
+		alert("请输入剧本名称!");
+		return;
+	}
 	playbook_data["playbook_name"] = playbook_name;
 	var allStep = $(".widget-box[id^='step']");
 	for(var i=0;i<allStep.length;i++){
@@ -263,20 +266,49 @@ function saveAnsible(){
 		playbook_data[oneStepID] = {};
 		var oneStepNum = oneStepID.charAt(oneStepID.length-1);
 		var role_name = $("input[name='step"+oneStepNum+"']").val();
+		if(role_name.trim().length==0){
+			alert("请输入步骤名称!");
+			return;
+		}
 		playbook_data[oneStepID]["role_name"] = role_name;
 		var task_editor = ace.edit("task-editor"+oneStepNum);
-		var contents = task_editor.getSession().getValue();
-		playbook_data[oneStepID]["tasks"] = contents;
+		var task_content = task_editor.getSession().getValue();
+		if(task_content.length==0){
+			alert("请输入"+role_name+"步骤的tasks内容!");
+			return;
+		}
+		playbook_data[oneStepID]["tasks"] = task_content;
+		
+		var handler_editor = ace.edit("handler-editor"+oneStepNum);
+		var handler_content = handler_editor.getSession().getValue();
+		playbook_data[oneStepID]["handlers"] = handler_content;
+		var var_editor = ace.edit("var-editor"+oneStepNum);
+		var var_content = var_editor.getSession().getValue();
+		playbook_data[oneStepID]["vars"] = var_content;
 		var checked_host_array = getHostAccount("host"+oneStepNum);
-		console.log(checked_host_array);
-		console.log(playbook_data);
+		if(checked_host_array.length==0){
+			alert("请选择要执行"+role_name+"步骤的主机!");
+			return;
+		}
+		playbook_data[oneStepID]["hosts"]=checked_host_array;
 	}
+	
+	$.ajax({
+		type: "POST",
+		url:  "/ansible/add/save/",
+		processData: true,
+		data: {"playbook_data":JSON.stringify(playbook_data)},
+		success: function(data){
+			console.log(data);
+		}
+		
+	})
 }
 
 //获取已选择的主机和帐号,返回一个数组['192.168.10.3:root','192.168.10.4:clouder']
 function getHostAccount(hostId){
 	var checked_host_array = new Array();
-	var checkedHostTrObj = $(hostId+" table tr");
+	var checkedHostTrObj = $("#"+hostId+" table tr");
 	for(var i=1;i<checkedHostTrObj.length;i++){
 		var ip = $(checkedHostTrObj[i]).children().eq(3).text();
 		var accountObj = $(checkedHostTrObj[i]).children().eq(2);

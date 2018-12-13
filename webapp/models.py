@@ -243,28 +243,13 @@ class TaskHost(models.Model):
     execute_status = models.IntegerField(choices=executeStatus)
     
 class AnsibleModel(models.Model):
-    scriptFrom = (
-                  (1,'手动录入'),
-                  (2,'本地导入'),
-                  (3,'已有脚本')
-                  )
     name = models.CharField(unique=True,max_length=64)
-    script_from = models.IntegerField(choices=scriptFrom)
-    script_file = models.CharField(max_length=64)
-    script_owner = models.ForeignKey('SysUser')
+    total_role_count = models.IntegerField()
+    total_task_count = models.IntegerField()
+    dir_name = models.CharField(max_length=32,verbose_name='保存目录')
+    owner = models.ForeignKey('SysUser')
     total_run_count = models.IntegerField(default=0)
     create_time = models.DateTimeField(auto_now_add=True)
-    
-class CmdTemplate(models.Model):
-    temp_type = (
-                 (1,'playbook'),
-                 )
-    name = models.CharField(max_length=32,verbose_name='剧本名')
-    type = models.IntegerField(choices=temp_type,verbose_name='类型')
-    owner = models.ForeignKey('SysUser',verbose_name='创建人')
-    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
-    description = models.CharField(max_length=32,verbose_name='说明')
-    detail = models.TextField(verbose_name='详情')
 
 class PaasHost(models.Model):
     ip = models.GenericIPAddressField(verbose_name='IP地址')
