@@ -1,3 +1,10 @@
 django==1.11.1
-paramiko==2.0
+paramiko==2.4.1
 dwebsocket==0.4.2
+celery==3.1.20
+django-celery=3.2.2
+xlrd==1.1.0
+PyYAML==3.10
+Jinja2==2.8.1
+#yum install mysql-devel gcc python-devel
+

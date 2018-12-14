@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50712
 File Encoding         : 65001
 
-Date: 2018-10-30 23:42:19
+Date: 2018-12-14 17:19:31
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -27,7 +27,7 @@ CREATE TABLE `webapp_level1menu` (
   `url` varchar(64) NOT NULL,
   `menu_icon` varchar(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of webapp_level1menu
@@ -41,3 +41,4 @@ INSERT INTO `webapp_level1menu` VALUES ('7', 'monitor', '监控告警', '7', '#'
 INSERT INTO `webapp_level1menu` VALUES ('8', 'log', '日志中心', '8', '#', 'fa-file-o');
 INSERT INTO `webapp_level1menu` VALUES ('9', 'store', '应用商店', '9', '#', 'fa-shopping-cart');
 INSERT INTO `webapp_level1menu` VALUES ('10', 'sysmgt', '系统管理', '10', '#', 'fa-cog');
+INSERT INTO `webapp_level1menu` VALUES ('11', 'celery_task', '任务调度', '1', '#', 'fa-cogs');
