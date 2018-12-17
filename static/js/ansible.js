@@ -299,7 +299,13 @@ function saveAnsible(){
 		processData: true,
 		data: {"playbook_data":JSON.stringify(playbook_data)},
 		success: function(data){
-			console.log(data);
+			if(data['status']==200){
+				location.href='/ansible/list/';
+			}else{
+				$("#err-div").css('display','block');
+				$("#err-msg").text(data['msg']);
+			}
+				
 		}
 		
 	})

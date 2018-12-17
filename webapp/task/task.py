@@ -19,7 +19,7 @@ import pickle
 import json
 import sys
 import io,yaml
-from gevent.monkey import saved
+from django.core.exceptions import ObjectDoesNotExist
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -354,6 +354,7 @@ class AnsibleList(ListView):
     context_object_name = 'ansibles'
     template_name = 'task/ansible/AnsibleList.html'
     
+# ------------------ ansible add -----------------------------------    
 class AnsibleAdd(TemplateView):
     template_name = 'task/ansible/AnsibleAdd.html'
     def get_context_data(self, **kwargs):
@@ -480,17 +481,62 @@ def ansible_save(request):
         playbook_data_dict = json.loads(playbook_data_str)
         total_role_count = playbook_data_dict.keys()
         owner_id = int(request.session.get('_user_id'))
-        total_task_count = save_task_handler_var(playbook_data_dict)
         save_dict['name'] = playbook_data_dict['playbook_name']
-        save_dict['owner_id'] = owner_id
-        save_dict['total_run_count'] = 0
-        save_dict['dir_name'] = playbook_data_dict['playbook_name']
-        save_dict['total_role_count'] = len(total_role_count) - 1
-        save_dict['total_task_count'] = total_task_count
-        gen_main_yaml_and_hosts_file(playbook_data_dict)
-        AnsibleModel.objects.create(**save_dict)
+        try:
+            AnsibleModel.objects.get(name=save_dict['name'])
+        except ObjectDoesNotExist:
+            total_task_count = save_task_handler_var(playbook_data_dict)
+            save_dict['owner_id'] = owner_id
+            save_dict['total_run_count'] = 0
+            save_dict['dir_name'] = playbook_data_dict['playbook_name']
+            save_dict['total_role_count'] = len(total_role_count) - 1
+            save_dict['total_task_count'] = total_task_count
+            gen_main_yaml_and_hosts_file(playbook_data_dict)
+            AnsibleModel.objects.create(**save_dict)
+            return JsonResponse({'status':200})
+        else:
+            return JsonResponse({'status':500,'msg':'{}剧本名已经存在!'.format(save_dict['name'])})
         
-    return JsonResponse({'status':200})
+# ------------------end ansible add -----------------------------------  
+
+
+# ------------------ansible update -----------------------------------
+class AnsibleUpdate(UpdateView):
+    model = AnsibleModel
+    pk_url_kwarg = 'pk'
+    form_class = ScriptModelForm
+    template_name = 'task/ansible/AnsibleUpdate.html'
+    success_url = reverse_lazy('AnsibleList')
+    def get_context_data(self, **kwargs):
+        context = super(AnsibleUpdate,self).get_context_data(**kwargs)
+        if self.request.session.get('_user_id') == 1:
+            assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
+        else:
+            assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
+        context['hosts'] = generate_host_list(assetHostQuerySet)
+        context['total_host_count'] = len(context['hosts'])
+        return context
+
+def get_playbook_file_content(playbook_id):
+    '''
+    return all files content under the playbook_name directory of subdirectory, data format,eg:
+    [
+    {'role_name':'install_db','tasks':'contents','handlers':'contents','vars':'contents',
+    'templates':[file1,file2],'files':[file1,file2],'hosts':[{'ip':'192.168.10.3','account':'root'},]}
+    ]
+    '''
+    playbookObj = AnsibleModel.objects.get(id=playbook_id)
+    playbook_name = playbookObj.name
+    playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name)
+    if len(os.listdir(playbook_dir)) ==3:
+        pass
+    else:
+        pass
+        
+        
+
+# ------------------end ansible update -----------------------------------  
+
 
 class AnsibleExecute(TemplateView):
     template_name = 'task/ansible/AnsibleExecute.html'

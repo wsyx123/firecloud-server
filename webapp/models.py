@@ -244,11 +244,11 @@ class TaskHost(models.Model):
     
 class AnsibleModel(models.Model):
     name = models.CharField(unique=True,max_length=64)
-    total_role_count = models.IntegerField()
-    total_task_count = models.IntegerField()
-    dir_name = models.CharField(max_length=32,verbose_name='保存目录')
+    total_role_count = models.IntegerField(null=True,blank=True)
+    total_task_count = models.IntegerField(null=True,blank=True)
+    dir_name = models.CharField(max_length=32,verbose_name='保存目录',null=True,blank=True)
     owner = models.ForeignKey('SysUser')
-    total_run_count = models.IntegerField(default=0)
+    total_run_count = models.IntegerField(default=0,null=True,blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
 
 class PaasHost(models.Model):

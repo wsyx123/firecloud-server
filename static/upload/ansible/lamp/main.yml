@@ -1,0 +1,8 @@
+- hosts: install_web
+  name: install_web
+  roles:
+  - install_web
+- hosts: install_db
+  name: install_db
+  roles:
+  - install_db

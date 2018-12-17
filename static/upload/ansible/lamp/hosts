@@ -1,0 +1,6 @@
+[install_web]
+192.168.10.3 ansible_ssh_user=root
+
+[install_db]
+192.168.10.4 ansible_ssh_user=root
+

@@ -47,7 +47,7 @@
 					作业中心
 				</li>
 				<li><a href="{% url 'AnsibleList' %}">Ansible</a></li>
-				<li>新建剧本</li>
+				<li>编辑剧本</li>
 			</ul><!-- /.breadcrumb -->
 		</div>
 
@@ -64,13 +64,14 @@
 					<div class="tabbable">
 						<div class="tab-content">
 							<form class="form-horizontal" method="POST" enctype="multipart/form-data">
+								<input name="owner_id" type='text' value="{{request.session.user_id}}" hidden>
 								<div class="form-group">
 									<label class="col-xs-12 col-sm-1 no-padding-right">
 										<span style="font-size:18px;">剧本名称</span><span class="red">*</span>
 									</label>
 									<div class="col-xs-12 col-sm-11">
 										<span class="block input-icon input-icon-right">
-											<input name="playbook_name" class="form-control" placeholder="只能使用英文字母、数字、连接符、下划线, 如：lamp, lamp_1," />
+											{{form.name}}
 										</span>
 									</div>
 								</div>
