@@ -1,1 +1,2 @@
---
+- name: install docker
+  yum: docker

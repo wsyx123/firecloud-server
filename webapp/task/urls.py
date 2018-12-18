@@ -9,7 +9,8 @@ from django.conf.urls import url
 from task import OptList,OptAudit,OptDelete
 from task import ScriptList,ScriptAdd,ScriptDelete,FileSend,get_script_content,\
 ScriptUpdate,ScriptExecute,ScriptExecuteResult
-from task import AnsibleList,AnsibleExecute,AnsibleAdd,ansible_upload_file,ansible_save,AnsibleUpdate
+from task import AnsibleList,AnsibleExecute,AnsibleAdd,ansible_upload_file,ansible_save,AnsibleUpdate,\
+del_upload_file
 
 urlpatterns = [
     url(r'^optlog/list/$',OptList.as_view(),name='OptList'),
@@ -26,6 +27,7 @@ urlpatterns = [
     url(r'^ansible/add/$',AnsibleAdd.as_view(),name='AnsibleAdd'),
     url(r'^ansible/add/save/$',ansible_save),
     url(r'^ansible/add/file/$',ansible_upload_file),
+    url(r'^ansible/delete/file/$',del_upload_file),
     url(r'^ansible/update/(?P<pk>.+)$',AnsibleUpdate.as_view(),name='AnsibleUpdate'),
     url(r'^ansible/execute/$',AnsibleExecute.as_view(),name='AnsibleExecute'),
     url(r'^file/$',FileSend.as_view(),name='file'),

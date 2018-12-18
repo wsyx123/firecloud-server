@@ -20,8 +20,6 @@ class AnsibleModelForm(forms.ModelForm):
     class Meta:
         model = AnsibleModel
         fields = "__all__"
-        widgets = {'name': forms.TextInput(attrs={'class': 'form-control'}),
-                   }
 
 
         

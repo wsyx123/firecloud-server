@@ -188,7 +188,7 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 
 		FilesAdded: function(up, files) {
 			plupload.each(files, function(file) {
-				var txt = '<tr><td>' + file.name + '</td><td id="'+file.id+'">0%</td><td>' + plupload.formatSize(file.size) + '</td><td><button class="btn btn-minier btn-danger">删除</button></td></tr>';
+				var txt = '<tr><td>' + file.name + '</td><td id="'+file.id+'">0%</td><td>' + plupload.formatSize(file.size) + '</td><td><button type="button" onclick="delFile(this);" class="btn btn-minier btn-danger">删除</button></td></tr>';
 				document.getElementById(filelistID).innerHTML += txt;
 			});
 		},
@@ -252,7 +252,7 @@ function switchUpDown(obj){
 		}
 	}
 */
-function saveAnsible(){
+function saveAnsible(actionType){
 	var playbook_data = {}
 	var playbook_name = $("input[name='playbook_name']").val();
 	if(playbook_name.trim().length==0){
@@ -297,7 +297,7 @@ function saveAnsible(){
 		type: "POST",
 		url:  "/ansible/add/save/",
 		processData: true,
-		data: {"playbook_data":JSON.stringify(playbook_data)},
+		data: {"playbook_data":JSON.stringify(playbook_data),"action_type":actionType},
 		success: function(data){
 			if(data['status']==200){
 				location.href='/ansible/list/';
@@ -362,8 +362,26 @@ function addHost(){
 
 // 删除已选择服务器
 function delChecked(obj){
+	var stepID = $(obj).parent().parent().parent().parent().parent().parent().attr('id');
+	StepNum = stepID.charAt(stepID.length-1);
 	$(obj).parent().remove();
 	var hostTabObj = $("a[href='#host"+StepNum+"']");
 	var currCheckedHostNum = $(hostTabObj).children().eq(1).text();
 	$(hostTabObj).children().eq(1).text(parseInt(currCheckedHostNum)-1);
+}
+
+function delFile(obj){
+	var stepID = $(obj).parent().parent().parent().parent().parent().parent().parent().attr('id');
+	var num = stepID.charAt(stepID.length-1);
+	var playbook_name = $("input[name='playbook_name']").val();
+	var role_name = $("input[name='step"+num+"']").val();
+	var file_type = stepID.slice(0,-1);
+	var file_name = $(obj).parent().siblings().eq(0).text();
+	$(obj).parent().parent().remove();
+	$.ajax({
+		type: 'POST',
+		url: '/ansible/delete/file/',
+		data: {'playbook_name':playbook_name,'role_name':role_name,
+			   'file_type':file_type,'file_name':file_name}
+	})
 }

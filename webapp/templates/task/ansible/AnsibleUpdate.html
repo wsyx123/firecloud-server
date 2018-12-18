@@ -71,15 +71,15 @@
 									</label>
 									<div class="col-xs-12 col-sm-11">
 										<span class="block input-icon input-icon-right">
-											{{form.name}}
+											<input name="playbook_name" value="{{ playbook_info.playbook_name}}" class="form-control" placeholder="只能使用英文字母、数字、连接符、下划线, 如：lamp, lamp_1," />
 										</span>
 									</div>
 								</div>
-								
-								<div class="widget-box" id='step1'>
+								{% for step in playbook_info.steps %}
+								<div class="widget-box" id='step{{ forloop.counter }}'>
 									<div class="widget-header">
 										<div style="padding-top:5px;display:inline-block;">
-											<span class="white">步骤名称<span class="red"> *</span></span><input name="step1" type="text" style="line-height:15px;" />
+											<span class="white">步骤名称<span class="red"> *</span></span><input name="step{{ forloop.counter }}" type="text" value="{{step.role_name}}" style="line-height:15px;" />
 										</div>
 										<div class="widget-toolbar">
 											<label class="white">
@@ -103,47 +103,50 @@
 											<div class="tabbable">
 												<ul class="nav nav-tabs">
 													<li class="active">
-														<a data-toggle="tab" href="#task1"><span class="red"> *</span>tasks</a>
+														<a data-toggle="tab" href="#task{{ forloop.counter }}"><span class="red"> *</span>tasks</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#handler1">handlers</a>
+														<a data-toggle="tab" href="#handler{{ forloop.counter }}">handlers</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#var1">vars</a>
+														<a data-toggle="tab" href="#var{{ forloop.counter }}">vars</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#template1">templates</a>
+														<a data-toggle="tab" href="#template{{ forloop.counter }}">templates</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#file1">files</a>
+														<a data-toggle="tab" href="#file{{ forloop.counter }}">files</a>
 													</li>
 													<li>
-														<a data-toggle="tab" href="#host1"><span class="red"> *</span>hosts(已选服务器)
-														<span class="badge badge-danger">0</span>
+														<a data-toggle="tab" href="#host{{ forloop.counter }}"><span class="red"> *</span>hosts(已选服务器)
+														<span class="badge badge-danger">{{ step.hosts|length}}</span>
 														</a>
 													</li>
 												</ul>
 
 												<div class="tab-content">
-													<div id="task1" class="tab-pane in active">
+													<div id="task{{ forloop.counter }}" class="tab-pane in active">
+														<textarea name="task-editor{{ forloop.counter }}" hidden>{{step.tasks}}</textarea>
 														备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> tasks </strong>目录下的main.yml文件中</span>
 														<p></p>
-														<div id="task-editor1" class="ace_editor" style="min-height:200px"></div> 
+														<div id="task-editor{{ forloop.counter }}" class="ace_editor" style="min-height:200px"></div> 
 													</div>
 													
-													<div id="handler1" class="tab-pane">
+													<div id="handler{{ forloop.counter }}" class="tab-pane">
+														<textarea name="handler-editor{{ forloop.counter }}" hidden>{{step.handlers}}</textarea>
 														备注:<span class="smaller green">这里所编写的任务会保存在此步骤（角色）下的<strong class="red"> handlers </strong>目录下的main.yml文件中</span>
 														<p></p>
-														<div id="handler-editor1" class="ace_editor" style="min-height:200px"></div> 
+														<div id="handler-editor{{ forloop.counter }}" class="ace_editor" style="min-height:200px"></div> 
 													</div>
 													
-													<div id="var1" class="tab-pane">
+													<div id="var{{ forloop.counter }}" class="tab-pane">
+														<textarea name="var-editor{{ forloop.counter }}" hidden>{{step.vars}}</textarea>
 														备注:<span class="smaller green">这里所编写内容会保存在此步骤（角色）下的<strong class="red"> vars </strong>目录下的main.yml文件中</span>
 														<p></p>
-														<div id="var-editor1" class="ace_editor" style="min-height:200px"></div>
+														<div id="var-editor{{ forloop.counter }}" class="ace_editor" style="min-height:200px"></div>
 													</div>
 													
-													<div id="template1" class="tab-pane">
+													<div id="template{{ forloop.counter }}" class="tab-pane">
 														备注:<span class="smaller green">这里所上传的文件会保存在此步骤（角色）下的<strong class="red"> templates </strong>目录下</span>
 														<p></p>
 														<div class="widget-box">
@@ -152,21 +155,24 @@
 																	<thead>
 																		<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
 																	</thead>
-																	<tbody id="templatefilelist1">
+																	{% for template in step.templates %}
+																	<tr><td>{{template.file_name}}</td><td>100%</td><td>{{template.size}}</td><td><button type="button" onclick="delFile(this);" class="btn btn-minier btn-danger">删除</button></td></tr>
+																	{% endfor %}
+																	<tbody id="templatefilelist{{ forloop.counter }}">
 																		
 																	</tbody>
 																</table>
 															</div>
 															<div class="widget-footer">
-																<div id="templatecontainer1" class="center">
-																	<a id="templatepickfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
-																	<a id="templateuploadfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
+																<div id="templatecontainer{{ forloop.counter }}" class="center">
+																	<a id="templatepickfile{{ forloop.counter }}" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
+																	<a id="templateuploadfile{{ forloop.counter }}" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
 																</div>
 															</div>
 														</div>														
 													</div>
 													
-													<div id="file1" class="tab-pane">
+													<div id="file{{ forloop.counter }}" class="tab-pane">
 														备注:<span class="smaller green">这里所上传的文件会保存在此步骤（角色）下的<strong class="red"> files </strong>目录下</span>
 														<p></p>
 														<div class="widget-box">
@@ -175,35 +181,47 @@
 																	<thead>
 																		<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
 																	</thead>
-																	<tbody id="filefilelist1">
+																	{% for file in step.files %}
+																	<tr><td>{{file.file_name}}</td><td>100%</td><td>{{file.size}}</td><td><button type="button" onclick="delFile(this);" class="btn btn-minier btn-danger">删除</button></td></tr>
+																	{% endfor %}
+																	<tbody id="filefilelist{{ forloop.counter }}">
 																		
 																	</tbody>
 																</table>
 															</div>
 															<div class="widget-footer">
-																<div id="filecontainer1" class="center">
-																	<a id="filepickfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
-																	<a id="fileuploadfile1" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
+																<div id="filecontainer{{ forloop.counter }}" class="center">
+																	<a id="filepickfile{{ forloop.counter }}" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button></a> 
+																	<a id="fileuploadfile{{ forloop.counter }}" href="javascript:;"><button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button></a>
 																</div>
 															</div>
 														</div>	
 													</div>
 													
-													<div id="host1" class="tab-pane">
+													<div id="host{{ forloop.counter }}" class="tab-pane">
 														备注:<span class="smaller green">以下列表的主机会被保存在<strong class="red"> roles </strong>同级目录的<strong class="red"> hosts </strong>文件里，组名为步骤名</span>
 														<p></p>
 														<div class="widget-box">
 															<div class="widget-body">
-														<table class="table">
-															<tr>
-																<th>主机名</th>
-																<th>状态</th>
-																<th>帐号</th>
-																<th>IP</th>
-																<th>动作</th>
-															</tr>
-														</table>
-														</div>
+																<table class="table">
+																	<tr>
+																		<th>主机名</th>
+																		<th>状态</th>
+																		<th>帐号</th>
+																		<th>IP</th>
+																		<th>动作</th>
+																	</tr>
+																	{% for host in step.hosts %}
+																	<tr>
+																		<td>{{host.ip}}</td>
+																		<td><span class="label label-sm label-success">在线</span></td>
+																		<td>{{host.account}}</td>
+																		<td>{{host.ip}}</td>
+																		<td id="delButton" onclick="delChecked(this);">删除</td>
+																	</tr>
+																	{% endfor %}
+																</table>
+															</div>
 														</div>
 													</div>
 												</div>
@@ -211,14 +229,14 @@
 										</div><!-- widget-main -->
 									</div><!-- widget-body -->
 								</div><!-- widget-box -->
-								
+								{% endfor %}
 								<div>
 									<button class="btn btn-sm" type="button" onclick="addStep(this);"><i class="fa fa-plus"></i> 添加步骤</button>
 								</div>
 									
 								<div class="center">
 									<input type="text" name="action_type" hidden />
-									<button class="btn btn-sm btn-primary" type="button" onclick="saveAnsible();"><i class="fa fa-check"></i> 保存</button>
+									<button class="btn btn-sm btn-primary" type="button" onclick="saveAnsible('update');"><i class="fa fa-check"></i> 保存</button>
 									<button class="btn btn-sm btn-danger" type="button"><i class="fa fa-close"></i> 取消</button>
 								</div>
 							</form>
@@ -298,18 +316,27 @@
 
 <script type="text/javascript">
 
-//定义全局变量div_id, 作为步骤ID递增值
-div_id = 1;
+initPage();
 
-//定义StepNum 变量，选择服务器时,获取当前step  ID，截取数字存入StepNum，当添加主机时，再读取StepNum值找到对应 ID=host+StepNum的元素
-StepNum = 1;
-
-
-setAceEditMode('task-editor1','yaml','');
-setAceEditMode('handler-editor1','yaml','');
-setAceEditMode('var-editor1','yaml','');
-InitFileUpload('templatepickfile1','templatecontainer1','templatefilelist1','templateuploadfile1');
-InitFileUpload('filepickfile1','filecontainer1','filefilelist1','fileuploadfile1');
+//初始化页面，
+function initPage(){
+	var allStep = $(".widget-box[id^='step']");
+	//定义全局变量div_id, 作为步骤ID递增值
+	div_id = allStep.length;
+	//定义StepNum 变量，选择服务器时,获取当前step  ID，截取数字存入StepNum，当添加主机时，再读取StepNum值找到对应 ID=host+StepNum的元素
+	StepNum = allStep.length;
+	// 填充editor内容
+	for(var i=1;i<=allStep.length;i++){
+		var task_content = $("textarea[name='task-editor"+i+"']").text();
+		var handler_content = $("textarea[name='handler-editor"+i+"']").text();
+		var var_content = $("textarea[name='var-editor"+i+"']").text();
+		setAceEditMode('task-editor'+i,'yaml',task_content);
+		setAceEditMode('handler-editor'+i,'yaml',handler_content);
+		setAceEditMode('var-editor'+i,'yaml',var_content);
+		InitFileUpload('templatepickfile'+i,'templatecontainer'+i,'templatefilelist'+i,'templateuploadfile'+i);
+		InitFileUpload('filepickfile'+i,'filecontainer'+i,'filefilelist'+i,'fileuploadfile'+i);
+	}
+}
 
 //使用easysearch 进行主机过滤
 $('#hostFilter').jSearch({ 

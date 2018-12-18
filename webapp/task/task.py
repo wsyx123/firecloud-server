@@ -15,6 +15,8 @@ from django.http import JsonResponse
 from utils.ansibleAdHoc import myadhoc
 from utils.callback import ScriptExecuteCallback,FileCopyCallback
 from utils.log_task_execute import log_task_execute
+from utils.cfg_parser import confParse
+import linecache
 import pickle
 import json
 import sys
@@ -374,11 +376,23 @@ def save_upload_file(playbook_name,role_name,file_type,f):
     full_name = os.path.join(full_type_dir,f.name) #l lamp/install_db/templates/my.cnf.j2
     if not os.path.exists(full_type_dir):
         os.makedirs(full_type_dir, 0755)
-    
     destination = open(full_name, 'wb+')
     for chunk in f.chunks():
         destination.write(chunk)
     destination.close()
+    
+def del_upload_file(request):
+    if request.method == 'POST':
+        playbook_name = request.POST.get('playbook_name')
+        role_name = request.POST.get('role_name')
+        file_type = request.POST.get('file_type')+'s'
+        file_name = request.POST.get('file_name')
+        full_name = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name+'/roles/'+\
+                                 role_name+'/'+file_type+'/'+file_name)
+        if os.path.exists(full_name):
+            os.remove(full_name)
+        
+    return JsonResponse({'status':200})
 
 def ansible_upload_file(request):
     if request.method == 'POST':
@@ -457,7 +471,8 @@ def save_task_handler_var(playbook_data_dict):
             var_content = playbook_data_dict[key]['vars']
             if len(task_content.strip()) !=0:
                 x=yaml.load(task_content)
-                tasks = tasks + len(x)
+                if x is not None:
+                    tasks = tasks + len(x)
                 task_dir = os.path.join(role_dir,'tasks')
                 os.makedirs(task_dir, 0755)
                 with open(task_dir+'/main.yml','w') as f:
@@ -476,26 +491,28 @@ def save_task_handler_var(playbook_data_dict):
 
 def ansible_save(request):
     if request.method == 'POST':
-        save_dict = {}
-        playbook_data_str = str(request.POST.get('playbook_data'))
-        playbook_data_dict = json.loads(playbook_data_str)
-        total_role_count = playbook_data_dict.keys()
-        owner_id = int(request.session.get('_user_id'))
-        save_dict['name'] = playbook_data_dict['playbook_name']
-        try:
-            AnsibleModel.objects.get(name=save_dict['name'])
-        except ObjectDoesNotExist:
-            total_task_count = save_task_handler_var(playbook_data_dict)
-            save_dict['owner_id'] = owner_id
-            save_dict['total_run_count'] = 0
-            save_dict['dir_name'] = playbook_data_dict['playbook_name']
-            save_dict['total_role_count'] = len(total_role_count) - 1
-            save_dict['total_task_count'] = total_task_count
-            gen_main_yaml_and_hosts_file(playbook_data_dict)
-            AnsibleModel.objects.create(**save_dict)
-            return JsonResponse({'status':200})
-        else:
-            return JsonResponse({'status':500,'msg':'{}剧本名已经存在!'.format(save_dict['name'])})
+        if request.POST.get('action_type') == 'save':
+            save_dict = {}
+            playbook_data_str = str(request.POST.get('playbook_data'))
+            playbook_data_dict = json.loads(playbook_data_str)
+            total_role_count = playbook_data_dict.keys()
+            owner_id = int(request.session.get('_user_id'))
+            save_dict['name'] = playbook_data_dict['playbook_name']
+            try:
+                AnsibleModel.objects.get(name=save_dict['name'])
+            except ObjectDoesNotExist:
+                total_task_count = save_task_handler_var(playbook_data_dict)
+                save_dict['owner_id'] = owner_id
+                save_dict['total_run_count'] = 0
+                save_dict['dir_name'] = playbook_data_dict['playbook_name']
+                save_dict['total_role_count'] = len(total_role_count) - 1
+                save_dict['total_task_count'] = total_task_count
+                gen_main_yaml_and_hosts_file(playbook_data_dict)
+                AnsibleModel.objects.create(**save_dict)
+                return JsonResponse({'status':200})
+            else:
+                return JsonResponse({'status':500,'msg':'{}剧本名已经存在!'.format(save_dict['name'])})
+        
         
 # ------------------end ansible add -----------------------------------  
 
@@ -515,26 +532,150 @@ class AnsibleUpdate(UpdateView):
             assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
         context['hosts'] = generate_host_list(assetHostQuerySet)
         context['total_host_count'] = len(context['hosts'])
+        playbook_dict = get_playbook_file_content(self.object.id)
+        context['playbook_info'] = playbook_dict
         return context
 
 def get_playbook_file_content(playbook_id):
     '''
     return all files content under the playbook_name directory of subdirectory, data format,eg:
-    [
-    {'role_name':'install_db','tasks':'contents','handlers':'contents','vars':'contents',
-    'templates':[file1,file2],'files':[file1,file2],'hosts':[{'ip':'192.168.10.3','account':'root'},]}
-    ]
+    {
+        "playbook_name":"lamp",
+        "steps":[
+            {
+            "role_name":"install_db",
+            "tasks": "contents",
+            "handlers": "contents",
+            "vars": "contents",
+            "templates":[{'file_name':'file1','size':'125KB'},{'file_name':'file1','size':'125KB'}],
+            "hosts": [{'ip':192.168.10.3,'account':'root','password':'password'}]
+            }
+        ]
+    }
     '''
+    playbook_dict = {}
+    playbook_dict['steps'] = []
     playbookObj = AnsibleModel.objects.get(id=playbook_id)
     playbook_name = playbookObj.name
+    playbook_dict['playbook_name'] = playbook_name
     playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name)
-    if len(os.listdir(playbook_dir)) ==3:
-        pass
-    else:
-        pass
-        
+    full_hosts_file = os.path.join(playbook_dir,'hosts')
+    full_main_file = os.path.join(playbook_dir,'main.yml')
+    # get roles list
+    roles_list = get_roles_list_from_main(full_main_file)
+    # get hosts contents 
+    host_position = get_role_position_in_hosts(full_hosts_file)
+    hosts_dict = gen_role_host_list_from_hosts(full_hosts_file, host_position)
+    # get tasks,vars,handlers,templates,files info
+    for role_name in roles_list:
+        step_dict = get_playbook_other_info(playbook_dir, role_name)
+        step_dict['hosts'] = hosts_dict[role_name]
+        playbook_dict['steps'].append(step_dict)
+    return playbook_dict
+    
+    
+def get_playbook_other_info(playbook_dir,role_name):
+    '''
+    get the role's conents of tasks,vars,handlers conents and the file list of templates,files if exist
+    {
+    "role_name":"install_db"
+    "tasks": "contents",
+    "handlers": "contents",
+    "vars": "contents",
+    "templates":[{'file_name':'file1','size':'125KB'},{'file_name':'file1','size':'125KB'}],
+    "files":[{'file_name':'file1','size':'125KB'},{'file_name':'file1','size':'125KB'}],  
+    }
+    '''
+    role_dict = {}
+    role_dict['role_name'] = role_name
+    role_dir = os.path.join(playbook_dir,'roles/'+role_name)
+    dir_list = os.listdir(role_dir)
+    for one_dir in dir_list:
+        if one_dir in ['templates','files']:
+            role_dict[one_dir] = []
+            tmp_dir = os.path.join(role_dir,one_dir)
+            file_list = os.listdir(tmp_dir)
+            for one_file in file_list:
+                tmp_fullname = os.path.join(tmp_dir,one_file)
+                if os.path.isfile(tmp_fullname):
+                    file_dict = {}
+                    file_dict['file_name'] = one_file
+                    file_size = int(round(float(os.path.getsize(tmp_fullname))/1024,0))
+                    file_dict['size'] = str(file_size)+'kb'
+                    role_dict[one_dir].append(file_dict)
+        elif one_dir in ['tasks','handlers','vars']:
+            tmp_dir = os.path.join(role_dir,one_dir)
+            main_fullname = os.path.join(tmp_dir,'main.yml')
+            with open(main_fullname,'r') as f:
+                contents = f.read()
+            role_dict[one_dir] = contents
+    return role_dict
         
 
+def get_roles_list_from_main(full_main_file):
+    '''
+    ['install_db','install_web']
+    '''
+    roles_list = []
+    with open(full_main_file,'r') as f:
+        x = yaml.load(f)
+        for role in x:
+            roles_list.append(role['name'])
+    return roles_list
+
+def gen_role_host_list_from_hosts(full_hosts_file,host_position):
+    '''
+    {'install_db':[{'ip':192.168.10.3,'account':'root','password':'password'}]}
+    '''
+    roles_dict = {}
+    for role in host_position:
+        all_lines_list = linecache.getlines(full_hosts_file)[role['start']:role['end']]
+        role_name = all_lines_list[0].strip().strip('[').strip(']')
+        roles_dict[role_name] = []
+        for i in range(1,len(all_lines_list)):
+            tmp_dict = {}
+            line_str = all_lines_list[i].strip()
+            if len(line_str) !=0:
+                split_list = line_str.split()
+                tmp_dict['ip'] = split_list[0]
+                tmp_dict['account'] = split_list[1].split('=')[1]
+                tmp_dict['password'] = split_list[2].split('=')[1]
+                roles_dict[role_name].append(tmp_dict)
+    return roles_dict  
+                    
+def get_role_position_in_hosts(full_hosts_file):
+    '''
+    [
+        {'name':'install_db','start':0,'end':3},
+        {'name':'install_web','start':3,'end':None}  None is mean [3:]
+    ]
+    '''
+    confObj = confParse(full_hosts_file)
+    sections = confObj.get_sections()
+    host_position = []
+    def get_line_num(section):
+        with open(full_hosts_file,'r') as f:
+            line_num = 0
+            for line in f.readlines():
+                if section in line:
+                    return line_num
+                line_num = line_num + 1
+    
+    for i in range(len(sections)):
+        position_dict = {}
+        line_num = get_line_num(sections[i])
+        start = line_num
+        position_dict['name'] = sections[i]
+        position_dict['start'] = start
+        position_dict['end'] = 0
+        host_position.append(position_dict)
+        if i !=0:
+            host_position[i-1]['end'] = start
+        if i == len(sections) - 1:
+            host_position[i]['end'] = None
+    return host_position
+    
+    
 # ------------------end ansible update -----------------------------------  
 
 

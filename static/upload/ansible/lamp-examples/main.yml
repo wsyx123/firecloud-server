@@ -2,3 +2,7 @@
   name: install_db
   roles:
   - install_db
+- hosts: install_web
+  name: install_web
+  roles:
+  - install_web

@@ -8,6 +8,7 @@ encoding//ssh_client/client.py=utf-8
 encoding//utils/ansibleAdHoc.py=utf-8
 encoding//utils/ansibleplaybook.py=utf-8
 encoding//utils/callback.py=utf-8
+encoding//utils/cfg_parser.py=utf-8
 encoding//utils/log_task_execute.py=utf-8
 encoding//webapp/admin.py=utf-8
 encoding//webapp/application/application.py=utf-8
