@@ -65,6 +65,7 @@
 						<div class="tab-content">
 							<form class="form-horizontal" method="POST" enctype="multipart/form-data">
 								<input name="owner_id" type='text' value="{{request.session.user_id}}" hidden>
+								<input name="playbook_id" type='text' value="{{playbook_info.playbook_id}}" hidden >
 								<div class="form-group">
 									<label class="col-xs-12 col-sm-1 no-padding-right">
 										<span style="font-size:18px;">剧本名称</span><span class="red">*</span>

@@ -22,6 +22,7 @@ import json
 import sys
 import io,yaml
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -406,10 +407,18 @@ def ansible_upload_file(request):
 def gen_main_yaml_and_hosts_file(playbook_data_dict):
     keys = playbook_data_dict.keys()
     keys.sort()
+    '''
+    [
+    {"group":"install_db","hosts":['192.168.10.3:root','192.168.10.4:clouder']},
+    ]
+    '''
     host_data_list = []
     main_data_list = []
     total_role_count = 0
     for key in keys:
+        '''
+        {"group":"install_db","hosts":['192.168.10.3:root','192.168.10.4:clouder']}
+        '''
         host_data_dict_tmp = {}
         main_data_dict_tmp = {}
         if 'step' in key:
@@ -439,7 +448,7 @@ def gen_main_yaml_and_hosts_file(playbook_data_dict):
             hf.write('\n')
             
 def generate_host(host_list):
-    '''
+    '''['192.168.10.3:root','192.168.10.4:clouder']
     generate host  list,  eg: 
     [
         '192.168.10.3 ansible_ssh_user=root ansible_ssh_port = 22',
@@ -450,14 +459,24 @@ def generate_host(host_list):
     for item in host_list:
         var_dict = ''
         host_ip = item.split(':')[0]
+        assetHostObj = AssetHost.objects.get(private_ip=host_ip)
         var_dict = var_dict+host_ip
         host_account = item.split(':')[1]
         if len(host_account.strip()) ==0:
-            var_dict = var_dict+' ansible_ssh_user=root'
+            host_account = 'root'
+        try:
+            accountObj = HostAccount.objects.get(Q(host_id=assetHostObj.id),Q(account=host_account))
+        except ObjectDoesNotExist:
+            password = 'password'
         else:
-            var_dict = var_dict+' ansible_ssh_user='+host_account
+            password = accountObj.passwd
+        var_dict = var_dict+' ansible_ssh_user={} ansible_ssh_password={}'.format(host_account,password)
         data_list.append(var_dict)
     return data_list            
+    
+def playbook_mkdirs(full_dir):
+    if not os.path.exists(full_dir):
+        os.makedirs(full_dir, 077)
        
 def save_task_handler_var(playbook_data_dict):
     tasks = 0
@@ -474,30 +493,30 @@ def save_task_handler_var(playbook_data_dict):
                 if x is not None:
                     tasks = tasks + len(x)
                 task_dir = os.path.join(role_dir,'tasks')
-                os.makedirs(task_dir, 0755)
+                playbook_mkdirs(task_dir)
                 with open(task_dir+'/main.yml','w') as f:
                     f.write(task_content)
             if len(handler_content.strip()) !=0:
                 handler_dir = os.path.join(role_dir,'handlers')
-                os.makedirs(handler_dir, 0755)
+                playbook_mkdirs(handler_dir)
                 with open(handler_dir+'/main.yml','w') as f:
                     f.write(handler_content)
             if len(var_content.strip()) !=0:
                 var_dir = os.path.join(role_dir,'vars')
-                os.makedirs(var_dir, 0755)
+                playbook_mkdirs(var_dir)
                 with open(var_dir+'/main.yml','w') as f:
                     f.write(var_content)
     return tasks
 
 def ansible_save(request):
     if request.method == 'POST':
+        save_dict = {}
+        playbook_data_str = str(request.POST.get('playbook_data'))
+        playbook_data_dict = json.loads(playbook_data_str)
+        total_role_count = playbook_data_dict.keys()
+        owner_id = int(request.session.get('_user_id'))
+        save_dict['name'] = playbook_data_dict['playbook_name']
         if request.POST.get('action_type') == 'save':
-            save_dict = {}
-            playbook_data_str = str(request.POST.get('playbook_data'))
-            playbook_data_dict = json.loads(playbook_data_str)
-            total_role_count = playbook_data_dict.keys()
-            owner_id = int(request.session.get('_user_id'))
-            save_dict['name'] = playbook_data_dict['playbook_name']
             try:
                 AnsibleModel.objects.get(name=save_dict['name'])
             except ObjectDoesNotExist:
@@ -512,6 +531,28 @@ def ansible_save(request):
                 return JsonResponse({'status':200})
             else:
                 return JsonResponse({'status':500,'msg':'{}剧本名已经存在!'.format(save_dict['name'])})
+            
+        if request.POST.get('action_type') == 'update':
+            playbook_id = request.POST.get('playbook_id')
+            try:
+                ansibleObj = AnsibleModel.objects.get(id=playbook_id)
+            except ObjectDoesNotExist:
+                return JsonResponse({'status':500,'msg':'剧本ID:{}不存在!'.format(playbook_id)})
+            else:
+                new_playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,playbook_data_dict['playbook_name'])
+                old_playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,ansibleObj.name)
+                os.rename(old_playbook_dir, new_playbook_dir)
+                total_task_count = save_task_handler_var(playbook_data_dict)
+                ansibleObj.name = playbook_data_dict['playbook_name']
+                ansibleObj.dir_name = playbook_data_dict['playbook_name']
+                ansibleObj.total_role_count = len(total_role_count) - 1
+                ansibleObj.total_task_count = total_task_count
+                gen_main_yaml_and_hosts_file(playbook_data_dict)
+                ansibleObj.save()
+                return JsonResponse({'status':200})
+                
+            
+            
         
         
 # ------------------end ansible add -----------------------------------  
@@ -533,6 +574,7 @@ class AnsibleUpdate(UpdateView):
         context['hosts'] = generate_host_list(assetHostQuerySet)
         context['total_host_count'] = len(context['hosts'])
         playbook_dict = get_playbook_file_content(self.object.id)
+        playbook_dict['playbook_id'] = self.object.id
         context['playbook_info'] = playbook_dict
         return context
 

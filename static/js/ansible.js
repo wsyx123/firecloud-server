@@ -293,11 +293,13 @@ function saveAnsible(actionType){
 		playbook_data[oneStepID]["hosts"]=checked_host_array;
 	}
 	
+	var playbook_id = $("input[name='playbook_id']").val();
+	
 	$.ajax({
 		type: "POST",
 		url:  "/ansible/add/save/",
 		processData: true,
-		data: {"playbook_data":JSON.stringify(playbook_data),"action_type":actionType},
+		data: {"playbook_data":JSON.stringify(playbook_data),"action_type":actionType,"playbook_id":playbook_id},
 		success: function(data){
 			if(data['status']==200){
 				location.href='/ansible/list/';
