@@ -83,8 +83,8 @@
 													<a class="blue" href="{% url 'AnsibleUpdate' pk=ansible.id %}">
 														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
 													</a>
-													<a class="red" href="#">
-														<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+													<a class="red" href="#" onclick="delAnsible(this);">
+														<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
 													</a>
 												</div>
 											</td>
@@ -100,6 +100,30 @@
 				</div><!-- /.col -->
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
+		<!-- 脚本删除模态框 -->
+		<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>确认窗口</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div style="padding-left:80px;">
+							<label>是否删除剧本: <span style="font-size:18px;font-weight:700;" id="del_name"></span> ?</label>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="delAnsibleAck();">删除</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
 	</div>
 	</div><!-- /.main-content -->
 {% endblock %}
@@ -118,5 +142,22 @@
 <script src="/static/js/dynamic-table.js"></script>
 <script type="text/javascript">
 	dynamicTable($);
+function delAnsible(obj){
+	host_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var host_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	$("#del_name").text(host_name);
+}
+
+function delAnsibleAck(){
+	$.ajax({
+		type: "POST",
+		url: "/ansible/delete/"+host_id,
+		data: {"pk":host_id},
+		success: function(){
+			window.location.reload();
+			}
+	});
+	
+}
 </script>
 {% endblock %}

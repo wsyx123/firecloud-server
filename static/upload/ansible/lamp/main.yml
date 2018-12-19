@@ -1,4 +1,0 @@
-- hosts: install_db
-  name: install_db
-  roles:
-  - install_db

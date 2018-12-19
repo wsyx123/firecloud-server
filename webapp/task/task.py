@@ -476,7 +476,7 @@ def generate_host(host_list):
     
 def playbook_mkdirs(full_dir):
     if not os.path.exists(full_dir):
-        os.makedirs(full_dir, 077)
+        os.makedirs(full_dir, 0775)
        
 def save_task_handler_var(playbook_data_dict):
     tasks = 0
@@ -720,6 +720,20 @@ def get_role_position_in_hosts(full_hosts_file):
     
 # ------------------end ansible update -----------------------------------  
 
+# ---------------------ansible delete -----------------------------------
+class AnsibleDelete(DeleteView):
+    model = AnsibleModel
+    pk_url_kwarg = 'pk'
+    success_url = reverse_lazy('AnsibleList')
+    def post(self, request, *args, **kwargs):
+        ansibleObj = AnsibleModel.objects.get(id=kwargs['pk'])
+        playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,ansibleObj.name)
+        if os.path.exists(playbook_dir):
+            import shutil
+            shutil.rmtree(playbook_dir, ignore_errors=True)
+        return DeleteView.post(self, request, *args, **kwargs)
+
+# ---------------------end ansible delete -----------------------------------
 
 class AnsibleExecute(TemplateView):
     template_name = 'task/ansible/AnsibleExecute.html'

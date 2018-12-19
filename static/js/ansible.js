@@ -387,3 +387,6 @@ function delFile(obj){
 			   'file_type':file_type,'file_name':file_name}
 	})
 }
+
+
+

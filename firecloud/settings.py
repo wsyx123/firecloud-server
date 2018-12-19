@@ -98,7 +98,7 @@ DATABASES = {
         'NAME': 'firecloud',
         'USER':'root',
         'PASSWORD':'root',
-        'HOST':'192.168.10.1',
+        'HOST':'192.168.43.115',
         'PORT':'3306',
     }
 }
@@ -156,7 +156,7 @@ celery 相关配置
 '''
 import djcelery
 djcelery.setup_loader()
-BROKER_URL = 'redis://192.168.10.1:6379/0'
+BROKER_URL = 'redis://localhost:6379/0'
 # BROKER_URL = 'redis://:密码@主机地址:端口号/数据库号'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 #计划任务
