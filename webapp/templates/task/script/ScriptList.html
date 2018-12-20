@@ -75,10 +75,13 @@
 													<a class="green" href="#" onclick="setTaskId(this)">
 														<i class="fa fa-telegram bigger-130" title="执行" data-toggle="modal" data-target="#mydisplay"></i>
 													</a>
+													<a class="green" href="#" onclick="copyScript(this);">
+														<i class="fa fa-files-o bigger-130" title="复制"></i>
+													</a>
 													<a class="blue" href="{% url 'ScriptUpdate' pk=script.id %}">
 														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
 													</a>
-													<a class="red" href="#" onclick="HostDelete(this);">
+													<a class="red" href="#" onclick="delScript(this);">
 														<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
 													</a>
 												</div>
@@ -109,7 +112,7 @@
 									</div>
 								</div>
 								<div class="modal-footer">
-									<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="HostDeleteAck();">删除</button>
+									<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="delScriptAck();">删除</button>
 									<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
 								</div>
 							</div><!-- /.modal-content -->
@@ -223,12 +226,12 @@ function setTaskId(obj){
 	script_id = $(obj).parent().parent().siblings().eq(0).text();
 }
 
-function HostDelete(obj){
+function delScript(obj){
 	host_id = $($(obj).parent().parent()).siblings().eq(0).text();
 	var host_name = $($(obj).parent().parent()).siblings().eq(1).text();
 	$("#del_name").text(host_name);
 };
-function HostDeleteAck(){
+function delScriptAck(){
 	$.ajax({
 		type: "POST",
 		url: "/script/delete/"+host_id,
@@ -237,8 +240,12 @@ function HostDeleteAck(){
 			window.location.reload();
 			}
 	});
-	
 };
+
+function copyScript(obj){
+
+}
+
 dynamicTable($);
 
 //使用easysearch 进行主机过滤

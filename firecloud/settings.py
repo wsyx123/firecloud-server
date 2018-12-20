@@ -98,7 +98,7 @@ DATABASES = {
         'NAME': 'firecloud',
         'USER':'root',
         'PASSWORD':'root',
-        'HOST':'192.168.43.115',
+        'HOST':'192.168.10.1',
         'PORT':'3306',
     }
 }

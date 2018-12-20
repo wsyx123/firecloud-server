@@ -95,16 +95,21 @@ def OptDelete(request):
     
 
 def generate_host_list(assetHostQuerySet):
-        host_list = []
-        for host in assetHostQuerySet:
-            accountQuerySetList = HostAccount.objects.filter(host_id=host.id)
-            host_dict = {}
-            host_dict['hostname'] = host.hostname
-            host_dict['host_status'] = host.host_status
-            host_dict['private_ip'] = host.private_ip
-            host_dict['accounts'] = accountQuerySetList
-            host_list.append(host_dict)
-        return host_list
+    ''' return 
+    [
+        {'hostname':'keystone','host_status':1,'private_ip':'192.168.10.3','account': []}
+    ]
+    '''
+    host_list = []
+    for host in assetHostQuerySet:
+        accountQuerySetList = HostAccount.objects.filter(host_id=host.id)
+        host_dict = {}
+        host_dict['hostname'] = host.hostname
+        host_dict['host_status'] = host.host_status
+        host_dict['private_ip'] = host.private_ip
+        host_dict['accounts'] = accountQuerySetList
+        host_list.append(host_dict)
+    return host_list
 
 class ScriptList(ListView):
     model = ScriptModel
@@ -442,17 +447,17 @@ def gen_main_yaml_and_hosts_file(playbook_data_dict):
             group_name = host['group']
             hf.write('['+group_name+']')
             hf.write('\n')
-            for one_host in generate_host(host['hosts']):
+            for one_host in generate_host_for_playbook(host['hosts']):
                 hf.write(one_host)
                 hf.write('\n')
             hf.write('\n')
             
-def generate_host(host_list):
+def generate_host_for_playbook(host_list):
     '''['192.168.10.3:root','192.168.10.4:clouder']
     generate host  list,  eg: 
     [
-        '192.168.10.3 ansible_ssh_user=root ansible_ssh_port = 22',
-        '192.168.10.4 ansible_ssh_user=root ansible_ssh_port = 22',
+        '192.168.10.3 ansible_ssh_user=root ansible_ssh_password=password ansible_ssh_port=22',
+        '192.168.10.4 ansible_ssh_user=root ansible_ssh_password=password ansible_ssh_port=22',
     ]
     '''
     data_list = []
@@ -470,7 +475,8 @@ def generate_host(host_list):
             password = 'password'
         else:
             password = accountObj.passwd
-        var_dict = var_dict+' ansible_ssh_user={} ansible_ssh_password={}'.format(host_account,password)
+        var_dict = var_dict+' ansible_ssh_user={} ansible_ssh_password={} ansible_ssh_port={}'\
+        .format(host_account,password,assetHostObj.port)
         data_list.append(var_dict)
     return data_list            
     
@@ -549,11 +555,7 @@ def ansible_save(request):
                 ansibleObj.total_task_count = total_task_count
                 gen_main_yaml_and_hosts_file(playbook_data_dict)
                 ansibleObj.save()
-                return JsonResponse({'status':200})
-                
-            
-            
-        
+                return JsonResponse({'status':200})   
         
 # ------------------end ansible add -----------------------------------  
 
@@ -648,8 +650,11 @@ def get_playbook_other_info(playbook_dir,role_name):
         elif one_dir in ['tasks','handlers','vars']:
             tmp_dir = os.path.join(role_dir,one_dir)
             main_fullname = os.path.join(tmp_dir,'main.yml')
-            with open(main_fullname,'r') as f:
-                contents = f.read()
+            try:
+                with open(main_fullname,'r') as f:
+                    contents = f.read()
+            except IOError:
+                contents = ''
             role_dict[one_dir] = contents
     return role_dict
         
@@ -659,8 +664,12 @@ def get_roles_list_from_main(full_main_file):
     ['install_db','install_web']
     '''
     roles_list = []
-    with open(full_main_file,'r') as f:
-        x = yaml.load(f)
+    try:
+        with open(full_main_file,'r') as f:
+            x = yaml.load(f)
+    except IOError:
+        return roles_list
+    else:
         for role in x:
             roles_list.append(role['name'])
     return roles_list
