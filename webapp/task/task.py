@@ -7,7 +7,8 @@ Created on 2018年8月6日
 '''
 from django.views.generic import TemplateView,FormView,ListView,DeleteView,UpdateView,DetailView
 from django.urls import reverse_lazy
-from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel
+from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,\
+    SysUser
 from forms import ScriptModelForm
 from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH
 import os,uuid
@@ -20,9 +21,11 @@ import linecache
 import pickle
 import json
 import sys
+import shutil
 import io,yaml
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.forms.models import model_to_dict
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -738,11 +741,38 @@ class AnsibleDelete(DeleteView):
         ansibleObj = AnsibleModel.objects.get(id=kwargs['pk'])
         playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,ansibleObj.name)
         if os.path.exists(playbook_dir):
-            import shutil
             shutil.rmtree(playbook_dir, ignore_errors=True)
         return DeleteView.post(self, request, *args, **kwargs)
 
 # ---------------------end ansible delete -----------------------------------
+
+# ---------------------ansible copy -----------------------------------
+def ansible_copy(request):
+    if request.method == 'POST':
+        playbook_id = request.POST.get('playbook_id')
+        ansiblObj = AnsibleModel.objects.get(id=playbook_id)
+        new_playbook_name = request.POST.get('new_playbook_name')
+        old_playbook_name = ansiblObj.name
+        playbook_dict = model_to_dict(ansiblObj)
+        user_id = request.session.get('_user_id')
+        user_instance = SysUser.objects.get(id=user_id)
+        playbook_dict['name'] = new_playbook_name
+        playbook_dict['dir_name'] = new_playbook_name
+        playbook_dict['owner'] = user_instance
+        del playbook_dict['id']
+        old_playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,old_playbook_name)
+        new_playbook_dir = os.path.join(ANSIBLE_PROJECT_PATH,new_playbook_name)
+        try:
+            AnsibleModel.objects.create(**playbook_dict)
+            shutil.copytree(old_playbook_dir,new_playbook_dir)
+            status = 200
+            err_msg = ''
+        except Exception as e:
+            err_msg = str(e)
+            status = 400
+        return JsonResponse({'status':status,'err_msg':err_msg})
+
+# ---------------------end ansible copy -----------------------------------
 
 class AnsibleExecute(TemplateView):
     template_name = 'task/ansible/AnsibleExecute.html'

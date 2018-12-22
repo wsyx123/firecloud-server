@@ -89,13 +89,13 @@
 														<i class="fa fa-telegram bigger-130" title="执行"></i>
 													</a>
 													<a class="green" href="#" onclick="copyAnsible(this);">
-														<i class="fa fa-files-o bigger-130" title="复制"></i>
+														<i class="fa fa-files-o bigger-130" title="复制" data-toggle="modal" data-target="#mycopy"></i>
 													</a>
 													<a class="blue" href="{% url 'AnsibleUpdate' pk=ansible.id %}">
 														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
 													</a>
 													<a class="red" href="#" onclick="delAnsible(this);">
-														<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
+														<i class="fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
 													</a>
 												</div>
 											</td>
@@ -111,7 +111,7 @@
 				</div><!-- /.col -->
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
-		<!-- 脚本删除模态框 -->
+		<!-- 剧本删除模态框 -->
 		<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -135,7 +135,37 @@
 				</div><!-- /.modal-content -->
 			</div><!-- /.modal -->
 		</div>
+
+		<!-- 剧本复制模态框 -->
+		<div class="modal fade" id="mycopy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>复制窗口</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div style="padding-left:80px;">
+							<label>原剧本名: <input type="text" name="old_name" readonly=""></label>
+							<label>新剧本名: <input type="text" name="new_name"></label>
+						</div>
+						<div style="padding-left:80px;">
+							<strong id="copyFailMsg" style="color: red;"></strong>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" onclick="copyAnsibleAck();">确定</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
 	</div>
+
 	</div><!-- /.main-content -->
 {% endblock %}
 
@@ -153,7 +183,7 @@
 <script src="/static/js/dynamic-table.js"></script>
 <script src="/static/js/ansible.js"></script>
 <script type="text/javascript">
-	dynamicTable($);
+dynamicTable($);
 function delAnsible(obj){
 	host_id = $($(obj).parent().parent()).siblings().eq(0).text();
 	var host_name = $($(obj).parent().parent()).siblings().eq(1).text();
@@ -172,7 +202,26 @@ function delAnsibleAck(){
 }
 
 function copyAnsible(obj){
-	alert(obj);
+	playbook_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var playbook_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	$("input[name='old_name']").val(playbook_name);
+}
+
+function copyAnsibleAck(){
+	var new_playbook_name = $("input[name='new_name']").val();
+	$.ajax({
+		type: "POST",
+		url: "/ansible/add/copy/",
+		data: {"playbook_id":playbook_id,"new_playbook_name":new_playbook_name},
+		success: function(data){
+			if(data['status'] == 200){
+				window.location.reload();
+			}else{
+				$("#copyFailMsg").text(data["err_msg"]);
+			}
+			
+		}
+	});
 }
 </script>
 {% endblock %}
