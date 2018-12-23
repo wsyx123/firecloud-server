@@ -42,7 +42,6 @@ input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].
 
 					<div class="widget-box">
 						<div class="widget-header widget-header-blue widget-header-flat">
-
 							<div class="widget-toolbar">
 								<label>
 									<small class="green">
@@ -83,6 +82,7 @@ input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].
 
 									<div class="step-content pos-rel">
 										<form class="form-horizontal" method="POST" id="assetForm">
+											<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
 											<div class="step-pane active" data-step="1">
 												<div class="form-group">
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">目标主机</label>

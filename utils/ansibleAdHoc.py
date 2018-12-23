@@ -45,9 +45,10 @@ class myadhoc():
         #host = HostVar() 
         #variable_manager.set_host_variable(host, 'ansible_ssh_user', 'clouder')
         #方法二   设置主机变量, 直接操作_vars_cache
-        for host in self.hostVar:
-            for key,val in host.items():
-                variable_manager._vars_cache[key]=val
+        if self.hostVar is not None:
+            for host in self.hostVar:
+                for key,val in host.items():
+                    variable_manager._vars_cache[key]=val
         
         # create play with tasks
         

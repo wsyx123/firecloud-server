@@ -7,4 +7,5 @@ xlrd==1.1.0
 PyYAML==3.10
 Jinja2==2.8.1
 #yum install mysql-devel gcc python-devel
-
+#yum install sshpass
+redis==2.10.6

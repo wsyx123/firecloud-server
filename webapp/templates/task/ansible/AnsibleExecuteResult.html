@@ -1,0 +1,160 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<style>
+.ui-progressbar {
+    background-color: #cad7d0;
+}
+
+.progress-bar-striped, .progress-striped .progress-bar, .progress-striped .progress-bar-success{
+	background-image:none;
+}
+
+.resultData,#progressbar-div{
+	display:none;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>
+					作业中心
+				</li>
+				<li><a href="{% url 'AnsibleList' %}">剧本执行</a></li>
+				<li>执行结果</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div id="progressbar-div">
+						<div id="progressbar" style="margin-top:7px;"></div>
+					</div>
+					<table class="table table-bordered"">
+						<tr>
+							<th class="col-sm-1">任务ID</th><td class="col-sm-2">1233443</td>
+							<th class="col-sm-1">剧本名称</th><td class="col-sm-2">lamp</td>
+							<th class="col-sm-1">总步骤</th><td class="col-sm-2">2</td>
+							<th class="col-sm-">总任务</th><td class="col-sm-2">4</td>
+						</tr>
+						<tr>
+							<th>任务状态</th><td><span class="label label-sm label-success">正在执行</span></td>
+							<th>开始时间</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i></td>
+							<th>结束时间</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i></td>
+							<th>总耗时</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i></td>
+						</tr>
+						<tr>
+							<td colspan="8">
+								<textarea></textarea>
+							</td>
+						</tr>
+					</table>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+			
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<!-- page specific plugin scripts -->
+<script src="/static/assets/js/jquery-ui.min.js"></script>
+
+<script type="text/javascript">
+
+//脚本执行进度条
+function ScriptExecuteProgressBar(proVal){
+	$( "#progressbar" ).progressbar({
+		value: proVal,
+		create: function( event, ui ) {
+			$(this).addClass('progress progress-striped active')
+				   .children(0).addClass('progress-bar progress-bar-success');
+		}
+	});
+	$(".ui-progressbar-value").text(proVal+'%');
+}
+
+function getResult(){
+	var task_id = $("#task_id").text();
+	$.ajax({
+		type: 'GET',
+		url: '/script/execute/result/?get_result&task_id='+task_id,
+		success:function(data){
+			ScriptExecuteProgressBar(100);
+			var success_num = data['ok'].length;
+			var failure_num = data['failed'].length;
+			var allResult = data['ok'].concat(data['failed']);
+			$("#task_id").text(data['task_id']);
+			$("#total").text(success_num+failure_num);
+			$("#success").text(success_num);
+			$("#failure").text(failure_num);
+			for(var i=0;i<allResult.length;i++){
+				if(allResult[i]['status']=='ok'){
+					status_msg = '<span class="badge badge-success">成功</span>';
+				}else{
+					status_msg = '<span class="badge badge-danger">失败</span>';
+				}
+				one_item ='<div>\
+								<p>\
+									<i class="oneResult fa fa-angle-double-right" onclick="foldOneResult(this);"></i>\
+									<span style="font-weight:700;">'+allResult[i].host+'</span> |\
+									<span>'+allResult[i].start_time+'</span> |\
+									'+status_msg+'\
+								</p>\
+								<pre class="resultData">'+allResult[i].data+'</pre>\
+							</div>'
+				$("#result-display").append(one_item);
+			}
+		}
+	})
+}
+
+
+$("#progressbar-div").css('display','block');//显示进度条
+ScriptExecuteProgressBar(100);
+getResult();
+
+//折叠/展开所有结果详情
+function foldAllResult(obj){
+	classStr = $(obj).children().attr('class');
+	if(classStr.indexOf("glyphicon-chevron-left") !=-1){
+		$(obj).children().removeClass('glyphicon-chevron-left');
+		$(obj).children().addClass('glyphicon-chevron-down');
+		$(".oneResult").removeClass('fa-angle-double-right');
+		$(".oneResult").addClass('fa-angle-double-down');
+		$(".resultData").css('display','block');
+	}else{
+		$(obj).children().removeClass('glyphicon-chevron-down');
+		$(obj).children().addClass('glyphicon-chevron-left');
+		$(".oneResult").removeClass('fa-angle-double-down');
+		$(".oneResult").addClass('fa-angle-double-right');
+		$(".resultData").css('display','none');
+	}
+}
+
+//折叠/展开单个结果详情
+function foldOneResult(obj){
+	classStr = $(obj).attr('class');
+	if(classStr.indexOf("fa-angle-double-right") !=-1){
+		$(obj).removeClass('fa-angle-double-right');
+		$(obj).addClass('fa-angle-double-down');
+		$(obj).parent().next().css('display','block');
+	}else{
+		$(obj).removeClass('fa-angle-double-down');
+		$(obj).addClass('fa-angle-double-right');
+		$(obj).parent().next().css('display','none');
+	}
+}
+</script>
+{% endblock %}

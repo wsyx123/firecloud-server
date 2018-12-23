@@ -67,7 +67,7 @@
 											<td>{{script.get_script_type_display }}</td>
 											<td>{{script.get_script_from_display }}</td>
 											<td>{{script.script_file}}</td>
-											<td>{{script.script_owner}}</td>
+											<td>{{script.owner}}</td>
 											<td>{{script.create_time|date:"Y-m-d H:i:s"}}</td>
 											<td><span class="badge badge-warning">{{script.total_run_count}}</span></td>
 											<td>
@@ -76,7 +76,7 @@
 														<i class="fa fa-telegram bigger-130" title="执行" data-toggle="modal" data-target="#mydisplay"></i>
 													</a>
 													<a class="green" href="#" onclick="copyScript(this);">
-														<i class="fa fa-files-o bigger-130" title="复制"></i>
+														<i class="fa fa-files-o bigger-130" title="复制" data-toggle="modal" data-target="#mycopy"></i>
 													</a>
 													<a class="blue" href="{% url 'ScriptUpdate' pk=script.id %}">
 														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
@@ -93,113 +93,140 @@
 							</div>
 						</div>
 					</div>
-					
-					<!-- 脚本删除模态框 -->
-					<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-						<div class="modal-dialog">
-							<div class="modal-content">
-								<div class="modal-header">
-									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-										&times;
-									</button>
-									<h4>
-										<span>确认窗口</span>
-									</h4>
-								</div>
-								<div class="modal-body">
-									<div style="padding-left:80px;">
-										<label>是否删除脚本: <span style="font-size:18px;font-weight:700;" id="del_name"></span> ?</label>
-									</div>
-								</div>
-								<div class="modal-footer">
-									<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="delScriptAck();">删除</button>
-									<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-								</div>
-							</div><!-- /.modal-content -->
-						</div><!-- /.modal -->
-					</div>
-					
-					<!-- 服务器显示模态框（Modal） -->
-					<div class="modal fade" id="mydisplay" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-						<div class="modal-dialog">
-							<div class="modal-content">
-								<div class="modal-header">
-									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-									<div class="col-xs-12 col-sm-5">
-										<span class="block input-icon input-icon-right">
-											<button type="button" class="btn btn-sm btn-primary">
-												<i class="fa fa-television" aria-hidden="true"></i> 选择服务器
-											</button>
-										</span>
-									</div>
-									<div class="col-xs-12 col-sm-3">
-										<span class="block input-icon input-icon-right">
-											<div style="margin-top:6px;">
-											已选 <span class="badge badge-warning" id="checked-num">0</span> 台
-											</div>
-										</span>
-									</div>
-									<div class="col-xs-12 col-sm-3">
-										<span class="block input-icon input-icon-right">
-											<div style="margin-top:6px;">
-											共 <span class="badge badge-info">{{total_host_count}}</span> 台
-											</div>
-										</span>
-									</div>
-								</div>
-								<div class="modal-body">
-									<div class="input-group">
-										<span class="input-group-btn">
-											<input type="text" class="form-control search-query" id="hostFilter" placeholder="通过IP过滤搜索" />
-										</span>
-									</div>
-									<div class="space-4"></div>
-									<div>
-										<table class="table" id="table">
-											<tr>
-												<th><input type="checkbox" onclick="allChecked(this);" /></th>
-												<th>主机名</th>
-												<th>状态</th>
-												<th>帐号</th>
-												<th>IP</th>
-											</tr>
-											{% for host in hosts %}
-											<tr class="tr-select-modal">
-												<td><input type="checkbox" onclick="oneChecked(this);"/></td>
-												<td>{{ host.hostname }}</td>
-												{% ifequal host.host_status 1 %}
-												<td><span class="label label-sm label-success">在线</span></td>
-												{% else %}
-												<td><span class="label label-sm label-danger">离线</span></td>
-												{% endifequal %}
-												<td>
-													<select name="accounts" style="width:80px;">
-														{% for account in host.accounts %}
-														<option>{{account.account}}</option>
-														{% endfor %}
-													</select>
-												</td>
-												<td>{{host.private_ip}}</td>
-											</tr>
-											{% endfor %}
-										</table>
-									</div>
-								</div>
-								<div class="modal-footer">
-									<div class="center">
-										<button type="button" class="btn btn-success" data-dismiss="modal" onclick="executeButton();">
-											<i class="fa fa-telegram bigger-130">执行</i>
-										</button>
-									</div>
-								</div>
-							</div><!-- /.modal-content -->
-						</div><!-- /.modal -->
-					</div>
-
 					<!-- PAGE CONTENT ENDS -->
 				</div><!-- /.col -->
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
+		<!-- 脚本删除模态框 -->
+		<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>确认窗口</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div style="padding-left:80px;">
+							<label>是否删除脚本: <span style="font-size:18px;font-weight:700;" id="del_name"></span> ?</label>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="delScriptAck();">删除</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+
+		<!-- 服务器显示模态框（Modal） -->
+		<div class="modal fade" id="mydisplay" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<div class="col-xs-12 col-sm-5">
+							<span class="block input-icon input-icon-right">
+								<button type="button" class="btn btn-sm btn-primary">
+									<i class="fa fa-television" aria-hidden="true"></i> 选择服务器
+								</button>
+							</span>
+						</div>
+						<div class="col-xs-12 col-sm-3">
+							<span class="block input-icon input-icon-right">
+								<div style="margin-top:6px;">
+								已选 <span class="badge badge-warning" id="checked-num">0</span> 台
+								</div>
+							</span>
+						</div>
+						<div class="col-xs-12 col-sm-3">
+							<span class="block input-icon input-icon-right">
+								<div style="margin-top:6px;">
+								共 <span class="badge badge-info">{{total_host_count}}</span> 台
+								</div>
+							</span>
+						</div>
+					</div>
+					<div class="modal-body">
+						<div class="input-group">
+							<span class="input-group-btn">
+								<input type="text" class="form-control search-query" id="hostFilter" placeholder="通过IP过滤搜索" />
+							</span>
+						</div>
+						<div class="space-4"></div>
+						<div>
+							<table class="table" id="table">
+								<tr>
+									<th><input type="checkbox" onclick="allChecked(this);" /></th>
+									<th>主机名</th>
+									<th>状态</th>
+									<th>帐号</th>
+									<th>IP</th>
+								</tr>
+								{% for host in hosts %}
+								<tr class="tr-select-modal">
+									<td><input type="checkbox" onclick="oneChecked(this);"/></td>
+									<td>{{ host.hostname }}</td>
+									{% ifequal host.host_status 1 %}
+									<td><span class="label label-sm label-success">在线</span></td>
+									{% else %}
+									<td><span class="label label-sm label-danger">离线</span></td>
+									{% endifequal %}
+									<td>
+										<select name="accounts" style="width:80px;">
+											<option selected="selected">root</option>
+											{% for account in host.accounts %}
+											<option>{{account.account}}</option>
+											{% endfor %}
+										</select>
+									</td>
+									<td>{{host.private_ip}}</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<div class="center">
+							<button type="button" class="btn btn-success" data-dismiss="modal" onclick="executeButton();">
+								<i class="fa fa-telegram bigger-130">执行</i>
+							</button>
+						</div>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+		<!-- 脚本复制模态框 -->
+		<div class="modal fade" id="mycopy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>复制窗口</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div style="padding-left:80px;">
+							<label>原脚本名: <input type="text" name="old_name" readonly=""></label>
+							<label>新脚本名: <input type="text" name="new_name"></label>
+						</div>
+						<div style="padding-left:80px;">
+							<strong id="copyFailMsg" style="color: red;"></strong>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" onclick="copyScriptAck();">确定</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
 	</div>
 	</div><!-- /.main-content -->
 {% endblock %}
@@ -243,7 +270,26 @@ function delScriptAck(){
 };
 
 function copyScript(obj){
+	script_id = $(obj).parent().parent().siblings().eq(0).text();
+	var script_name = $(obj).parent().parent().siblings().eq(1).text();
+	$("input[name='old_name']").val(script_name);
+}
 
+function copyScriptAck(){
+	var new_script_name= $("input[name='new_name']").val();
+	$.ajax({
+		type: "POST",
+		url: "/script/add/copy/",
+		data: {"script_id":script_id,"new_script_name":new_script_name},
+		success: function(data){
+			if(data['status'] == 200){
+				window.location.reload();
+			}else{
+				$("#copyFailMsg").text(data["err_msg"]);
+			}
+			
+		}
+	});
 }
 
 dynamicTable($);

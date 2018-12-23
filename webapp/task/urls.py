@@ -8,9 +8,9 @@ Created on 2018年10月24日
 from django.conf.urls import url
 from task import OptList,OptAudit,OptDelete
 from task import ScriptList,ScriptAdd,ScriptDelete,FileSend,get_script_content,\
-ScriptUpdate,ScriptExecute,ScriptExecuteResult
-from task import AnsibleList,AnsibleExecute,AnsibleAdd,ansible_upload_file,ansible_save,AnsibleUpdate,\
-del_upload_file,AnsibleDelete,ansible_copy
+ScriptUpdate,ScriptExecute,ScriptExecuteResult,script_copy
+from task import AnsibleList,AnsibleAdd,ansible_upload_file,ansible_save,AnsibleUpdate,\
+del_upload_file,AnsibleDelete,ansible_copy,AnsibleExecute
 
 urlpatterns = [
     url(r'^optlog/list/$',OptList.as_view(),name='OptList'),
@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^optlog/audit/(?P<pk>.+)$',OptAudit.as_view(),name='OptAudit'),
     url(r'^script/list/$',ScriptList.as_view(),name='ScriptList'),
     url(r'^script/add/$',ScriptAdd.as_view(),name='ScriptAdd'),
+    url(r'^script/add/copy/$',script_copy),
     url(r'^script/execute/result/$',ScriptExecuteResult.as_view(),name='ScriptExecuteResult'),
     url(r'^script/execute/$',ScriptExecute,name='ScriptExecute'),
     url(r'^script/add/content/$',get_script_content),
@@ -31,6 +32,6 @@ urlpatterns = [
     url(r'^ansible/delete/file/$',del_upload_file),
     url(r'^ansible/update/(?P<pk>.+)$',AnsibleUpdate.as_view(),name='AnsibleUpdate'),
     url(r'^ansible/delete/(?P<pk>.+)$',AnsibleDelete.as_view(),name='AnsibleDelete'),
-    url(r'^ansible/execute/$',AnsibleExecute.as_view(),name='AnsibleExecute'),
+    url(r'^ansible/execute/$',AnsibleExecute.as_view()),
     url(r'^file/$',FileSend.as_view(),name='file'),
     ]

@@ -7,8 +7,7 @@ Created on 2018年8月6日
 '''
 from django.views.generic import TemplateView,FormView,ListView,DeleteView,UpdateView,DetailView
 from django.urls import reverse_lazy
-from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,\
-    SysUser
+from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,SysUser
 from forms import ScriptModelForm
 from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH
 import os,uuid
@@ -26,6 +25,7 @@ import io,yaml
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.forms.models import model_to_dict
+from django.shortcuts import render_to_response
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -359,6 +359,36 @@ class ScriptUpdate(UpdateView):
         with open(fullname, 'wb') as f:
             f.write(contents)
         return UpdateView.post(self, request, *args, **kwargs)
+
+def script_copy(request):
+    if request.method == 'POST':
+        script_id = request.POST.get('script_id')
+        new_script_name = request.POST.get('new_script_name')
+        scriptObj = ScriptModel.objects.get(id=script_id)
+        old_file_name = scriptObj.script_file
+        file_suffix = old_file_name.split('.')[1]
+        new_file_name = uuid.uuid4().hex[:8]+'.'+file_suffix
+        script_dict = model_to_dict(scriptObj)
+        user_id = request.session.get('_user_id')
+        user_instance = SysUser.objects.get(id=user_id)
+        
+        script_dict['name'] = new_script_name
+        script_dict['script_file'] = new_file_name
+        script_dict['owner'] = user_instance
+        del script_dict['total_run_count']
+        del script_dict['id']
+        old_full_file = os.path.join(SCRIPT_SAVE_PATH,old_file_name)
+        new_full_file = os.path.join(SCRIPT_SAVE_PATH,new_file_name)
+        try:
+            ScriptModel.objects.create(**script_dict)
+            shutil.copyfile(old_full_file,new_full_file)
+            status = 200
+            err_msg = ''
+        except Exception as e:
+            err_msg = str(e)
+            status = 400
+        return JsonResponse({'status':status,'err_msg':err_msg})
+        
     
 class AnsibleList(ListView):
     model = AnsibleModel
@@ -775,7 +805,7 @@ def ansible_copy(request):
 # ---------------------end ansible copy -----------------------------------
 
 class AnsibleExecute(TemplateView):
-    template_name = 'task/ansible/AnsibleExecute.html'
+    template_name = 'task/ansible/AnsibleExecuteResult.html'
     
 class FileSend(TemplateView):
     template_name = 'task/file/file.html'

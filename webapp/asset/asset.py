@@ -20,6 +20,7 @@ from webapp.models import SysUser
 import xlrd
 from webapp.tasks import process_asset_import,collect_host_info
 import os,sys
+from django.http.response import JsonResponse
 root_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
     
 class HostList(ListView):
@@ -62,9 +63,14 @@ def host_refresh(request):
     if request.method == 'POST':
         key = request.POST.get('pk')
         obj = AssetHost.objects.get(id=key)
-        collect_host_info.delay(obj.id,obj.private_ip,obj.port,
-                                obj.remote_user,obj.remote_passwd,3)
-    return HttpResponse(json.dumps({'status':True}),content_type="application/json")
+        try:
+            collect_host_info.delay(obj.id,obj.private_ip,obj.port,obj.remote_user,obj.remote_passwd,3)
+            status = 200
+            err_msg = ''
+        except Exception as e:
+            status = 400
+            err_msg = str(e)
+    return JsonResponse({'status':status,'err_msg':err_msg})
         
 
 class HostDelete(DeleteView):

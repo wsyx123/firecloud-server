@@ -211,7 +211,7 @@ class ScriptModel(models.Model):
     script_type = models.IntegerField(choices=scriptType,default=1)
     script_from = models.IntegerField(choices=scriptFrom,default=1)
     script_file = models.CharField(max_length=64)
-    script_owner = models.ForeignKey('SysUser')
+    owner = models.ForeignKey('SysUser')
     total_run_count = models.IntegerField(default=0,null=True,blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     

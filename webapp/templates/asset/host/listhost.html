@@ -2,13 +2,6 @@
 {% load menu %}
 {% block css %}
 <style type="text/css">
-	#mySuccessAlert{
-		display:none;
-		position:absolute;
-		margin:5px 500px;
-		width:300px;
-		height:60px;
-	}
 </style>
 {% endblock %}
 {% block main %}
@@ -166,9 +159,12 @@
 									<div style="padding-left:80px;">
 										<label>是否刷新主机: <span style="font-size:18px;font-weight:700;" id="refresh_name"></span> ?</label>
 									</div>
+									<div style="padding-left:80px;">
+										<strong id="refreshFailMsg" style="color: red;"></strong>
+									</div>
 								</div>
 								<div class="modal-footer">
-									<button type="button" class="btn btn-primary" data-dismiss="modal"onclick="HostRefreshAck();">刷新</button>
+									<button type="button" class="btn btn-primary" onclick="HostRefreshAck();">刷新</button>
 									<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
 								</div>
 							</div><!-- /.modal-content -->
@@ -180,14 +176,6 @@
 				</div><!-- /.col -->
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
-	</div>
-	<!-- 刷新结果（Alert） -->	
-	<div id="mySuccessAlert" class="alert alert-success">
-		<button type="button" class="close" data-dismiss="alert"
-			aria-hidden="true">
-			&times;
-		</button>
-		<strong>刷新成功！</strong>
 	</div>
 </div><!-- /.main-content -->
 
@@ -234,8 +222,10 @@
 			url: "/host/refresh/",
 			data: {"pk":host_id},
 			success: function(data){
-				if(data['status']){
-					$("#mySuccessAlert").css('display','block');
+				if(data['status']==200){
+					window.location.reload();
+				}else{
+					$("#refreshFailMsg").text(data["err_msg"]);
 				}
 			}
 		});

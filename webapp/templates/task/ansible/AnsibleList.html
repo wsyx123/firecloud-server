@@ -85,8 +85,8 @@
 											<td><span class="badge badge-warning">{{ ansible.total_run_count }}</span></td>
 											<td>
 												<div class="action-buttons">
-													<a class="green" href="#">
-														<i class="fa fa-telegram bigger-130" title="执行"></i>
+													<a class="green" href="#" onclick="runAnsible(this);">
+														<i class="fa fa-telegram bigger-130" title="执行" data-toggle="modal" data-target="#myrun"></i>
 													</a>
 													<a class="green" href="#" onclick="copyAnsible(this);">
 														<i class="fa fa-files-o bigger-130" title="复制" data-toggle="modal" data-target="#mycopy"></i>
@@ -164,6 +164,37 @@
 				</div><!-- /.modal-content -->
 			</div><!-- /.modal -->
 		</div>
+
+		<!-- 剧本执行模态框 -->
+		<div class="modal fade" id="myrun" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>执行确认窗口</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="center">
+							<form action="/ansible/execute/" method="get" id="ansible_form">
+								<input type="text" name="execute_playbook_name" value="" hidden />
+								<label>确定执行<strong id="execute_playbook_name" class="red"></strong> 剧本?</label>
+							</form>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<div class="center">
+							<button type="button" class="btn btn-success" data-dismiss="modal" onclick="runAnsibleAck();">
+								<i class="fa fa-telegram bigger-130">执行</i>
+							</button>
+						</div>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
 	</div>
 
 	</div><!-- /.main-content -->
@@ -222,6 +253,17 @@ function copyAnsibleAck(){
 			
 		}
 	});
+}
+
+function runAnsible(obj){
+	playbook_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var playbook_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	$("input[name='execute_playbook_name']").val(playbook_name);
+	$("#execute_playbook_name").text(playbook_name);
+}
+
+function runAnsibleAck(){
+	$("#ansible_form").submit();
 }
 </script>
 {% endblock %}
