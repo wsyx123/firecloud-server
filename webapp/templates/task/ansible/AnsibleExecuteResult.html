@@ -2,13 +2,6 @@
 
 {% block css %}
 <style>
-.ui-progressbar {
-    background-color: #cad7d0;
-}
-
-.progress-bar-striped, .progress-striped .progress-bar, .progress-striped .progress-bar-success{
-	background-image:none;
-}
 
 .resultData,#progressbar-div{
 	display:none;
@@ -42,10 +35,10 @@
 					</div>
 					<table class="table table-bordered"">
 						<tr>
-							<th class="col-sm-1">任务ID</th><td class="col-sm-2">1233443</td>
-							<th class="col-sm-1">剧本名称</th><td class="col-sm-2">lamp</td>
-							<th class="col-sm-1">总步骤</th><td class="col-sm-2">2</td>
-							<th class="col-sm-">总任务</th><td class="col-sm-2">4</td>
+							<th class="col-sm-1">任务ID</th><td class="col-sm-2">{{taskid}}</td>
+							<th class="col-sm-1">剧本名称</th><td class="col-sm-2">{{ansibleObj.name}}</td>
+							<th class="col-sm-1">总步骤</th><td class="col-sm-2">{{ansibleObj.total_role_count}}</td>
+							<th class="col-sm-">总任务</th><td class="col-sm-2">{{ansibleObj.total_task_count}}</td>
 						</tr>
 						<tr>
 							<th>任务状态</th><td><span class="label label-sm label-success">正在执行</span></td>
@@ -55,7 +48,9 @@
 						</tr>
 						<tr>
 							<td colspan="8">
-								<textarea></textarea>
+								<div style="color:gray;">
+									<p>task</p>
+								</div>
 							</td>
 						</tr>
 					</table>
@@ -123,7 +118,6 @@ function getResult(){
 
 $("#progressbar-div").css('display','block');//显示进度条
 ScriptExecuteProgressBar(100);
-getResult();
 
 //折叠/展开所有结果详情
 function foldAllResult(obj){

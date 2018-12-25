@@ -489,8 +489,8 @@ def generate_host_for_playbook(host_list):
     '''['192.168.10.3:root','192.168.10.4:clouder']
     generate host  list,  eg: 
     [
-        '192.168.10.3 ansible_ssh_user=root ansible_ssh_password=password ansible_ssh_port=22',
-        '192.168.10.4 ansible_ssh_user=root ansible_ssh_password=password ansible_ssh_port=22',
+        '192.168.10.3 ansible_ssh_user=root ansible_ssh_pass=password ansible_ssh_port=22',
+        '192.168.10.4 ansible_ssh_user=root ansible_ssh_pass=password ansible_ssh_port=22',
     ]
     '''
     data_list = []
@@ -508,7 +508,7 @@ def generate_host_for_playbook(host_list):
             password = 'password'
         else:
             password = accountObj.passwd
-        var_dict = var_dict+' ansible_ssh_user={} ansible_ssh_password={} ansible_ssh_port={}'\
+        var_dict = var_dict+' ansible_ssh_user={} ansible_ssh_pass={} ansible_ssh_port={}'\
         .format(host_account,password,assetHostObj.port)
         data_list.append(var_dict)
     return data_list            
@@ -806,6 +806,14 @@ def ansible_copy(request):
 
 class AnsibleExecute(TemplateView):
     template_name = 'task/ansible/AnsibleExecuteResult.html'
+    
+    def get_context_data(self, **kwargs):
+        playbook_name = self.request.GET.get('execute_playbook_name')
+        ansibleObj = AnsibleModel.objects.get(name=playbook_name)
+        context = super(AnsibleExecute, self).get_context_data(**kwargs)
+        context['ansibleObj'] = ansibleObj
+        context['taskid'] = uuid.uuid4().hex[:8]
+        return context
     
 class FileSend(TemplateView):
     template_name = 'task/file/file.html'

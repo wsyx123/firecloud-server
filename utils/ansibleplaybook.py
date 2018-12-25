@@ -41,7 +41,7 @@ class myplaybook():
                               listhosts=False, syntax=False, 
                               connection=connection, module_path=module_path, 
                               forks=fork, private_key_file=None, 
-                              ssh_common_args=None, ssh_extra_args=None, 
+                              ssh_common_args=None, ssh_extra_args='-o StrictHostKeyChecking=no', 
                               sftp_extra_args=None, scp_extra_args=None, 
                               become=become, become_method=None, 
                               become_user=become_user, 
