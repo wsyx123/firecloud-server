@@ -10,22 +10,22 @@ from django.urls import reverse_lazy
 from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,SysUser
 from forms import ScriptModelForm
 from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH
-import os,uuid
 from django.http import JsonResponse
 from utils.ansibleAdHoc import myadhoc
 from utils.callback import ScriptExecuteCallback,FileCopyCallback
 from utils.log_task_execute import log_task_execute
 from utils.cfg_parser import confParse
+from webapp.tasks import playbook_execute_task
 import linecache
-import pickle
-import json
-import sys
+import pickle,json
+import sys,io,os
 import shutil
-import io,yaml
+import yaml
+import uuid
+from datetime import datetime  
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.forms.models import model_to_dict
-from django.shortcuts import render_to_response
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
@@ -809,11 +809,38 @@ class AnsibleExecute(TemplateView):
     
     def get_context_data(self, **kwargs):
         playbook_name = self.request.GET.get('execute_playbook_name')
+        playbook_full_name = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name)
         ansibleObj = AnsibleModel.objects.get(name=playbook_name)
         context = super(AnsibleExecute, self).get_context_data(**kwargs)
         context['ansibleObj'] = ansibleObj
+        context['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         context['taskid'] = uuid.uuid4().hex[:8]
+        playbook_execute_task.delay(playbook_full_name)
         return context
+    
+def get_playbook_result(request):
+    '''
+    redis save:
+         taskid_tasks = ['play;task;host;status;msg'] : 
+            41b180b7_tasks = ['install_db;copy file;192.168.10.1;true;'']
+         taskid_status = 'status'   :
+            41b180b7_status = 'running'
+         lpush = left push  = head
+         rpush = right push = tail
+         
+    return 
+    {'play':'install_db','task':'install mysql','host':'192.168.10.3','status':true,'msg':''}
+    {'play':'install_db','task':'install mysql','host':'192.168.10.4','status':false,'msg':'Failed to connect to the host'}
+    '''
+    if request.method == 'POST':
+        print request.POST.get('task_id')
+        end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#         return JsonResponse({'data':None,'status':'Done','end_time':end_time})
+        return JsonResponse({'data':
+                                {'play':'install_web',
+                                 'task':'install httpd','host':'192.168.10.3',
+                                 'status':True,'msg':'Failed to connect to the host via ssh: ssh: connect to host 192.168.10.4 port 22: No route to host'},
+                                 'status':'running','progress':'20'})
     
 class FileSend(TemplateView):
     template_name = 'task/file/file.html'

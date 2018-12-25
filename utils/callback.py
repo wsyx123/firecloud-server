@@ -142,3 +142,24 @@ class FileCopyCallback(CallbackBase):
                                        'start_time':start_time,
                                        'data':data,
                                        'status':'failed'})
+
+class PlaybookExecuteCallback(CallbackBase):
+    def __init__(self,*args,**kwargs):
+        self._result = {'ok':[],'failed':[]}
+        super(FileCopyCallback,self).__init__(display=None)
+
+    def v2_runner_on_ok(self, result, **kwargs):
+        host = result._host.get_name()
+        self._result['ok'].append(host)
+        
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        host = result._host.get_name()
+        
+    def v2_runner_on_unreachable(self, result):
+        host = result._host.get_name()
+        start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S %f')
+        data = result._result['msg']
+        self._result['failed'].append({'host':host,
+                                       'start_time':start_time,
+                                       'data':data,
+                                       'status':'failed'})

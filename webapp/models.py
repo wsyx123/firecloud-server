@@ -250,6 +250,32 @@ class AnsibleModel(models.Model):
     owner = models.ForeignKey('SysUser')
     total_run_count = models.IntegerField(default=0,null=True,blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
+    
+class AnsibleLog(models.Model):
+    executeStatus = (
+                     (1,'完成'),
+                     (2,'未完成')
+                     )
+    task_id = models.CharField(unique=True,max_length=8)
+    name = models.CharField(max_length=32)
+    status = models.IntegerField(choices=executeStatus,default=2)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    total_time = models.IntegerField()
+    
+class AnsibleHost(models.Model):
+    executeStatus = (
+                     (1,'成功'),
+                     (2,'失败')
+                     )
+    task_id = models.CharField(max_length=8,verbose_name='任务ID')
+    step = models.CharField(max_length=32)
+    task = models.CharField(max_length=32)
+    host_ip = models.GenericIPAddressField(verbose_name='主机IP')
+    execute_status = models.IntegerField(choices=executeStatus)
+    
+    
+    
 
 class PaasHost(models.Model):
     ip = models.GenericIPAddressField(verbose_name='IP地址')

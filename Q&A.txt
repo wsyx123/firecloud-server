@@ -20,3 +20,9 @@ function removeAllLines(editor){
 		editor.removeLines();
 	}
 }
+
+Q:python如何不生成pyc文件（两种方式）
+ 1 设置环境变量 export PYTHONDONTWRITEBYTECODE=1
+ 2 在导入的地方写:
+ import sys
+ sys.dont_write_bytecode = True

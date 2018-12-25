@@ -10,7 +10,8 @@ from celery import task
 
 from webapp.models import HostImport,AssetHost,HostEvent
 from utils.ansibleAdHoc import myadhoc
-from utils.callback import CollectAssetInfoCallback
+from utils.ansibleplaybook import myplaybook
+from utils.callback import CollectAssetInfoCallback,PlaybookExecuteCallback
 import xlrd
 from django.core.validators import validate_ipv4_address
 from django.core.exceptions import ValidationError
@@ -168,7 +169,11 @@ def collect_host_info(asset_id,private_ip,port,user,password,action_num):
     elif collect_result['status'] == 'unreachable':
         HostEvent.objects.create(host_id=queryset.id,action=action_num,is_succeeded=False,
                                  content=u'主机不可达')
-         
+@task(name='playbook_execute_task')
+def playbook_execute_task(playbook_full_name,playbook_full_host):
+    my=myplaybook(playbook_full_name,playbook_full_host,PlaybookExecuteCallback)
+    execute_host_count = my.run()
+    print execute_host_count
 
 # @shared_task(name='test_celery')
 # def test_celery():
