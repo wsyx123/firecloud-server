@@ -7,7 +7,7 @@ Created on 2018年8月6日
 '''
 from django.views.generic import TemplateView,FormView,ListView,DeleteView,UpdateView,DetailView
 from django.urls import reverse_lazy
-from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,SysUser
+from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,SysUser,AnsibleLog,AnsibleHost
 from forms import ScriptModelForm
 from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH
 from django.http import JsonResponse
@@ -809,38 +809,39 @@ class AnsibleExecute(TemplateView):
     
     def get_context_data(self, **kwargs):
         playbook_name = self.request.GET.get('execute_playbook_name')
-        playbook_full_name = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name)
+        playbook_full_name = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name+'/main.yml')
+        playbook_full_hosts = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name+'/hosts')
         ansibleObj = AnsibleModel.objects.get(name=playbook_name)
         context = super(AnsibleExecute, self).get_context_data(**kwargs)
         context['ansibleObj'] = ansibleObj
         context['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         context['taskid'] = uuid.uuid4().hex[:8]
-        playbook_execute_task.delay(playbook_full_name)
+        AnsibleLog.objects.create(task_id=context['taskid'],name=playbook_name,
+                                  start_time=context['start_time'],total_task_count=ansibleObj.total_task_count)
+        playbook_execute_task.delay(context['taskid'],playbook_full_name,playbook_full_hosts)
         return context
     
 def get_playbook_result(request):
-    '''
-    redis save:
-         taskid_tasks = ['play;task;host;status;msg'] : 
-            41b180b7_tasks = ['install_db;copy file;192.168.10.1;true;'']
-         taskid_status = 'status'   :
-            41b180b7_status = 'running'
-         lpush = left push  = head
-         rpush = right push = tail
-         
-    return 
-    {'play':'install_db','task':'install mysql','host':'192.168.10.3','status':true,'msg':''}
-    {'play':'install_db','task':'install mysql','host':'192.168.10.4','status':false,'msg':'Failed to connect to the host'}
-    '''
     if request.method == 'POST':
-        print request.POST.get('task_id')
-        end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#         return JsonResponse({'data':None,'status':'Done','end_time':end_time})
-        return JsonResponse({'data':
-                                {'play':'install_web',
-                                 'task':'install httpd','host':'192.168.10.3',
-                                 'status':True,'msg':'Failed to connect to the host via ssh: ssh: connect to host 192.168.10.4 port 22: No route to host'},
-                                 'status':'running','progress':'20'})
+        task_id = request.POST.get('task_id')
+        LogObj = AnsibleLog.objects.get(task_id=task_id)
+        HostObj = AnsibleHost.objects.filter(Q(task_id=task_id),Q(is_read=False)).order_by('id')
+        DistObj = AnsibleHost.objects.filter(Q(task_id=task_id),Q(is_read=True)).values('task').distinct()
+        if LogObj.status == 1 and len(HostObj) == 0 :
+            return JsonResponse({'status':'Done','end_time':str(LogObj.end_time),'total_time':LogObj.total_time})
+        elif LogObj.status == 3:
+            return JsonResponse({'status':'Exception','msg':LogObj.msg})
+        elif len(HostObj) == 0 :
+            return JsonResponse({'status':'Running','data':None})
+        else:
+            execute_dict = model_to_dict(HostObj[0])
+            HostObj[0].is_read=True
+            HostObj[0].save()
+            progress = len(DistObj)/LogObj.total_task_count
+            if progress == 0:
+                progress = 5
+            return JsonResponse({'status':'Running','progress':str(progress),'data':execute_dict})
+            
     
 class FileSend(TemplateView):
     template_name = 'task/file/file.html'

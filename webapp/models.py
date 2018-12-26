@@ -254,25 +254,26 @@ class AnsibleModel(models.Model):
 class AnsibleLog(models.Model):
     executeStatus = (
                      (1,'完成'),
-                     (2,'未完成')
+                     (2,'未完成'),
+                     (3,'异常')
                      )
     task_id = models.CharField(unique=True,max_length=8)
     name = models.CharField(max_length=32)
+    total_task_count = models.IntegerField(null=True,blank=True)
     status = models.IntegerField(choices=executeStatus,default=2)
     start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    total_time = models.IntegerField()
+    end_time = models.DateTimeField(null=True,blank=True)
+    total_time = models.IntegerField(null=True,blank=True)
+    msg = models.TextField(null=True,blank=True)
     
 class AnsibleHost(models.Model):
-    executeStatus = (
-                     (1,'成功'),
-                     (2,'失败')
-                     )
     task_id = models.CharField(max_length=8,verbose_name='任务ID')
     step = models.CharField(max_length=32)
     task = models.CharField(max_length=32)
-    host_ip = models.GenericIPAddressField(verbose_name='主机IP')
-    execute_status = models.IntegerField(choices=executeStatus)
+    host = models.GenericIPAddressField(verbose_name='主机IP')
+    status = models.BooleanField()
+    msg = models.TextField(null=True,blank=True)
+    is_read = models.BooleanField(default=False)
     
     
     

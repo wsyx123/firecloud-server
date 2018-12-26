@@ -2,7 +2,8 @@
 #_*_ coding:utf-8 _*_
 
 from ansible.plugins.callback import CallbackBase 
-from datetime import datetime       
+from datetime import datetime
+from webapp.models import AnsibleHost
 
 class CollectAssetInfoCallback(CallbackBase):
     def __init__(self,*args,**kwargs):
@@ -145,21 +146,25 @@ class FileCopyCallback(CallbackBase):
 
 class PlaybookExecuteCallback(CallbackBase):
     def __init__(self,*args,**kwargs):
-        self._result = {'ok':[],'failed':[]}
-        super(FileCopyCallback,self).__init__(display=None)
+        self.task_id=kwargs['task_id']
+        super(PlaybookExecuteCallback,self).__init__(display=None)
 
     def v2_runner_on_ok(self, result, **kwargs):
         host = result._host.get_name()
-        self._result['ok'].append(host)
+        step = str(result._task).split(':')[1].strip()
+        task = result.task_name
+        AnsibleHost.objects.create(task_id=self.task_id,step=step,task=task,host=host,status=True)
         
     def v2_runner_on_failed(self, result, ignore_errors=False):
         host = result._host.get_name()
+        step = str(result._task).split(':')[1].strip()
+        task = result.task_name
+        msg = result._result['msg']
+        AnsibleHost.objects.create(task_id=self.task_id,step=step,task=task,host=host,status=False,msg=msg)
         
     def v2_runner_on_unreachable(self, result):
         host = result._host.get_name()
-        start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S %f')
-        data = result._result['msg']
-        self._result['failed'].append({'host':host,
-                                       'start_time':start_time,
-                                       'data':data,
-                                       'status':'failed'})
+        step = str(result._task).split(':')[1].strip()
+        task = result.task_name
+        msg = result._result['msg']
+        AnsibleHost.objects.create(task_id=self.task_id,step=step,task=task,host=host,status=False,msg=msg)

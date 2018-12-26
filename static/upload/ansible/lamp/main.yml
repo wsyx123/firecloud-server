@@ -1,4 +1,5 @@
-- hosts: install_db
-  name: install_db
+- name: install_db
+  hosts: all
+  gather_facts: no
   roles:
-  - install_db
+    - install_db

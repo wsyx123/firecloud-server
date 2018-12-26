@@ -11,7 +11,7 @@ from ansible.errors import AnsibleParserError
 class myplaybook():
     #这里是ansible运行 
     #初始化各项参数，大部分都定义好，只有几个参数是必须要传入的
-    def __init__(self, playbook,hosts,result_callback,extra_vars={}, 
+    def __init__(self, playbook,hosts,result_callback,task_id,extra_vars={}, 
                         connection='ssh',
                         become=False,
                         become_user=None,
@@ -25,7 +25,7 @@ class myplaybook():
         self.passwords=passwords
         self.extra_vars=extra_vars
         self.hosts = hosts
-        self.result_callback = result_callback
+        self.result_callback = result_callback(task_id=task_id)
         Options = namedtuple('Options',
                    ['listtags', 'listtasks', 'listhosts', 'syntax', 'connection','module_path',
                    'forks', 'private_key_file', 'ssh_common_args', 'ssh_extra_args', 'sftp_extra_args',
@@ -55,10 +55,10 @@ class myplaybook():
         pbex._tqm._stdout_callback = self.result_callback
         try:
             execute_host_count=pbex.run()
-        except AnsibleParserError:
-            pass
-        return execute_host_count
-            #results='syntax error in '+self.playbook_path #语法错误
+            return execute_host_count
+        except Exception as e:
+            return str(e)
             
-
+    def get_result(self):
+        return self.result_callback._result
         
