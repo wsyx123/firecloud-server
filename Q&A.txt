@@ -22,7 +22,50 @@ function removeAllLines(editor){
 }
 
 Q:python如何不生成pyc文件（两种方式）
+
+A:
  1 设置环境变量 export PYTHONDONTWRITEBYTECODE=1
  2 在导入的地方写:
  import sys
  sys.dont_write_bytecode = True
+ 
+ Q: git 使用 (比较本地分支与远程分支差异)
+ A:
+  1 使用git  branch -a  查看所有分支（本地，远程 ，  git branch 只显示本地分支， git branch -r 只显示远程分支）
+  2 使用git fetch firecloud master 获取  firecloud主机master分支
+  3 使用git log  master..firecloud/master  比较本地master 与远端firecloud/master的差异
+           所取回的更新，在本地主机上要用”远程主机名/分支名”的形式读取，比如firecloud主机的master分支，就可以用firecloud/master读取
+                                               
+  4 使用git merge firecloud/master  更新(合并)远端firecloud/master分支 到当前分支
+  
+ 
+ Q: 执行python  manage.py makemigrations  出现no changes detected
+ 
+ A:
+  1 先  python manage.py makemigrations --empty webapp
+  2 再 python manage.py makemigrations
+  3 python manage.py migrate
+  
+  Q:安装libtorrent 
+  A： 需要先安装  yum install  boost-devel
+   1 下载libtorrent-libtorrent_1_1_11.zip
+   2 ./autotool.sh
+   3 ./configure --enable-python-binding
+   4 make
+   5 make install
+   6 cd bindings/python
+   7 python setup.py build
+   8 python setup.py install
+   9 cp /usr/local/lib/libtorrent-rasterbar.so.9  /lib64/
+   备注: ldd  /usr/lib64/python2.7/site-packages/libtorrent.so  可以查看哪些库  not  found
+   
+  其它主机可以使用编译好的包，操作如下：
+   需要先安装  yum install  boost-devel
+  1 在firecloud/libtorrent_python 下执行  
+   python setup.py build
+   python setup.py install
+   cp libtorrent-rasterbar.so.9  /lib64/
+   
+   
+Q： P2P文件分发可以使用Twitter 的 murder
+   

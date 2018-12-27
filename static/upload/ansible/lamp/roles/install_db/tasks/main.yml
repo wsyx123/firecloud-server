@@ -1,2 +1,5 @@
-- name: Start Mysql Service
-  service: name=mysqld state=started enabled=yes
+- name: copy mysqld package
+  copy: src=hosts dest=/root/
+  
+- name: install mysqld
+  shell: ls

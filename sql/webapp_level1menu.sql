@@ -32,13 +32,13 @@ CREATE TABLE `webapp_level1menu` (
 -- ----------------------------
 -- Records of webapp_level1menu
 -- ----------------------------
-INSERT INTO `webapp_level1menu` VALUES ('2', 'asset', '资产管理', '2', '#', 'fa-desktop');
-INSERT INTO `webapp_level1menu` VALUES ('3', 'enterprise', '组织管理', '3', '#', 'fa-align-justify');
-INSERT INTO `webapp_level1menu` VALUES ('4', 'task', '作业中心', '4', '#', 'fa-coffee');
-INSERT INTO `webapp_level1menu` VALUES ('5', 'paas', 'PAAS中心', '5', '#', 'fa-cloud');
-INSERT INTO `webapp_level1menu` VALUES ('6', 'application', '应用管理', '6', '#', 'fa-cube');
-INSERT INTO `webapp_level1menu` VALUES ('7', 'monitor', '监控告警', '7', '#', 'fa-bar-chart');
-INSERT INTO `webapp_level1menu` VALUES ('8', 'log', '日志中心', '8', '#', 'fa-file-o');
-INSERT INTO `webapp_level1menu` VALUES ('9', 'store', '应用商店', '9', '#', 'fa-shopping-cart');
-INSERT INTO `webapp_level1menu` VALUES ('10', 'sysmgt', '系统管理', '10', '#', 'fa-cog');
-INSERT INTO `webapp_level1menu` VALUES ('11', 'celery_task', '任务调度', '1', '#', 'fa-cogs');
+INSERT INTO `webapp_level1menu` VALUES ('1', 'asset', '资产管理', '2', '#', 'fa-desktop');
+INSERT INTO `webapp_level1menu` VALUES ('2', 'enterprise', '组织管理', '3', '#', 'fa-align-justify');
+INSERT INTO `webapp_level1menu` VALUES ('3', 'task', '作业中心', '4', '#', 'fa-coffee');
+INSERT INTO `webapp_level1menu` VALUES ('4', 'paas', 'PAAS中心', '5', '#', 'fa-cloud');
+INSERT INTO `webapp_level1menu` VALUES ('5', 'application', '应用管理', '6', '#', 'fa-cube');
+INSERT INTO `webapp_level1menu` VALUES ('6', 'monitor', '监控告警', '7', '#', 'fa-bar-chart');
+INSERT INTO `webapp_level1menu` VALUES ('7', 'log', '日志中心', '8', '#', 'fa-file-o');
+INSERT INTO `webapp_level1menu` VALUES ('8', 'store', '应用商店', '9', '#', 'fa-shopping-cart');
+INSERT INTO `webapp_level1menu` VALUES ('9', 'sysmgt', '系统管理', '10', '#', 'fa-cog');
+INSERT INTO `webapp_level1menu` VALUES ('10', 'celery_task', '任务调度', '1', '#', 'fa-cogs');

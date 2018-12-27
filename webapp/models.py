@@ -259,6 +259,7 @@ class AnsibleLog(models.Model):
                      )
     task_id = models.CharField(unique=True,max_length=8)
     name = models.CharField(max_length=32)
+    owner = models.ForeignKey('SysUser')
     total_task_count = models.IntegerField(null=True,blank=True)
     status = models.IntegerField(choices=executeStatus,default=2)
     start_time = models.DateTimeField()
@@ -276,8 +277,6 @@ class AnsibleHost(models.Model):
     is_read = models.BooleanField(default=False)
     
     
-    
-
 class PaasHost(models.Model):
     ip = models.GenericIPAddressField(verbose_name='IP地址')
     label = models.CharField(max_length=16,verbose_name='备注')

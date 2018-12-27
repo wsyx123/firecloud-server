@@ -128,8 +128,8 @@ function getResult(){
 				var pg=document.getElementById('pg');
 				if(data['status'] == 'Running' && data['data'] != null){
 					pg.value = data['progress'];
-					var step_id = data['data']['step'].replace(/ /g,'');
-					var task_id = data['data']['task'].replace(/ /g,'');
+					var step_id = data['data']['step'].replace(/ /g,'')+'-step';
+					var task_id = data['data']['task'].replace(/ /g,'')+'-task';
 					if(data['data']['status']){
 						var tr_str = '<tr>\
 										<td class="col-sm-1 center">'+data['data']['host']+'</td>\

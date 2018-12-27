@@ -812,11 +812,14 @@ class AnsibleExecute(TemplateView):
         playbook_full_name = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name+'/main.yml')
         playbook_full_hosts = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name+'/hosts')
         ansibleObj = AnsibleModel.objects.get(name=playbook_name)
+        ansibleObj.total_run_count = ansibleObj.total_run_count + 1
+        ansibleObj.save()
         context = super(AnsibleExecute, self).get_context_data(**kwargs)
         context['ansibleObj'] = ansibleObj
         context['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         context['taskid'] = uuid.uuid4().hex[:8]
-        AnsibleLog.objects.create(task_id=context['taskid'],name=playbook_name,
+        owner_id = self.request.session.get('_user_id')
+        AnsibleLog.objects.create(task_id=context['taskid'],name=playbook_name,owner_id=owner_id,
                                   start_time=context['start_time'],total_task_count=ansibleObj.total_task_count)
         playbook_execute_task.delay(context['taskid'],playbook_full_name,playbook_full_hosts)
         return context
@@ -845,3 +848,12 @@ def get_playbook_result(request):
     
 class FileSend(TemplateView):
     template_name = 'task/file/file.html'
+    def get_context_data(self, **kwargs):
+        context = super(FileSend, self).get_context_data(**kwargs)
+        if self.request.session.get('_user_id') == 1:
+            assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
+        else:
+            assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
+        context['hosts'] = generate_host_list(assetHostQuerySet)
+        context['total_host_count'] = len(context['hosts'])
+        return context
