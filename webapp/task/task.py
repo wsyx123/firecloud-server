@@ -9,7 +9,7 @@ from django.views.generic import TemplateView,FormView,ListView,DeleteView,Updat
 from django.urls import reverse_lazy
 from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,SysUser,AnsibleLog,AnsibleHost
 from forms import ScriptModelForm
-from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH
+from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH,FILE_DISTRIBUTE_PATH
 from django.http import JsonResponse
 from utils.ansibleAdHoc import myadhoc
 from utils.callback import ScriptExecuteCallback,FileCopyCallback
@@ -846,10 +846,10 @@ def get_playbook_result(request):
             return JsonResponse({'status':'Running','progress':str(progress),'data':execute_dict})
             
     
-class FileSend(TemplateView):
+class FileDistribute(TemplateView):
     template_name = 'task/file/file.html'
     def get_context_data(self, **kwargs):
-        context = super(FileSend, self).get_context_data(**kwargs)
+        context = super(FileDistribute, self).get_context_data(**kwargs)
         if self.request.session.get('_user_id') == 1:
             assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
         else:
@@ -857,3 +857,23 @@ class FileSend(TemplateView):
         context['hosts'] = generate_host_list(assetHostQuerySet)
         context['total_host_count'] = len(context['hosts'])
         return context
+    
+def save_send_file(request):
+    if request.method == 'POST':
+        f = request.FILES['file']
+        print request.POST.get('sendTaskName')
+    return JsonResponse({'code':200})
+    
+def del_send_file(request):
+    if request.method == 'POST':
+        playbook_name = request.POST.get('playbook_name')
+        role_name = request.POST.get('role_name')
+        file_type = request.POST.get('file_type')+'s'
+        file_name = request.POST.get('file_name')
+        full_name = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name+'/roles/'+\
+                                 role_name+'/'+file_type+'/'+file_name)
+        if os.path.exists(full_name):
+            os.remove(full_name)
+def send_send_file(request):
+    if request.method == 'POST':
+        print request.POST.get('hosts')

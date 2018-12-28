@@ -1,5 +1,0 @@
-- name: copy mysqld package
-  copy: src=hosts dest=/root/
-  
-- name: install mysqld
-  shell: ls

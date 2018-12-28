@@ -7,10 +7,11 @@ Created on 2018年10月24日
 '''
 from django.conf.urls import url
 from task import OptList,OptAudit,OptDelete
-from task import ScriptList,ScriptAdd,ScriptDelete,FileSend,get_script_content,\
+from task import ScriptList,ScriptAdd,ScriptDelete,get_script_content,\
 ScriptUpdate,ScriptExecute,ScriptExecuteResult,script_copy
 from task import AnsibleList,AnsibleAdd,ansible_upload_file,ansible_save,AnsibleUpdate,\
 del_upload_file,AnsibleDelete,ansible_copy,AnsibleExecute,get_playbook_result
+from task import save_send_file,del_send_file,FileDistribute,send_send_file
 
 urlpatterns = [
     url(r'^optlog/list/$',OptList.as_view(),name='OptList'),
@@ -34,5 +35,8 @@ urlpatterns = [
     url(r'^ansible/delete/(?P<pk>.+)$',AnsibleDelete.as_view(),name='AnsibleDelete'),
     url(r'^ansible/execute/$',AnsibleExecute.as_view()),
     url(r'^ansible/execute/result/$',get_playbook_result),
-    url(r'^file/$',FileSend.as_view(),name='file'),
+    url(r'^file/list/$',FileDistribute.as_view(),name='FileList'),
+    url(r'^file/add/upload/$',save_send_file),
+    url(r'^file/add/delete/$',del_send_file),
+    url(r'^file/add/send/$',send_send_file),
     ]

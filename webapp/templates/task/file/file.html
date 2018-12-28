@@ -2,7 +2,7 @@
 
 {% block css %}
 <style>
-#checked-div{
+#checked-div,#file-selected-div,#had-div,#url-div{
 	display:none;
 }
 .modal{
@@ -43,7 +43,7 @@
 									</label>
 									<div class="col-xs-12 col-sm-11">
 										<span class="block input-icon input-icon-right">
-											<input class="form-control"></input>
+											<input class="form-control" name="sendTaskName" placeholder="只能使用英文字母、数字、连接符、下划线, 如: send_Logstash3.5"></input>
 										</span>
 									</div>
 								</div>
@@ -53,7 +53,7 @@
 									</label>
 									<div class="col-xs-12 col-sm-11">
 										<span class="block input-icon input-icon-right">
-											<input class="form-control"></input>
+											<input class="form-control" name="remotePath" value="/var/local"></input>
 										</span>
 									</div>
 								</div>
@@ -63,15 +63,14 @@
 									</label>
 									<div class="col-xs-12 col-sm-2">
 										<span class="block input-icon input-icon-right">
-											<button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#myselect">
-												<i class="fa fa-television" aria-hidden="true"></i> 选择服务器
+											<button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#myselect">
+												<i class="fa fa-television" aria-hidden="true"></i> 选择主机
 											</button>
 										</span>
 									</div>
-									
 									<div class="col-xs-12 col-sm-2">
 										<span class="block input-icon input-icon-right">
-											<button type="button" class="btn btn-sm btn-danger" onclick="cleanIP();">清空IP</button>
+											<button type="button" class="btn btn-xs btn-danger" onclick="cleanIP();">清空主机</button>
 										</span>
 									</div>
 									<div class="col-xs-12 col-sm-2">
@@ -80,6 +79,12 @@
 											已选 <span class="badge badge-warning" id="checked-num">0</span> 台
 											</div>
 										</span>
+									</div>
+								</div>
+								<div class="form-group" id="unSelect-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<i>未选择任何主机</i>
 									</div>
 								</div>
 								<div class="form-group" id="checked-div">
@@ -98,34 +103,111 @@
 										</table>
 									</div>
 								</div>
+
 								<div class="form-group">
 									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
-										选择文件<span class="red">*</span>
+										文件来源<span class="red">*</span>
 									</label>
+									<div class="col-xs-12 col-sm-8">
+										<label class="control-label no-padding-right" onclick="fileFrom('local')">
+											<input type="radio" name="fileFrom" class="ace ace-radio" checked />
+											<span class="lbl">本地上传</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right" onclick="fileFrom('had')">
+											<input type="radio" name="fileFrom" class="ace ace-radio" />
+											<span class="lbl">已有文件</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right" onclick="fileFrom('url')">
+											<input type="radio" name="fileFrom" class="ace ace-radio" />
+											<span class="lbl">文件地址</span>
+										</label>
+									</div>
+								</div>
+								<div class="form-group" id="local-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
 									<div class="col-xs-12 col-sm-11">
 										<span class="block input-icon input-icon-right">
 											<table class="table table-bordered">
-												<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr></thead>
+												<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
 												<tbody id="filelist">
 													
 												</tbody>
 											</table>
+											<div class="center" id="filecontainer">
+												<a id="pickFile" href="javascript:;">
+													<button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button>
+												</a>
+												<a id="uploadFile" href="javascript:;">
+													<button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button>
+												</a>
+											</div>
 										</span>	
+									</div>
+								</div>
+								<div class="form-group" id="had-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<div class="input-group">
+												<span class="input-group-btn">
+													<input type="text" class="form-control search-query" id="fileFilter" placeholder="通过文件名过滤搜索" />
+												</span>
+											</div>
+											<div class="space-4"></div>
+											<table class="table table-bordered" id="fileTable">
+												<tr>
+													<th><input type="checkbox"></th>
+													<th>大小</th>
+													<th>文件名</th>
+												</tr>
+												<tr>
+													<td><input type="checkbox" /></td>
+													<td>120KB</td>
+													<td>logstash3.5</td>
+												</tr>
+												<tr>
+													<td><input type="checkbox" /></td>
+													<td>120KB</td>
+													<td>zookeeper3.5</td>
+												</tr>
+											</table>
+										</span>	
+									</div>
+								</div>
+								<div class="form-group" id="url-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<input class="form-control" name="fileUrl" value="http://192.168.10.3/logstash.tar.gz"></input>
+										</span>
 									</div>
 								</div>
 								<div class="form-group">
 									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
 										分发模式<span class="red">*</span>
 									</label>
-									<div class="col-xs-12 col-sm-11">
-										<span class="block input-icon input-icon-right">
-											<input class="form-control"></input>
-										</span>
+									<div class="col-xs-12 col-sm-8">
+										<label class="control-label no-padding-right">
+											<input type="radio" name="fileSendType" class="ace ace-radio" checked />
+											<span class="lbl">ansible file</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right">
+											<input type="radio" name="fileSendType" class="ace ace-radio" />
+											<span class="lbl">murder p2p</span>
+										</label>
+										<div>
+											<p></p>
+											<i>小于50MB的文件建议使用ansible file模式,大于50MB的文件使用murder p2p</i>
+										</div>
 									</div>
 								</div>
 								<div class="center" id="filecontainer">
-									<button class="btn btn-sm btn-primary" type="button" id="selectFile"><i class="fa fa-arrow-circle-up"></i>选择文件</button>
-									<button class="btn btn-sm btn-success" type="button" id="uploadFile"><i class="glyphicon glyphicon-cog"></i>上传文件</button>
+									<button class="btn btn-sm btn-success" type="button" onclick="sendFile();">
+										<i class="fa fa-arrow-circle-o-up"></i>开始分发
+									</button>
 								</div>
 							</form>
 						</div>
@@ -194,7 +276,7 @@
 <script src="/static/plupload-2.3.6/js/plupload.full.min.js"></script>
 <script src="/static/js/jquery.easysearch.js"></script>
 <script type="text/javascript">
-InitFileUpload('selectFile','filecontainer','filelist','uploadFile',);
+InitFileUpload('pickFile','filecontainer','filelist','uploadFile',);
 
 //文件上传初始化
 function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
@@ -202,12 +284,12 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 	runtimes : 'html5,flash,silverlight,html4',
 	browse_button : pickfileID, // you can pass an id...
 	container: document.getElementById(containerID), // ... or DOM Element itself
-	url : '/ansible/add/file/',
+	url : '/file/add/upload/',
 	flash_swf_url : '/static/plupload-2.3.6/js/Moxie.swf',
 	silverlight_xap_url : '/static/plupload-2.3.6/js/Moxie.xap',
 	
 	filters : {
-		max_file_size : '10mb',
+		max_file_size : '500mb',
 		mime_types: [
 			{title : "Template files", extensions : "*"},
 		]
@@ -230,21 +312,12 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 		},
 		
 		BeforeUpload: function(up,file){
-			var TmpStepNum = uploadfileID.charAt(uploadfileID.length-1);
-			var playbook_name = $("input[name='playbook_name']").val();
-			var role_name = $("input[name='step"+TmpStepNum+"']").val();
-			var file_type =  "";
-			if(containerID.indexOf("template") != -1){
-				var file_type = 'templates';
-			}else if(containerID.indexOf("file") != -1){
-				var file_type = 'files';
-			}
-			if(playbook_name==''|| role_name==''){
+			var sendTaskName = $("input[name='sendTaskName']").val();
+			if(sendTaskName.trim().length==0){
 				uploader.stop();
-				alert("请输入剧本名称和步骤名称!");
-				
+				alert("请输入分发任务名称!");
 			}
-			uploader.setOption("multipart_params",{"playbook_name":playbook_name,"role_name":role_name,"file_type":file_type});
+			uploader.setOption("multipart_params",{"sendTaskName":sendTaskName});
 		},
 
 		UploadProgress: function(up, file) {
@@ -282,6 +355,27 @@ $('#hostFilter').jSearch({
     }
 });
 
+//使用easysearch 进行文件过滤
+$('#fileFilter').jSearch({ 
+    selector  : '#fileTable',
+    child : 'tr > td',
+    minValLength: 0,
+    Before: function(){
+        $('#fileTable tr').data('find','');
+    },
+    Found : function(elem){
+        $(elem).parent().data('find','true');
+        $(elem).parent().show();
+    },
+    NotFound : function(elem){
+        if (!$(elem).parent().data('find'));
+        $(elem).parent().hide();
+    },
+    After : function(t){
+        if (!t.val().length) $('#fileTable tr').show();
+    }
+});
+
 //服务器全选，取消全选
 //备注：easysearch过滤的原理是使不匹配的元素不可见，所有在全选时需要先过滤掉不可见的元素
 function allChecked(obj){
@@ -309,6 +403,7 @@ function addHost(){
 		$(checkTempObj).append(del_txt);
 		$(checkTempObj).appendTo("#checked-tbody");
 		$("#checked-div").css('display','block');
+		$("#unSelect-div").css('display','none');
 		$(checked[i]).parent().parent().remove();
 	}
 	$("tbody input[type='checkbox']").removeAttr("checked");
@@ -326,6 +421,7 @@ function delChecked(obj){
 	var checkedObj = ($("#checked-tbody").children());
 	if(checkedObj.length==0){
 		$("#checked-div").css('display','none');
+		$("#unSelect-div").css('display','block');
 		$("#checked-num").text(0);
 	}else{
 		$("#checked-num").text(checkedObj.length);
@@ -341,7 +437,47 @@ function cleanIP(){
 	}
 	$(checkedObj).remove();
 	$("#checked-div").css('display','none');
+	$("#unSelect-div").css('display','block');
 	
+}
+
+//删除已选择文件或已上传文件
+function delFile(obj){
+	var percent = $(obj).parent().siblings().eq(1).text();
+	if(percent == '0%'){
+		$(obj).parent().parent().remove();
+	}else{
+		$.ajax({
+			type: 'POST',
+			url : '/file/add/delete/',
+			data: {'filename':'filename'},
+			success: function(data){
+			
+			}
+		})
+	}
+}
+
+//开始分发文件到主机
+function sendFile(){
+	
+}
+
+//选择文件来源
+function fileFrom(type){
+	if(type=='had'){
+		$("#local-div").css('display','none');
+		$("#had-div").css('display','block');
+		$("#url-div").css('display','none');
+	}else if(type=='url'){
+		$("#local-div").css('display','none');
+		$("#had-div").css('display','none');
+		$("#url-div").css('display','block');
+	}else{
+		$("#local-div").css('display','block');
+		$("#had-div").css('display','none');
+		$("#url-div").css('display','none');
+	}
 }
 </script>
 {% endblock %}
