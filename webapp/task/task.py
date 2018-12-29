@@ -876,4 +876,4 @@ def del_send_file(request):
             os.remove(full_name)
 def send_send_file(request):
     if request.method == 'POST':
-        print request.POST.get('hosts')
+        print request.POST

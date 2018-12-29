@@ -257,6 +257,7 @@
 										{% endifequal %}
 										<td>
 											<select name="accounts" style="width:80px;">
+												<option selected="selected">root</option>
 												{% for account in host.accounts %}
 												<option>{{account.account}}</option>
 												{% endfor %}
