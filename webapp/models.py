@@ -276,6 +276,37 @@ class AnsibleHost(models.Model):
     msg = models.TextField(null=True,blank=True)
     is_read = models.BooleanField(default=False)
     
+class FileModel(models.Model):
+    fileFrom = (
+              (1,'本地上传'),
+              (2,'已有文件'),
+              (3,'文件地址')
+              )
+    sendModel = (
+                 (1,'ansible'),
+                 (2,'murder p2p')
+                 )
+    name = models.CharField(unique=True,max_length=64)
+    remote_path = models.CharField(max_length=32)
+    file_from = models.IntegerField(choices=fileFrom,default=1)
+    send_model = models.IntegerField(choices=sendModel,default=1)
+    owner = models.ForeignKey('SysUser')
+    total_run_count = models.IntegerField(default=0,null=True,blank=True)
+    create_time = models.DateTimeField(auto_now_add=True)
+
+class FileModelExistList(models.Model):
+    file_name = models.CharField(max_length=32)
+    file_path = models.CharField(max_length=64)
+    file_size = models.CharField(max_length=8)
+    task_name = models.CharField(max_length=32)
+    
+class FileModelForHad(models.Model):
+    task_name = models.CharField(max_length=32)
+    file_name = models.ForeignKey('FileModelExistList')
+
+class FileModelForUrl(models.Model):
+    task_name = models.CharField(max_length=32)
+    url = models.CharField(max_length=128)
     
 class PaasHost(models.Model):
     ip = models.GenericIPAddressField(verbose_name='IP地址')

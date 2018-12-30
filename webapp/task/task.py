@@ -7,7 +7,8 @@ Created on 2018年8月6日
 '''
 from django.views.generic import TemplateView,FormView,ListView,DeleteView,UpdateView,DetailView
 from django.urls import reverse_lazy
-from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,AnsibleModel,SysUser,AnsibleLog,AnsibleHost
+from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,\
+AnsibleModel,SysUser,AnsibleLog,AnsibleHost,FileModel,FileModelExistList,FileModelForHad,FileModelForUrl
 from forms import ScriptModelForm
 from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH,FILE_DISTRIBUTE_PATH
 from django.http import JsonResponse
@@ -148,8 +149,7 @@ class ScriptAdd(FormView):
     file_suffix = None
     filename = None
     fullname = None
-    
-    
+
     def get_context_data(self, **kwargs):
         context = super(ScriptAdd, self).get_context_data(**kwargs)
         if self.request.session.get('_user_id') == 1:
@@ -845,9 +845,13 @@ def get_playbook_result(request):
                 progress = 5
             return JsonResponse({'status':'Running','progress':str(progress),'data':execute_dict})
             
+class FileList(ListView):
+    model = FileModel
+    context_object_name = 'files'
+    template_name = 'task/file/FileList.html'
     
 class FileDistribute(TemplateView):
-    template_name = 'task/file/file.html'
+    template_name = 'task/file/FileDistribute.html'
     def get_context_data(self, **kwargs):
         context = super(FileDistribute, self).get_context_data(**kwargs)
         if self.request.session.get('_user_id') == 1:
@@ -855,25 +859,72 @@ class FileDistribute(TemplateView):
         else:
             assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
         context['hosts'] = generate_host_list(assetHostQuerySet)
+        context['files'] = FileModelExistList.objects.all()
         context['total_host_count'] = len(context['hosts'])
+        
         return context
     
-def save_send_file(request):
+def file_distribute_upload(request):
     if request.method == 'POST':
         f = request.FILES['file']
-        print request.POST.get('sendTaskName')
+        task_name = request.POST.get('sendTaskName')
+        file_size = request.POST.get('fileSize')
+        task_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name)
+        file_name = f.name
+        file_fullname = os.path.join(task_dir,file_name)
+        if not os.path.exists(task_dir):
+            os.mkdir(task_dir)
+        destination = open(file_fullname, 'wb+')
+        try:
+            for chunk in f.chunks():
+                destination.write(chunk)
+            destination.close()
+        except:
+            pass
+        else:
+            FileModelExistList.objects.create(file_name=file_name,file_path=file_fullname,
+                                           file_size=file_size,task_name=task_name)
     return JsonResponse({'code':200})
     
-def del_send_file(request):
+def file_distribute_delete(request):
     if request.method == 'POST':
-        playbook_name = request.POST.get('playbook_name')
-        role_name = request.POST.get('role_name')
-        file_type = request.POST.get('file_type')+'s'
-        file_name = request.POST.get('file_name')
-        full_name = os.path.join(ANSIBLE_PROJECT_PATH,playbook_name+'/roles/'+\
-                                 role_name+'/'+file_type+'/'+file_name)
-        if os.path.exists(full_name):
-            os.remove(full_name)
-def send_send_file(request):
+        task_name = request.POST.get('sendTaskName')
+        file_name = request.POST.get('filename')
+        task_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name)
+        file_fullname = os.path.join(task_dir,file_name)
+        if os.path.exists(file_fullname):
+            os.remove(file_fullname)
+            FileModelExistList.objects.filter(Q(task_name=task_name),Q(file_name=file_name)).delete()
+    return JsonResponse({'code':200})
+
+def file_distribute_save(request):
     if request.method == 'POST':
-        print request.POST
+        fileFrom = {'local':1,'had':2,'url':3}
+        sendModel = {'ansible':1,'p2p':2}
+        task_name = request.POST.get('sendTaskName')
+        remote_path = request.POST.get('remotePath')
+        file_from = request.POST.get('fileFrom')
+        send_model = request.POST.get('fileSendType')
+        user_id = request.session.get('_user_id')
+        try:
+            FileModel.objects.get(name=task_name)
+        except ObjectDoesNotExist:
+            FileModel.objects.create(name=task_name,remote_path=remote_path,
+                                     file_from=fileFrom[file_from],
+                                     send_model=sendModel[send_model],owner_id=user_id)
+            if file_from=='had':
+                exist_file_id_list = json.loads(str(request.POST.get('checked_file_array')))
+                for file_id in exist_file_id_list:
+                    FileModelForHad.objects.create(task_name=task_name,file_name_id=file_id)
+            if file_from=='url':
+                file_url = request.POST.get('fileUrl')
+                FileModelForUrl.objects.create(task_name=task_name,url=file_url)
+            return JsonResponse({'code':200})
+        else:
+            return JsonResponse({'code':400,'msg':'{}任务名已存在'.format(task_name)})
+
+def file_distribute_send(request):
+    if request.method == 'POST':
+        hosts_list = json.loads(str(request.POST.get('checked_host_array')))
+        generate_host_for_playbook(hosts_list)
+    return JsonResponse({'code':200})

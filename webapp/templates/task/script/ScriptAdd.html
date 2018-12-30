@@ -33,7 +33,7 @@
 						<div class="tab-content">
 							<form class="form-horizontal" method="POST" enctype="multipart/form-data" id="script_form">
 								<!--在middleware authentication中request.session['user_id']=request.session['_user_id'] -->
-								<input name="script_owner" type='text' value="{{request.session.user_id}}" hidden>
+								<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
 								<div class="form-group">
 									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
 										脚本名称<span class="red">*</span>

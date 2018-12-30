@@ -23,12 +23,9 @@
 					<i class="ace-icon fa fa-home home-icon"></i>
 					<a href="{% url 'dashboard' %}">Home</a>
 				</li>
-
-				<li>
-					作业中心
-				</li>
-				<li>文件分发</li>
-				
+				<li>作业中心</li>
+				<li><a href="{% url 'FileList' %}">文件分发</a></li>
+				<li>新建分发</li>
 				
 			</ul><!-- /.breadcrumb -->
 
@@ -162,19 +159,18 @@
 											<table class="table table-bordered" id="fileTable">
 												<tr>
 													<th><input type="checkbox" onclick="allChecked(this,'file-select-tr');"></th>
+													<th>ID</th>
 													<th>大小</th>
 													<th>文件名</th>
 												</tr>
+												{% for file in files %}
 												<tr class="file-select-tr">
 													<td><input type="checkbox" /></td>
-													<td>120KB</td>
-													<td>logstash3.5</td>
+													<th>{{file.id}}</th>
+													<td>{{file.file_size}}</td>
+													<td>{{file.file_name}}</td>
 												</tr>
-												<tr class="file-select-tr">
-													<td><input type="checkbox" /></td>
-													<td>120KB</td>
-													<td>zookeeper3.5</td>
-												</tr>
+												{% endfor %}
 											</table>
 										</span>	
 									</div>
@@ -208,8 +204,11 @@
 									</div>
 								</div>
 								<div class="center" id="filecontainer">
-									<button class="btn btn-sm btn-success" type="button" onclick="sendFile();">
-										<i class="fa fa-arrow-circle-o-up"></i>开始分发
+									<button class="btn btn-sm btn-primary" type="button" onclick="sendFile('save');">
+										<i class="fa fa-floppy-o"></i>保存
+									</button>
+									<button class="btn btn-sm btn-success" type="button" onclick="sendFile('send');">
+										<i class="glyphicon glyphicon-cog"></i>分发
 									</button>
 								</div>
 							</form>
@@ -321,11 +320,12 @@ function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
 		
 		BeforeUpload: function(up,file){
 			var sendTaskName = $("input[name='sendTaskName']").val();
+			var fileSize = file.size;
 			if(sendTaskName.trim().length==0){
 				uploader.stop();
 				alert("请输入分发任务名称!");
 			}
-			uploader.setOption("multipart_params",{"sendTaskName":sendTaskName});
+			uploader.setOption("multipart_params",{"sendTaskName":sendTaskName,"fileSize":fileSize});
 		},
 
 		UploadProgress: function(up, file) {
@@ -452,6 +452,8 @@ function cleanIP(){
 
 //删除已选择文件或已上传文件
 function delFile(obj){
+	var sendTaskName = $("input[name='sendTaskName']").val();
+	var filename = $(obj).parent().siblings().eq(0).text();
 	var percent = $(obj).parent().siblings().eq(1).text();
 	if(percent == '0%'){
 		$(obj).parent().parent().remove();
@@ -459,9 +461,11 @@ function delFile(obj){
 		$.ajax({
 			type: 'POST',
 			url : '/file/add/delete/',
-			data: {'filename':'filename'},
+			data: {'sendTaskName':sendTaskName,'filename':filename},
 			success: function(data){
-			
+				if(data['code']==200){
+					$(obj).parent().parent().remove();
+				}
 			}
 		})
 	}
@@ -502,14 +506,14 @@ function getHadFileName(){
 	var checked_file_array = new Array();
 	var hadSelectedObj = $(".file-select-tr:visible input[type='checkbox']:checked");
 	for(var i=0;i<hadSelectedObj.length;i++){
-		var filename = $(hadSelectedObj[i]).parent().siblings().eq(1).text();
+		var filename = $(hadSelectedObj[i]).parent().siblings().eq(0).text();
 		checked_file_array.push(filename);
 	}
 	return checked_file_array;
 }
 
 //开始分发文件到主机
-function sendFile(){
+function sendFile(actionType){
 	var sendTaskName = $("input[name='sendTaskName']").val();
 	var remotePath = $("input[name='remotePath']").val();
 	var checked_host_array = getHostAccount();
@@ -517,6 +521,7 @@ function sendFile(){
 	var checked_file_array = getHadFileName();
 	var fileUrl = $("input[name='fileUrl']").val();
 	var fileSendType = $("input[name='fileSendType']:checked").val();
+	console.log(checked_file_array);
 	if(sendTaskName.trim().length==0){
 		alert("请输入分发任务名称!");
 		return false;
@@ -525,9 +530,11 @@ function sendFile(){
 		alert("请输入远程路径!");
 		return false;
 	};
-	if(checked_host_array.length==0){
-		alert("请选择目标主机!");
-		return false;
+	if(actionType=='send'){
+		if(checked_host_array.length==0){
+			alert("请选择目标主机!");
+			return false;
+		};
 	};
 	if(fileFrom=='local' && uploadNum==0 ){
 		alert("还未上传本地文件!");
@@ -543,8 +550,16 @@ function sendFile(){
 	};
 	$.ajax({
 		type: 'POST',
-		url : '/file/add/send/',
-		data: {},
+		url : '/file/add/save/',
+		data: {'actionType':actionType,
+			   'sendTaskName':sendTaskName,
+			   'remotePath':remotePath,
+			   'checked_host_array':JSON.stringify(checked_host_array),
+			   'fileFrom':fileFrom,
+			   'checked_file_array':JSON.stringify(checked_file_array),
+			   'fileUrl':fileUrl,
+			   'fileSendType':fileSendType
+		},
 		success:function(data){
 			console.log(data);
 		}
