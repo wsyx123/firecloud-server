@@ -2,7 +2,7 @@
 
 {% block css %}
 <style>
-#checked-div,#file-selected-div,#had-div,#url-div{
+#checked-div,#file-selected-div,#had-div,#url-div,#sendResult,.side-bar{
 	display:none;
 }
 .modal{
@@ -11,6 +11,16 @@
 #delButton{
 	cursor:pointer;
 }
+#execute-result td{
+	border:none;
+}
+
+.side-bar {width: 22px;position: fixed;bottom: 50%;right: 0px;z-index: 100;border:1px solid #ddd;}
+.side-bar a {width: 22px;display: inline-block;margin-bottom: 2px;writing-mode:lr-tb ;}
+.side-bar a {color: #000000;}
+.side-bar a:hover {text-decoration:none;}
+
+
 </style>
 {% endblock %}
 
@@ -30,10 +40,76 @@
 			</ul><!-- /.breadcrumb -->
 
 		</div>
+		
+		<div class="page-content" id="sendResult">
 
-		<div class="page-content">
 			<div class="row">
 				<div class="col-xs-12">
+					<h4 class="header smaller lighter blue">
+					<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+					任务详情
+					<button class="btn btn-xs btn-warning" style="float:right;" onclick="hiddenResult();">返回</button>
+					</h4>
+					
+					<table class="table table-bordered"">
+						<tr>
+							<th class="col-sm-1">任务ID</th><td class="col-sm-2" id="task_id">686b1358</td>
+							<th class="col-sm-1">分发名称</th><td class="col-sm-2">send_Logstash3.0</td>
+							<th class="col-sm-1">文件数</th><td class="col-sm-2">1</td>
+							<th class="col-sm-">总主机</th><td class="col-sm-2">5</td>
+						</tr>
+						<tr>
+							<th>任务状态</th><td><progress max="100" value="0" id="pg"></progress></td>
+							<th>开始时间</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480"> {{start_time}}</i></td>
+							<th>结束时间</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480" id="end-time"> </i></td>
+							<th>总耗时</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480" id="total-time"></i></td>
+						</tr>
+						<tr>
+							<th colspan="1">结果状态</th>
+							<td colspan="7" class="blue" id="execute-description">
+								正在获取执行结果...
+							</td>
+						</tr>
+						<tr id="execute-result">
+							<td colspan="8">
+								<ul class="nav nav-list" id="step_id">
+									<span><strong>任务：</strong>分发 logstash3.0 文件</span>
+									<ul class="submenu">
+										<p></p>
+										<table class="table table-bordered">
+											<tr>
+												<td class="col-sm-1 center">192.168.10.3</td>
+												<td class="col-sm-1 center"><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+												<td></td>
+											</tr>
+											<tr>
+												<td class="col-sm-1 center">192.168.10.4</td>
+												<td class="col-sm-1 center"><i class="icon-cancel-circled red"></i>  </td>
+												<td class="col-sm-10 red">
+													ntp-4.2.6p5-28.el7.centos.x86_64: [Errno 256] No more mirrors to try
+												</td>
+											</tr>
+										</table>
+									</ul>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+			
+		</div><!-- /.page-content -->
+		
+
+		<div class="page-content" id="sendContent">
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="side-bar">
+						<a href="#" class="center" onclick="displayResult();">
+						<span class="label label-inverse"><i class="fa fa-angle-double-left" aria-hidden="true"></i></span>
+						查看执行结果</a> 
+					</div>
 					<div class="tabbable">
 						<div class="tab-content">
 							<form class="form-horizontal" method="POST" enctype="multipart/form-data">
@@ -43,7 +119,7 @@
 									</label>
 									<div class="col-xs-12 col-sm-11">
 										<span class="block input-icon input-icon-right">
-											<input class="form-control" name="sendTaskName" placeholder="只能使用英文字母、数字、连接符、下划线, 如: send_Logstash3.5"></input>
+											<input class="form-control" name="sendTaskName" onchange="validateTaskName();" placeholder="只能使用英文字母、数字、连接符、下划线, 如: send_Logstash3.5"></input>
 										</span>
 									</div>
 								</div>
@@ -203,11 +279,11 @@
 										</div>
 									</div>
 								</div>
-								<div class="center" id="filecontainer">
+								<div class="center">
 									<button class="btn btn-sm btn-primary" type="button" onclick="sendFile('save');">
 										<i class="fa fa-floppy-o"></i>保存
 									</button>
-									<button class="btn btn-sm btn-success" type="button" onclick="sendFile('send');">
+									<button class="btn btn-sm btn-success" type="button" onclick="sendFile('send');" id="sendButton">
 										<i class="glyphicon glyphicon-cog"></i>分发
 									</button>
 								</div>
@@ -512,6 +588,21 @@ function getHadFileName(){
 	return checked_file_array;
 }
 
+//实时验证任务名是否已存在
+function validateTaskName(){
+	var sendTaskName = $("input[name='sendTaskName']").val();
+	$.ajax({
+		type: 'POST',
+		url : '/file/add/validate/',
+		data: {'sendTaskName':sendTaskName},
+		success: function(data){
+			if(data['code']==400){
+				alert(sendTaskName+'任务名已存在!');
+			}
+		}
+	})
+}
+
 //开始分发文件到主机
 function sendFile(actionType){
 	var sendTaskName = $("input[name='sendTaskName']").val();
@@ -548,23 +639,65 @@ function sendFile(actionType){
 		alert("请填写要分发的文件地址!");
 		return false;
 	};
-	$.ajax({
-		type: 'POST',
-		url : '/file/add/save/',
-		data: {'actionType':actionType,
-			   'sendTaskName':sendTaskName,
-			   'remotePath':remotePath,
-			   'checked_host_array':JSON.stringify(checked_host_array),
-			   'fileFrom':fileFrom,
-			   'checked_file_array':JSON.stringify(checked_file_array),
-			   'fileUrl':fileUrl,
-			   'fileSendType':fileSendType
-		},
-		success:function(data){
-			console.log(data);
-		}
-	});
-	
+	if(actionType=='save'){
+		$.ajax({
+			type: 'POST',
+			url : '/file/add/save/',
+			data: {'actionType':actionType,
+				   'sendTaskName':sendTaskName,
+				   'remotePath':remotePath,
+				   'checked_host_array':JSON.stringify(checked_host_array),
+				   'fileFrom':fileFrom,
+				   'checked_file_array':JSON.stringify(checked_file_array),
+				   'fileUrl':fileUrl,
+				   'fileSendType':fileSendType
+			},
+			success:function(data){
+				if(data['code']==200){
+					window.location.href="/file/list/";
+				}else{
+					alert(data['msg']);
+				}
+			}
+		});
+	}else{
+		$("#sendContent").css("display","none");
+		$("#sendResult").css("display","block");
+		$(".side-bar").css("display","block");
+		$("#sendButton").attr("disabled","disabled");
+		/*
+		$.ajax({
+			type: 'POST',
+			url : '/file/add/send/',
+			data: {'actionType':actionType,
+				   'sendTaskName':sendTaskName,
+				   'remotePath':remotePath,
+				   'checked_host_array':JSON.stringify(checked_host_array),
+				   'fileFrom':fileFrom,
+				   'checked_file_array':JSON.stringify(checked_file_array),
+				   'fileUrl':fileUrl,
+				   'fileSendType':fileSendType
+			},
+			success:function(data){
+				if(data['code']==200){
+					window.location.href="/file/list/";
+				}else{
+					alert(data['msg']);
+				}
+			}
+		});*/
+	}
+}
+
+
+function displayResult(){
+	$("#sendContent").css("display","none");
+	$("#sendResult").css("display","block");
+}
+
+function hiddenResult(){
+	$("#sendContent").css("display","block");
+	$("#sendResult").css("display","none");
 }
 </script>
 {% endblock %}

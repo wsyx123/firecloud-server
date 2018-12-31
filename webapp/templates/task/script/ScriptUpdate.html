@@ -32,7 +32,7 @@
 					<div class="tabbable">
 						<div class="tab-content">
 							<form class="form-horizontal" method="POST" enctype="multipart/form-data" id="script_form">
-								<input name="script_owner" type='text' value="{{request.session.user_id}}" hidden>
+								<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
 								<input type="text" name="haved_script" value="{{script_id}}" hidden >
 								<div class="form-group">
 									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">

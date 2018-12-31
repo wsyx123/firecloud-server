@@ -928,3 +928,13 @@ def file_distribute_send(request):
         hosts_list = json.loads(str(request.POST.get('checked_host_array')))
         generate_host_for_playbook(hosts_list)
     return JsonResponse({'code':200})
+
+def file_task_name_validate(request):
+    if request.method == 'POST':
+        task_name = request.POST.get('sendTaskName')
+        try:
+            FileModel.objects.get(name=task_name)
+        except ObjectDoesNotExist:
+            return JsonResponse({'code':200})
+        else:
+            return JsonResponse({'code':400})
