@@ -75,7 +75,7 @@
 													<a class="green" href="#" onclick="setTaskId(this)">
 														<i class="fa fa-telegram bigger-130" title="分发" data-toggle="modal" data-target="#mydisplay"></i>
 													</a>
-													<a class="blue" href="{% url 'ScriptUpdate' pk=file.id %}">
+													<a class="blue" href="{% url 'FileUpdate' pk=file.id %}">
 														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
 													</a>
 													<a class="red" href="#" onclick="delScript(this);">
@@ -189,7 +189,7 @@
 					<div class="modal-footer">
 						<div class="center">
 							<button type="button" class="btn btn-success" data-dismiss="modal" onclick="executeButton();">
-								<i class="fa fa-telegram bigger-130">执行</i>
+								<i class="fa fa-telegram bigger-130">执行<span id="executeScriptName"></span>任务</i>
 							</button>
 						</div>
 					</div>
@@ -220,6 +220,8 @@ $("input[type='checkbox']").removeAttr('checked','true');
 // get script id
 function setTaskId(obj){
 	script_id = $(obj).parent().parent().siblings().eq(0).text();
+	var script_name = $(obj).parent().parent().siblings().eq(1).text();
+	$("#executeScriptName").text(script_name);
 }
 
 function delScript(obj){
@@ -230,7 +232,7 @@ function delScript(obj){
 function delScriptAck(){
 	$.ajax({
 		type: "POST",
-		url: "/script/delete/"+host_id,
+		url: "/file/delete/"+host_id,
 		data: {"pk":host_id},
 		success: function(){
 			window.location.reload();
@@ -238,28 +240,6 @@ function delScriptAck(){
 	});
 };
 
-function copyScript(obj){
-	script_id = $(obj).parent().parent().siblings().eq(0).text();
-	var script_name = $(obj).parent().parent().siblings().eq(1).text();
-	$("input[name='old_name']").val(script_name);
-}
-
-function copyScriptAck(){
-	var new_script_name= $("input[name='new_name']").val();
-	$.ajax({
-		type: "POST",
-		url: "/script/add/copy/",
-		data: {"script_id":script_id,"new_script_name":new_script_name},
-		success: function(data){
-			if(data['status'] == 200){
-				window.location.reload();
-			}else{
-				$("#copyFailMsg").text(data["err_msg"]);
-			}
-			
-		}
-	});
-}
 
 dynamicTable($);
 
@@ -310,33 +290,33 @@ function oneChecked(obj){
 	}
 }
 
-//get the checked host, push into checked_host_array
+//获取已选择的服务器IP和帐号,格式IP:Acount,IP:Acount
 function getHostAccount(){
-	var checked_host_str = ''
 	var checked = $(".tr-select-modal:visible input[type='checkbox']:checked");
+	var checked_host_array = new Array();
 	for(var i=0;i<checked.length;i++){
 		tds_obj = $(checked[i]).parent().siblings();
 		var ip = $(tds_obj).eq(3).text();
 		var accountObj = $(tds_obj).eq(2);
 		var account = $(accountObj).children("select").find('option:selected').text();
-		checked_host_str = checked_host_str+ip+':'+account+',';
+		checked_host_array.push(ip+':'+account);
 	}
-	return checked_host_str;
+	return checked_host_array;
 }
 
 // submit  execute action to the '/script/execute/' url by  post method
 function executeButton(){
-	checked_host_str = getHostAccount();
-	if(checked_host_str==''){
+	checked_host_array = getHostAccount();
+	if(checked_host_array.length==0){
 		alert('请选择服务器!');
 		return;
 	}
 	$.ajax({
 		type: 'POST',
-		url: '/script/execute/',
-		data: {'id':script_id,'checked_host_array':checked_host_str},
+		url: '/file/add/send/',
+		data: {'id':script_id,'checked_host_array':JSON.stringify(checked_host_array)},
 		success: function(data){
-			location.href='/script/execute/result/?task_id='+data['task_id']+'&task_total='+data['task_total'];
+			location.href='/file/execute/result/?task_id='+data['task_id'];
 		}
 	})
 }

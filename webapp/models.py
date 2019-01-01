@@ -215,7 +215,7 @@ class ScriptModel(models.Model):
     total_run_count = models.IntegerField(default=0,null=True,blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     
-    
+#ScriptLog    
 class TaskLog(models.Model):
     taskType = (
                 (1,'脚本执行'),
@@ -231,7 +231,7 @@ class TaskLog(models.Model):
     execute_owner = models.ForeignKey('SysUser')
     script_file = models.CharField(max_length=64)
     execute_time = models.DateTimeField(auto_now=True,verbose_name='执行时间')
-
+#ScriptHost
 class TaskHost(models.Model):
     executeStatus = (
                      (1,'成功'),
@@ -294,9 +294,45 @@ class FileModel(models.Model):
     total_run_count = models.IntegerField(default=0,null=True,blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
 
+class FileLog(models.Model):
+    executeStatus = (
+                     (1,'完成'),
+                     (2,'未完成'),
+                     (3,'异常')
+                     )
+    fileFrom = (
+              (1,'本地上传'),
+              (2,'已有文件'),
+              (3,'文件地址')
+              )
+    sendModel = (
+                 (1,'ansible'),
+                 (2,'murder p2p')
+                 )
+    task_id = models.CharField(unique=True,max_length=8)
+    name = models.CharField(max_length=32)
+    file_from = models.IntegerField(choices=fileFrom,default=1)
+    send_model = models.IntegerField(choices=sendModel,default=1)
+    owner = models.ForeignKey('SysUser')
+    total_file = models.IntegerField()
+    total_host = models.IntegerField()
+    status = models.IntegerField(choices=executeStatus,default=2)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True,blank=True)
+    total_time = models.IntegerField(null=True,blank=True)
+    msg = models.TextField(null=True,blank=True)
+    
+class FileHost(models.Model):
+    task_id = models.CharField(max_length=8,verbose_name='任务ID')
+    task = models.CharField(max_length=32)
+    host = models.GenericIPAddressField(verbose_name='主机IP')
+    status = models.BooleanField()
+    msg = models.TextField(null=True,blank=True)
+    is_read = models.BooleanField(default=False)
+
 class FileModelExistList(models.Model):
     file_name = models.CharField(max_length=32)
-    file_path = models.CharField(max_length=64)
+    file_path = models.CharField(max_length=128)
     file_size = models.CharField(max_length=8)
     task_name = models.CharField(max_length=32)
     
@@ -305,7 +341,7 @@ class FileModelForHad(models.Model):
     file_name = models.ForeignKey('FileModelExistList')
 
 class FileModelForUrl(models.Model):
-    task_name = models.CharField(max_length=32)
+    task_name = models.CharField(max_length=32,unique=True)
     url = models.CharField(max_length=128)
     
 class PaasHost(models.Model):

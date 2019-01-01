@@ -6,7 +6,7 @@ Created on 2018年10月29日
 @author: yangxu
 '''
 from django import forms
-from webapp.models import ScriptModel,AnsibleModel
+from webapp.models import ScriptModel,AnsibleModel,FileModel
 
 class ScriptModelForm(forms.ModelForm):
     class Meta:
@@ -21,5 +21,9 @@ class AnsibleModelForm(forms.ModelForm):
         model = AnsibleModel
         fields = "__all__"
 
+class FileModelForm(forms.ModelForm):
+    class Meta:
+        model = FileModel
+        fields = "__all__"
 
         

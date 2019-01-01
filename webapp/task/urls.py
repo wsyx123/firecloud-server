@@ -11,9 +11,10 @@ from task import ScriptList,ScriptAdd,ScriptDelete,get_script_content,\
 ScriptUpdate,ScriptExecute,ScriptExecuteResult,script_copy
 from task import AnsibleList,AnsibleAdd,ansible_upload_file,ansible_save,AnsibleUpdate,\
 del_upload_file,AnsibleDelete,ansible_copy,AnsibleExecute,get_playbook_result
-from task import FileList,FileDistribute,\
+from task import FileList,FileDistributeAdd,FileDistributeUpdate,\
 file_distribute_upload,file_distribute_delete,\
-file_distribute_save,file_distribute_send,file_task_name_validate
+file_distribute_save,file_task_name_validate,\
+get_file_distribute_result,file_distribute_send,FileDistributeResult,FileDistributeDelete
 
 urlpatterns = [
     url(r'^optlog/list/$',OptList.as_view(),name='OptList'),
@@ -38,10 +39,14 @@ urlpatterns = [
     url(r'^ansible/execute/$',AnsibleExecute.as_view()),
     url(r'^ansible/execute/result/$',get_playbook_result),
     url(r'^file/list/$',FileList.as_view(),name='FileList'),
-    url(r'^file/add/$',FileDistribute.as_view(),name='FileAdd'),
+    url(r'^file/add/$',FileDistributeAdd.as_view(),name='FileAdd'),
+    url(r'^file/update/(?P<pk>.+)$',FileDistributeUpdate.as_view(),name='FileUpdate'),
     url(r'^file/add/upload/$',file_distribute_upload),
     url(r'^file/add/delete/$',file_distribute_delete),
     url(r'^file/add/validate/$',file_task_name_validate),
     url(r'^file/add/save/$',file_distribute_save),
     url(r'^file/add/send/$',file_distribute_send),
+    url(r'^file/add/result/$',get_file_distribute_result),
+    url(r'^file/execute/result/$',FileDistributeResult.as_view()),
+     url(r'^file/delete/(?P<pk>.+)$',FileDistributeDelete.as_view()),
     ]

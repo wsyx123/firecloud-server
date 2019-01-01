@@ -1,6 +1,8 @@
 {% extends "base/base.html" %}
 
 {% block css %}
+<!-- custom css -->
+<link rel="stylesheet" href="/static/css/fontello/fontello.css" />
 <style>
 #checked-div,#file-selected-div,#had-div,#url-div,#sendResult,.side-bar{
 	display:none;
@@ -72,6 +74,7 @@
 						</tr>
 						<tr id="execute-result">
 							<td colspan="8">
+								<!--
 								<ul class="nav nav-list" id="step_id">
 									<span><strong>任务：</strong>分发 logstash3.0 文件</span>
 									<ul class="submenu">
@@ -92,6 +95,7 @@
 										</table>
 									</ul>
 								</ul>
+								-->
 							</td>
 						</tr>
 					</table>
@@ -186,17 +190,17 @@
 									</label>
 									<div class="col-xs-12 col-sm-8">
 										<label class="control-label no-padding-right" onclick="selectFileFrom('local');">
-											<input type="radio" name="fileFrom" value="local" class="ace ace-radio" checked />
+											<input type="radio" name="fileFrom" value="1" class="ace ace-radio" checked />
 											<span class="lbl">本地上传</span>
 										</label>
 										<span>&nbsp;&nbsp;</span>
 										<label class="control-label no-padding-right" onclick="selectFileFrom('had');">
-											<input type="radio" name="fileFrom" value="had" class="ace ace-radio" />
+											<input type="radio" name="fileFrom" value="2" class="ace ace-radio" />
 											<span class="lbl">已有文件</span>
 										</label>
 										<span>&nbsp;&nbsp;</span>
 										<label class="control-label no-padding-right" onclick="selectFileFrom('url');">
-											<input type="radio" name="fileFrom" value="url" class="ace ace-radio" />
+											<input type="radio" name="fileFrom" value="3" class="ace ace-radio" />
 											<span class="lbl">文件地址</span>
 										</label>
 									</div>
@@ -265,12 +269,12 @@
 									</label>
 									<div class="col-xs-12 col-sm-8">
 										<label class="control-label no-padding-right">
-											<input type="radio" name="fileSendType" value="ansible" class="ace ace-radio" checked />
+											<input type="radio" name="fileSendType" value="1" class="ace ace-radio" checked />
 											<span class="lbl">ansible file</span>
 										</label>
 										<span>&nbsp;&nbsp;</span>
 										<label class="control-label no-padding-right">
-											<input type="radio" name="fileSendType" value="p2p" class="ace ace-radio" />
+											<input type="radio" name="fileSendType" value="2" class="ace ace-radio" />
 											<span class="lbl">murder p2p</span>
 										</label>
 										<div>
@@ -612,7 +616,6 @@ function sendFile(actionType){
 	var checked_file_array = getHadFileName();
 	var fileUrl = $("input[name='fileUrl']").val();
 	var fileSendType = $("input[name='fileSendType']:checked").val();
-	console.log(checked_file_array);
 	if(sendTaskName.trim().length==0){
 		alert("请输入分发任务名称!");
 		return false;
@@ -627,68 +630,107 @@ function sendFile(actionType){
 			return false;
 		};
 	};
-	if(fileFrom=='local' && uploadNum==0 ){
+	if(fileFrom==1 && uploadNum==0 ){
 		alert("还未上传本地文件!");
 		return false;
 	};
-	if(fileFrom=='had' && checked_file_array.length==0){
+	if(fileFrom==2 && checked_file_array.length==0){
 		alert("请选择已有要分发的文件!");
 		return false;
 	};
-	if(fileFrom=='url' && fileUrl.trim().length==0){
+	if(fileFrom==3 && fileUrl.trim().length==0){
 		alert("请填写要分发的文件地址!");
 		return false;
 	};
-	if(actionType=='save'){
-		$.ajax({
-			type: 'POST',
-			url : '/file/add/save/',
-			data: {'actionType':actionType,
-				   'sendTaskName':sendTaskName,
-				   'remotePath':remotePath,
-				   'checked_host_array':JSON.stringify(checked_host_array),
-				   'fileFrom':fileFrom,
-				   'checked_file_array':JSON.stringify(checked_file_array),
-				   'fileUrl':fileUrl,
-				   'fileSendType':fileSendType
-			},
-			success:function(data){
+	$.ajax({
+		type: 'POST',
+		url : '/file/add/'+actionType+'/',
+		data: {'actionType':actionType,
+			   'sendTaskName':sendTaskName,
+			   'remotePath':remotePath,
+			   'checked_host_array':JSON.stringify(checked_host_array),
+			   'fileFrom':fileFrom,
+			   'uploadNum':uploadNum,
+			   'checked_file_array':JSON.stringify(checked_file_array),
+			   'fileUrl':fileUrl,
+			   'fileSendType':fileSendType
+		},
+		success:function(data){
+			if(actionType=='save'){
 				if(data['code']==200){
 					window.location.href="/file/list/";
 				}else{
 					alert(data['msg']);
+				}
+			}else if(actionType=='send'){
+				$("#sendContent").css("display","none");
+				$("#sendResult").css("display","block");
+				$(".side-bar").css("display","block");
+				task_id = data['task_id'];
+				getResult();
+			}
+			
+		}
+	});
+	
+}
+
+
+function getResult(){
+	var interval = setInterval(function(){
+		$.ajax({
+			type: 'POST',
+			url: '/file/add/result/',
+			data: {'task_id':task_id},
+			success:function(data){
+				var pg=document.getElementById('pg');
+				if(data['status'] == 'Running' && data['data'] != null){
+					pg.value = data['progress'];
+					var task_id = data['data']['task'].replace(/ /g,'');
+					task_id = task_id.toLowerCase();
+					if(data['data']['status']){
+						var tr_str = '<tr>\
+										<td class="col-sm-1 center">'+data['data']['host']+'</td>\
+										<td class="col-sm-1 center"><i class="fa fa-check-circle health"></i></td>\
+										<td>成功</td>\
+									</tr>';
+					}else{
+						var tr_str = '<tr>\
+										<td class="col-sm-1 center">'+data['data']['host']+'</td>\
+										<td class="col-sm-1 center"><i class="icon-cancel-circled red"></i></td>\
+										<td class="col-sm-10 red">'+data['data']['msg']+'</td>\
+									</tr>';
+					};
+					//如果任务存在，直接把主机结果附加到任务里
+					if(document.getElementById(task_id)){
+						$("#"+task_id+" table tbody").append(tr_str);
+					}else{
+					//如果任务不存在,说明是新任务,附加到结果里
+						task_str = '<ul class="nav nav-list" id="'+task_id+'">\
+									<span><strong>任务：</strong>分发 '+data['data']['task']+' 文件</span>\
+									<ul class="submenu">\
+										<p></p>\
+										<table class="table table-bordered">'+tr_str+'</table>\
+									</ul>\
+								</ul>'
+						$("#execute-result").children("td").append(task_str);
+					}
+				}else{
+					if(data['status']=='Done'){
+						clearInterval(interval);
+						pg.value = '100';
+						$("#end-time").text(' '+data['end_time']);
+						$("#total-time").text(' '+data['total_time']+'秒');
+						$("#execute-description").text("获取结果完成!");
+					}else if(data['status'] == 'Exception'){
+						clearInterval(interval);
+						$("#execute-result").children("td").text(data['msg']);
+					}
 				}
 			}
 		});
-	}else{
-		$("#sendContent").css("display","none");
-		$("#sendResult").css("display","block");
-		$(".side-bar").css("display","block");
-		$("#sendButton").attr("disabled","disabled");
-		/*
-		$.ajax({
-			type: 'POST',
-			url : '/file/add/send/',
-			data: {'actionType':actionType,
-				   'sendTaskName':sendTaskName,
-				   'remotePath':remotePath,
-				   'checked_host_array':JSON.stringify(checked_host_array),
-				   'fileFrom':fileFrom,
-				   'checked_file_array':JSON.stringify(checked_file_array),
-				   'fileUrl':fileUrl,
-				   'fileSendType':fileSendType
-			},
-			success:function(data){
-				if(data['code']==200){
-					window.location.href="/file/list/";
-				}else{
-					alert(data['msg']);
-				}
-			}
-		});*/
-	}
+	},1000); 
 }
-
 
 function displayResult(){
 	$("#sendContent").css("display","none");

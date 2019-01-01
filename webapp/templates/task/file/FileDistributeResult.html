@@ -1,0 +1,157 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<!-- custom css -->
+<link rel="stylesheet" href="/static/css/fontello/fontello.css" />
+<style>
+#execute-result td{
+	border:none;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>作业中心</li>
+				<li><a href="{% url 'FileList' %}">文件分发</a></li>
+				<li>执行结果</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+		
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<h4 class="header smaller lighter blue">
+					<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+					任务详情
+					</h4>
+					
+					<table class="table table-bordered"">
+						<tr>
+							<th class="col-sm-1">任务ID</th><td class="col-sm-2" id="task_id">{{task.task_id}}</td>
+							<th class="col-sm-1">分发名称</th><td class="col-sm-2">{{task.name}}</td>
+							<th class="col-sm-1">文件数</th><td class="col-sm-2">{{task.total_file}}</td>
+							<th class="col-sm-">总主机</th><td class="col-sm-2">{{task.total_host}}</td>
+						</tr>
+						<tr>
+							<th>任务状态</th><td><progress max="100" value="0" id="pg"></progress></td>
+							<th>开始时间</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480"> {{task.start_time|date:"Y-m-d H:i:s"}}</i></td>
+							<th>结束时间</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480" id="end-time"></i></td>
+							<th>总耗时</th><td><i class="ace-icon fa fa-clock-o bigger-110 hidden-480" id="total-time"></i></td>
+						</tr>
+						<tr>
+							<th colspan="1">结果状态</th>
+							<td colspan="7" class="blue" id="execute-description">
+								正在获取执行结果...
+							</td>
+						</tr>
+						<tr id="execute-result">
+							<td colspan="8">
+								<!--
+								<ul class="nav nav-list" id="step_id">
+									<span><strong>任务：</strong>分发 logstash3.0 文件</span>
+									<ul class="submenu">
+										<p></p>
+										<table class="table table-bordered">
+											<tr>
+												<td class="col-sm-1 center">192.168.10.3</td>
+												<td class="col-sm-1 center"><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+												<td></td>
+											</tr>
+											<tr>
+												<td class="col-sm-1 center">192.168.10.4</td>
+												<td class="col-sm-1 center"><i class="icon-cancel-circled red"></i>  </td>
+												<td class="col-sm-10 red">
+													ntp-4.2.6p5-28.el7.centos.x86_64: [Errno 256] No more mirrors to try
+												</td>
+											</tr>
+										</table>
+									</ul>
+								</ul>
+								-->
+							</td>
+						</tr>
+					</table>
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+			
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+task_id = $("#task_id").text();
+getResult();
+
+function getResult(){
+	var interval = setInterval(function(){
+		$.ajax({
+			type: 'POST',
+			url: '/file/add/result/',
+			data: {'task_id':task_id},
+			success:function(data){
+				var pg=document.getElementById('pg');
+				if(data['status'] == 'Running' && data['data'] != null){
+					pg.value = data['progress'];
+					var task_id = data['data']['task'].replace(/ /g,'');
+					task_id = task_id.toLowerCase();
+					if(data['data']['status']){
+						var tr_str = '<tr>\
+										<td class="col-sm-1 center">'+data['data']['host']+'</td>\
+										<td class="col-sm-1 center"><i class="fa fa-check-circle health"></i></td>\
+										<td>成功</td>\
+									</tr>';
+					}else{
+						var tr_str = '<tr>\
+										<td class="col-sm-1 center">'+data['data']['host']+'</td>\
+										<td class="col-sm-1 center"><i class="icon-cancel-circled red"></i></td>\
+										<td class="col-sm-10 red">'+data['data']['msg']+'</td>\
+									</tr>';
+					};
+					//如果任务存在，直接把主机结果附加到任务里
+					if(document.getElementById(task_id)){
+						$("#"+task_id+" table tbody").append(tr_str);
+					}else{
+					//如果任务不存在,说明是新任务,附加到结果里
+						task_str = '<ul class="nav nav-list" id="'+task_id+'">\
+									<span><strong>任务：</strong>分发 '+data['data']['task']+' 文件</span>\
+									<ul class="submenu">\
+										<p></p>\
+										<table class="table table-bordered">'+tr_str+'</table>\
+									</ul>\
+								</ul>'
+						$("#execute-result").children("td").append(task_str);
+					}
+				}else{
+					if(data['status']=='Done'){
+						clearInterval(interval);
+						pg.value = '100';
+						$("#end-time").text(' '+data['end_time']);
+						$("#total-time").text(' '+data['total_time']+'秒');
+						$("#execute-description").text("获取结果完成!");
+					}else if(data['status'] == 'Exception'){
+						clearInterval(interval);
+						$("#execute-result").children("td").text(data['msg']);
+					}
+				}
+			}
+		});
+	},1000); 
+}
+
+</script>
+{% endblock %}
+

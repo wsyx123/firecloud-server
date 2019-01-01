@@ -8,12 +8,14 @@ Created on 2018年8月6日
 from django.views.generic import TemplateView,FormView,ListView,DeleteView,UpdateView,DetailView
 from django.urls import reverse_lazy
 from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,\
-AnsibleModel,SysUser,AnsibleLog,AnsibleHost,FileModel,FileModelExistList,FileModelForHad,FileModelForUrl
+AnsibleModel,SysUser,AnsibleLog,AnsibleHost,FileModel,FileModelExistList,\
+FileModelForHad,FileModelForUrl,FileLog,FileHost
 from forms import ScriptModelForm
+from utils.callback import PlaybookExecuteCallback,FileDistributeCallback,\
+ScriptExecuteCallback,FileCopyCallback
 from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH,FILE_DISTRIBUTE_PATH
 from django.http import JsonResponse
 from utils.ansibleAdHoc import myadhoc
-from utils.callback import ScriptExecuteCallback,FileCopyCallback
 from utils.log_task_execute import log_task_execute
 from utils.cfg_parser import confParse
 from webapp.tasks import playbook_execute_task
@@ -821,7 +823,8 @@ class AnsibleExecute(TemplateView):
         owner_id = self.request.session.get('_user_id')
         AnsibleLog.objects.create(task_id=context['taskid'],name=playbook_name,owner_id=owner_id,
                                   start_time=context['start_time'],total_task_count=ansibleObj.total_task_count)
-        playbook_execute_task.delay(context['taskid'],playbook_full_name,playbook_full_hosts)
+        playbook_execute_task.delay(context['taskid'],playbook_full_name,
+                                    playbook_full_hosts,PlaybookExecuteCallback,AnsibleLog)
         return context
     
 def get_playbook_result(request):
@@ -849,11 +852,20 @@ class FileList(ListView):
     model = FileModel
     context_object_name = 'files'
     template_name = 'task/file/FileList.html'
-    
-class FileDistribute(TemplateView):
-    template_name = 'task/file/FileDistribute.html'
     def get_context_data(self, **kwargs):
-        context = super(FileDistribute, self).get_context_data(**kwargs)
+        context = super(FileList, self).get_context_data(**kwargs)
+        if self.request.session.get('_user_id') == 1:
+            assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
+        else:
+            assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
+        context['hosts'] = generate_host_list(assetHostQuerySet)
+        context['total_host_count'] = len(context['hosts'])
+        return context
+    
+class FileDistributeAdd(TemplateView):
+    template_name = 'task/file/FileDistributeAdd.html'
+    def get_context_data(self, **kwargs):
+        context = super(FileDistributeAdd, self).get_context_data(**kwargs)
         if self.request.session.get('_user_id') == 1:
             assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
         else:
@@ -869,11 +881,11 @@ def file_distribute_upload(request):
         f = request.FILES['file']
         task_name = request.POST.get('sendTaskName')
         file_size = request.POST.get('fileSize')
-        task_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name)
+        task_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name+'/files')
         file_name = f.name
         file_fullname = os.path.join(task_dir,file_name)
         if not os.path.exists(task_dir):
-            os.mkdir(task_dir)
+            os.makedirs(task_dir)
         destination = open(file_fullname, 'wb+')
         try:
             for chunk in f.chunks():
@@ -890,7 +902,7 @@ def file_distribute_delete(request):
     if request.method == 'POST':
         task_name = request.POST.get('sendTaskName')
         file_name = request.POST.get('filename')
-        task_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name)
+        task_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name+'/files')
         file_fullname = os.path.join(task_dir,file_name)
         if os.path.exists(file_fullname):
             os.remove(file_fullname)
@@ -899,35 +911,221 @@ def file_distribute_delete(request):
 
 def file_distribute_save(request):
     if request.method == 'POST':
-        fileFrom = {'local':1,'had':2,'url':3}
-        sendModel = {'ansible':1,'p2p':2}
         task_name = request.POST.get('sendTaskName')
         remote_path = request.POST.get('remotePath')
-        file_from = request.POST.get('fileFrom')
-        send_model = request.POST.get('fileSendType')
+        file_from = int(request.POST.get('fileFrom'))
+        send_model = int(request.POST.get('fileSendType'))
         user_id = request.session.get('_user_id')
+        file_url = request.POST.get('fileUrl')
+        files = None
+        if file_from==2:
+            files = json.loads(str(request.POST.get('checked_file_array')))
+        if file_from==3:
+            files = file_url.strip().strip(',').split(',')
+        #生成main.yml文件
+        gen_main_file_distribute(task_name,file_from,remote_path,files)
         try:
             FileModel.objects.get(name=task_name)
         except ObjectDoesNotExist:
             FileModel.objects.create(name=task_name,remote_path=remote_path,
-                                     file_from=fileFrom[file_from],
-                                     send_model=sendModel[send_model],owner_id=user_id)
-            if file_from=='had':
-                exist_file_id_list = json.loads(str(request.POST.get('checked_file_array')))
-                for file_id in exist_file_id_list:
+                                     file_from=file_from,
+                                     send_model=send_model,owner_id=user_id)
+            if file_from==2:
+                for file_id in files:
                     FileModelForHad.objects.create(task_name=task_name,file_name_id=file_id)
-            if file_from=='url':
-                file_url = request.POST.get('fileUrl')
+            if file_from==3:
                 FileModelForUrl.objects.create(task_name=task_name,url=file_url)
             return JsonResponse({'code':200})
         else:
             return JsonResponse({'code':400,'msg':'{}任务名已存在'.format(task_name)})
-
+            
 def file_distribute_send(request):
+    user_id = request.session.get('_user_id')
+    files = ''
     if request.method == 'POST':
-        hosts_list = json.loads(str(request.POST.get('checked_host_array')))
-        generate_host_for_playbook(hosts_list)
-    return JsonResponse({'code':200})
+        if request.POST.has_key('id'):
+            taskObj = FileModel.objects.get(id=int(request.POST.get('id')))
+            task_name = taskObj.name
+            remote_path = taskObj.remote_path
+            file_from = taskObj.file_from
+            send_model = taskObj.send_model
+            if file_from == 1:
+                files_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name+'/files')
+                upload_num = len(os.listdir(files_dir))
+            if file_from == 2:
+                files = []
+                hadFileObj = FileModelForHad.objects.filter(task_name=task_name)
+                for oneObj in hadFileObj:
+                    files.append(oneObj.file_name_id)
+                upload_num = len(files)
+            if file_from == 3:
+                urlFileObj = FileModelForUrl.objects.get(task_name=task_name)
+                files = (urlFileObj.url).strip().strip(',').split(',')
+                upload_num = len(files)
+        else:
+            task_name = request.POST.get('sendTaskName')
+            remote_path = request.POST.get('remotePath')
+            file_from = int(request.POST.get('fileFrom'))
+            send_model = int(request.POST.get('fileSendType'))
+            file_url = request.POST.get('fileUrl')
+            upload_num = int(request.POST.get('uploadNum'))        
+            if file_from==2:
+                files = json.loads(str(request.POST.get('checked_file_array')))
+                upload_num = len(files)
+            if file_from==3:
+                files = file_url.strip().strip(',').split(',')
+                upload_num = len(files)
+        #生成main.yml文件
+        gen_main_file_distribute(task_name,file_from,remote_path,files)
+        hosts = json.loads(str(request.POST.get('checked_host_array')))
+        #生成hosts文件
+        gen_host_file_distribute(task_name,hosts)
+        playbook_full_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name)
+        playbook_full_name = os.path.join(playbook_full_dir,'main.yml')
+        playbook_full_hosts = os.path.join(playbook_full_dir,'hosts')
+        host_num = len(json.loads(str(request.POST.get('checked_host_array'))))
+        start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        task_id = uuid.uuid4().hex[:8]
+        FileLog.objects.create(task_id=task_id,name=task_name,file_from=file_from,
+                                     send_model=send_model,owner_id=user_id,
+                                     total_file=upload_num,total_host=host_num,
+                                     start_time=start_time)
+        playbook_execute_task.delay(task_id,playbook_full_name,
+                                    playbook_full_hosts,FileDistributeCallback,FileLog)
+        return JsonResponse({'task_id':task_id,'task_name':task_name,'files':upload_num,
+                             'hosts':host_num,'start_time':start_time})
+
+def gen_main_file_distribute(task_name,file_from,remote_path,files=None):
+    file_full_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name)
+    if not os.path.exists(file_full_dir):
+        os.mkdir(file_full_dir)
+    main_full_name = os.path.join(file_full_dir,'main.yml')
+    f = open(main_full_name,'wb')
+    f.write('- name: {} \n'.format(task_name))
+    f.write('  hosts: all\n')
+    f.write('  tasks:\n')
+    if file_from == 1:
+        for onefile in os.listdir(file_full_dir+'/files'): #这里假定files目录下只有文件，没有目录，不然使用os.walk
+            file_full_name = os.path.join(file_full_dir+'/files',onefile)
+            f.write('    - name: {}\n'.format(onefile))
+            f.write('      copy: src={} dest={}\n'.format(file_full_name,remote_path))
+    elif file_from == 2:
+        for file_id in files:
+            fileObj = FileModelExistList.objects.get(id=file_id)
+            file_short_name = fileObj.file_name
+            file_full_name = fileObj.file_path
+            f.write('    - name: {}\n'.format(file_short_name))
+            f.write('      copy: src={} dest={}\n'.format(file_full_name,remote_path))
+    elif file_from == 3:
+        for url in files:
+            file_name = url.split('/')[-1]
+            f.write('    - name: {}\n'.format(file_name))
+            f.write('      get_url:\n')
+            f.write('        url: {}\n'.format(url))
+            f.write('        dest: {}\n'.format(remote_path))
+    f.close()
+
+def gen_host_file_distribute(task_name,hosts_list):
+    full_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name)
+    if not os.path.exists(full_dir):
+        os.mkdir(full_dir)
+    host_full_name = os.path.join(full_dir,'hosts')
+    f = open(host_full_name,'wb')
+    hosts = generate_host_for_playbook(hosts_list)
+    for host in hosts:
+        f.write(host)
+        f.write('\n')
+    f.close()
+        
+class FileDistributeResult(TemplateView):
+    template_name = 'task/file/FileDistributeResult.html'
+    def get(self, request, *args, **kwargs):
+        kwargs['task']=FileLog.objects.get(task_id=request.GET.get('task_id'))
+        return TemplateView.get(self, request, *args, **kwargs)
+
+def get_file_distribute_result(request):
+    if request.method == 'POST':
+        task_id = request.POST.get('task_id')
+        LogObj = FileLog.objects.get(task_id=task_id)
+        #获取未显示的结果
+        HostObj = FileHost.objects.filter(Q(task_id=task_id),Q(is_read=False)).order_by('id')
+        #获取已显示的结果
+        DistObj = FileHost.objects.filter(Q(task_id=task_id),Q(is_read=True)).values('task').distinct()
+        if LogObj.status == 1 and len(HostObj) == 0 :
+            return JsonResponse({'status':'Done','end_time':str(LogObj.end_time),'total_time':LogObj.total_time})
+        elif LogObj.status == 3:
+            return JsonResponse({'status':'Exception','msg':LogObj.msg})
+        elif len(HostObj) == 0 :
+            return JsonResponse({'status':'Running','data':None})
+        else:
+            execute_dict = model_to_dict(HostObj[0])
+            HostObj[0].is_read=True
+            HostObj[0].save()
+            progress = len(DistObj)/(LogObj.total_file*LogObj.total_host)
+            if progress == 0:
+                progress = 5
+            return JsonResponse({'status':'Running','progress':str(progress),'data':execute_dict})
+
+class FileDistributeDelete(DeleteView):
+    model = FileModel
+    pk_url_kwarg = 'pk'
+    success_url = reverse_lazy('FileList')
+    def post(self, request, *args, **kwargs):
+        fileObj = FileModel.objects.get(id=kwargs['pk'])
+        if fileObj.file_from == 1:
+            FileModelExistList.objects.filter(task_name=fileObj.name).delete()
+            task_dir = os.path.join(FILE_DISTRIBUTE_PATH,fileObj.name)
+            if os.path.exists(task_dir):
+                shutil.rmtree(task_dir, ignore_errors=True)
+        if fileObj.file_from == 2:
+            FileModelForHad.objects.filter(task_name=fileObj.name).delete()
+        if fileObj.file_from == 3:
+            FileModelForUrl.objects.get(task_name=fileObj.name).delete()
+        return DeleteView.post(self, request, *args, **kwargs)
+
+class FileDistributeUpdate(UpdateView):
+    model = FileModel
+    pk_url_kwarg = 'pk'
+    form_class = ScriptModelForm
+    template_name = 'task/file/FileDistributeUpdate.html'
+    success_url = reverse_lazy('FileList')
+    def get_context_data(self, **kwargs):
+        context = super(FileDistributeUpdate,self).get_context_data(**kwargs)
+        if self.request.session.get('_user_id') == 1:
+            assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
+        else:
+            assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
+        fileObj = FileModel.objects.get(id=self.object.id)
+        file_dict = get_file_distribute_update_info(fileObj)
+        context['hosts'] = generate_host_list(assetHostQuerySet)
+        context['file'] = file_dict
+        context['total_host_count'] = len(context['hosts'])
+        return context
+    
+def get_file_distribute_update_info(fileObj):
+    file_dict = model_to_dict(fileObj)
+    if fileObj.file_from == 1:
+        file_dict['local_files'] = FileModelExistList.objects.filter(task_name=fileObj.name)
+    if fileObj.file_from == 2:
+        had_files_list = []
+        hadObj = FileModelForHad.objects.filter(task_name=fileObj.name)
+        allExistFile = FileModelExistList.objects.all()
+        for oneExist in allExistFile:
+            temp_file_dict = {}
+            temp_file_dict['id']=oneExist.id
+            temp_file_dict['file_size']=oneExist.file_size
+            temp_file_dict['file_name']=oneExist.file_name
+            for oneHad in hadObj:
+                if oneHad.file_name_id == oneExist.id:
+                    temp_file_dict['checked']=True
+                else:
+                    temp_file_dict['checked']=False
+            had_files_list.append(temp_file_dict)
+        file_dict['had_files'] = had_files_list
+    if fileObj.file_from == 3:
+        file_dict['url_files'] = FileModelForUrl.objects.get(task_name=fileObj.name).url
+    return file_dict
+        
 
 def file_task_name_validate(request):
     if request.method == 'POST':

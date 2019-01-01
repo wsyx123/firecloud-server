@@ -11,7 +11,7 @@ from celery import task
 from webapp.models import HostImport,AssetHost,HostEvent, AnsibleLog
 from utils.ansibleAdHoc import myadhoc
 from utils.ansibleplaybook import myplaybook
-from utils.callback import CollectAssetInfoCallback,PlaybookExecuteCallback
+from utils.callback import CollectAssetInfoCallback
 import xlrd
 from django.core.validators import validate_ipv4_address
 from django.core.exceptions import ValidationError
@@ -172,17 +172,22 @@ def collect_host_info(asset_id,private_ip,port,user,password,action_num):
         HostEvent.objects.create(host_id=queryset.id,action=action_num,is_succeeded=False,
                                  content=u'主机不可达')
 @task(name='playbook_execute_task')
-def playbook_execute_task(task_id,playbook_full_name,playbook_full_host):
-    my=myplaybook(playbook_full_name,playbook_full_host,PlaybookExecuteCallback,task_id)
+def playbook_execute_task(task_id,playbook_full_name,playbook_full_host,callback,model):
+    my=myplaybook(playbook_full_name,playbook_full_host,callback,task_id)
     execute_host_count = my.run()
     if isinstance(execute_host_count, int):
         end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        obj = AnsibleLog.objects.get(task_id=task_id)
+        obj = model.objects.get(task_id=task_id)
         obj.end_time = end_time
         end_time_seconds = time.mktime(time.strptime(str(end_time),'%Y-%m-%d %H:%M:%S'))
         start_time_seconds = time.mktime(time.strptime(str(obj.start_time),'%Y-%m-%d %H:%M:%S'))
         obj.total_time = int(end_time_seconds - start_time_seconds)
         obj.status = 1
+        obj.save()
+    else:
+        model.objects.get(task_id=task_id)
+        obj.status = 3
+        obj.msg = execute_host_count # exception msg
         obj.save()
 
 # @shared_task(name='test_celery')

@@ -3,7 +3,7 @@
 
 from ansible.plugins.callback import CallbackBase 
 from datetime import datetime
-from webapp.models import AnsibleHost
+from webapp.models import AnsibleHost,FileHost
 
 class CollectAssetInfoCallback(CallbackBase):
     def __init__(self,*args,**kwargs):
@@ -168,3 +168,25 @@ class PlaybookExecuteCallback(CallbackBase):
         task = result.task_name
         msg = result._result['msg']
         AnsibleHost.objects.create(task_id=self.task_id,step=step,task=task,host=host,status=False,msg=msg)
+
+class FileDistributeCallback(CallbackBase):
+    def __init__(self,*args,**kwargs):
+        self.task_id=kwargs['task_id']
+        super(FileDistributeCallback,self).__init__(display=None)
+
+    def v2_runner_on_ok(self, result, **kwargs):
+        host = result._host.get_name()
+        task = result.task_name
+        FileHost.objects.create(task_id=self.task_id,task=task,host=host,status=True)
+        
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        host = result._host.get_name()
+        task = result.task_name
+        msg = result._result['msg']
+        FileHost.objects.create(task_id=self.task_id,task=task,host=host,status=False,msg=msg)
+        
+    def v2_runner_on_unreachable(self, result):
+        host = result._host.get_name()
+        task = result.task_name
+        msg = result._result['msg']
+        FileHost.objects.create(task_id=self.task_id,task=task,host=host,status=False,msg=msg)

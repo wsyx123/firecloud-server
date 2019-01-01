@@ -1,0 +1,626 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<!-- custom css -->
+<link rel="stylesheet" href="/static/css/fontello/fontello.css" />
+<style>
+#checked-div,#file-selected-div,#had-div,#url-div{
+	display:none;
+}
+.modal{
+	margin-top:60px;
+}
+#delButton{
+	cursor:pointer;
+}
+#execute-result td{
+	border:none;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>作业中心</li>
+				<li><a href="{% url 'FileList' %}">文件分发</a></li>
+				<li>编辑任务</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>		
+
+		<div class="page-content">
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="tabbable">
+						<div class="tab-content">
+							<form class="form-horizontal" method="POST" enctype="multipart/form-data">
+								<div class="form-group">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										分发名称<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<input class="form-control" name="sendTaskName" value="{{file.name}}" onchange="validateTaskName();" placeholder="只能使用英文字母、数字、连接符、下划线, 如: send_Logstash3.5"></input>
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										远程路径<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<input class="form-control" name="remotePath" value="{{file.remote_path}}" placeholder="/var/local"></input>
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										目标机器<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-2">
+										<span class="block input-icon input-icon-right">
+											<button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#myselect">
+												<i class="fa fa-television" aria-hidden="true"></i> 选择主机
+											</button>
+										</span>
+									</div>
+									<div class="col-xs-12 col-sm-2">
+										<span class="block input-icon input-icon-right">
+											<button type="button" class="btn btn-xs btn-danger" onclick="cleanIP();">清空主机</button>
+										</span>
+									</div>
+									<div class="col-xs-12 col-sm-2">
+										<span class="block input-icon input-icon-right">
+											<div style="margin-top:6px;">
+											已选 <span class="badge badge-warning" id="checked-num">0</span> 台
+											</div>
+										</span>
+									</div>
+								</div>
+								<div class="form-group" id="unSelect-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<i>未选择任何主机</i>
+									</div>
+								</div>
+								<div class="form-group" id="checked-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<table class="table table-bordered">
+											<tr>
+												<th>主机名</th>
+												<th>状态</th>
+												<th>帐号</th>
+												<th>IP</th>
+												<th>操作</th>
+											</tr>
+											<tbody id="checked-tbody">
+											</tbody>
+										</table>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										文件来源<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-8">
+										<input type="text" name="checkedfilefrom" value="{{file.file_from}}" hidden /> 
+										<label class="control-label no-padding-right" onclick="selectFileFrom(1);">
+											<input type="radio" name="fileFrom" value="1" class="ace ace-radio"/>
+											<span class="lbl">本地上传</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right" onclick="selectFileFrom(2);">
+											<input type="radio" name="fileFrom" value="2" class="ace ace-radio"/>
+											<span class="lbl">已有文件</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right" onclick="selectFileFrom(3);">
+										<input type="radio" name="fileFrom" value="3" class="ace ace-radio"/>
+											<span class="lbl">文件地址</span>
+										</label>
+									</div>
+								</div>
+								<div class="form-group" id="local-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<table class="table table-bordered">
+												<tr><th>文件名</th><th>状态</th><th>大小</th><th>动作</th></tr>
+												{% for localfile in file.local_files %}
+												<tr>
+													<td>{{localfile.file_name}}</td>
+													<td>100%</td>
+													<td>{{localfile.file_size}}</td>
+													<td><button type="button" onclick="delFile(this);" class="btn btn-minier btn-danger">删除</button></td>
+												</tr>
+												{% endfor %}
+												<tbody id="filelist">
+												</tbody>
+											</table>
+											<div class="center" id="filecontainer">
+												<a id="pickFile" href="javascript:;">
+													<button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button>
+												</a>
+												<a id="uploadFile" href="javascript:;">
+													<button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button>
+												</a>
+											</div>
+										</span>	
+									</div>
+								</div>
+								<div class="form-group" id="had-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<div class="input-group">
+												<span class="input-group-btn">
+													<input type="text" class="form-control search-query" id="fileFilter" placeholder="通过文件名过滤搜索" />
+												</span>
+											</div>
+											<div class="space-4"></div>
+											<table class="table table-bordered" id="fileTable">
+												<tr>
+													<th><input type="checkbox" onclick="allChecked(this,'file-select-tr');"></th>
+													<th>ID</th>
+													<th>大小</th>
+													<th>文件名</th>
+												</tr>
+												{% for hadfile in file.had_files %}
+												<tr class="file-select-tr">
+													{% if hadfile.checked %}
+													<td><input type="checkbox" checked /></td>
+													{% else %}
+													<td><input type="checkbox"/></td>
+													{% endif %}
+													<th>{{hadfile.id}}</th>
+													<td>{{hadfile.file_size}}</td>
+													<td>{{hadfile.file_name}}</td>
+												</tr>
+												{% endfor %}
+											</table>
+										</span>	
+									</div>
+								</div>
+								<div class="form-group" id="url-div">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right"></label>
+									<div class="col-xs-12 col-sm-11">
+										<span class="block input-icon input-icon-right">
+											<input class="form-control" name="fileUrl" value="{{file.url_files}}" placeholder="多个url用逗号隔开，如:http://192.168.10.3/logstash.tar.gz , ftp://192.168.10.3/test.tar"></input>
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
+										分发模式<span class="red">*</span>
+									</label>
+									<div class="col-xs-12 col-sm-8">
+										<label class="control-label no-padding-right">
+											<input type="radio" name="fileSendType" value="1" class="ace ace-radio" checked />
+											<span class="lbl">ansible file</span>
+										</label>
+										<span>&nbsp;&nbsp;</span>
+										<label class="control-label no-padding-right">
+											<input type="radio" name="fileSendType" value="2" class="ace ace-radio" />
+											<span class="lbl">murder p2p</span>
+										</label>
+										<div>
+											<p></p>
+											<i>小于50MB的文件建议使用ansible file模式,大于50MB的文件使用murder p2p</i>
+										</div>
+									</div>
+								</div>
+								<div class="center">
+									<button class="btn btn-sm btn-primary" type="button" onclick="sendFile('save');">
+										<i class="fa fa-floppy-o"></i>保存
+									</button>
+									<button class="btn btn-sm btn-success" type="button" onclick="sendFile('send');" id="sendButton">
+										<i class="glyphicon glyphicon-cog"></i>分发
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+		<!-- 服务器选择模态框（Modal） -->
+		<div class="modal fade" id="myselect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<div><h4>选择服务器 - 共 <span style="font-weight:700;">{{total_host_count}}</span> 台</h4></div>
+					</div>
+					<div class="modal-body">
+						<div class="input-group">
+							<span class="input-group-btn">
+								<input type="text" class="form-control search-query" id="hostFilter" placeholder="通过IP过滤搜索" />
+							</span>
+						</div>
+						<div class="space-4"></div>
+						<div>
+							<table class="table" id="table">
+								<tr>
+									<th><input type="checkbox" onclick="allChecked(this,'tr-select-modal');" /></th>
+									<th>主机名</th>
+									<th>状态</th>
+									<th>帐号</th>
+									<th>IP</th>
+								</tr>
+								{% for host in hosts %}
+								<tr class="tr-select-modal">
+									<td><input type="checkbox" /></td>
+									<td>{{ host.hostname }}</td>
+									{% ifequal host.host_status 1 %}
+									<td><span class="label label-sm label-success">在线</span></td>
+									{% else %}
+									<td><span class="label label-sm label-danger">离线</span></td>
+									{% endifequal %}
+									<td>
+										<select name="accounts" style="width:80px;">
+											<option selected="selected">root</option>
+											{% for account in host.accounts %}
+											<option>{{account.account}}</option>
+											{% endfor %}
+										</select>
+									</td>
+									<td>{{host.private_ip}}</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<div class="center">
+							<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="addHost();">添加</button>
+						</div>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<script src="/static/plupload-2.3.6/js/plupload.full.min.js"></script>
+<script src="/static/js/jquery.easysearch.js"></script>
+<script type="text/javascript">
+InitFileUpload('pickFile','filecontainer','filelist','uploadFile');
+
+//本地已上传文件数量
+uploadNum = 0;
+
+var fileFromType = $("input[name='checkedfilefrom']").val();
+$("input[name='fileFrom']").eq(fileFromType-1).attr('checked','checked');
+selectFileFrom(fileFromType);
+
+//文件上传初始化
+function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
+	var uploader = new plupload.Uploader({
+	runtimes : 'html5,flash,silverlight,html4',
+	browse_button : pickfileID, // you can pass an id...
+	container: document.getElementById(containerID), // ... or DOM Element itself
+	url : '/file/add/upload/',
+	flash_swf_url : '/static/plupload-2.3.6/js/Moxie.swf',
+	silverlight_xap_url : '/static/plupload-2.3.6/js/Moxie.xap',
+	
+	filters : {
+		max_file_size : '500mb',
+		mime_types: [
+			{title : "Template files", extensions : "*"},
+		]
+	},
+
+	init: {
+		PostInit: function() {
+			document.getElementById(filelistID).innerHTML = '';
+			document.getElementById(uploadfileID).onclick = function() {
+				uploader.start();
+				return false;
+			};
+		},
+
+		FilesAdded: function(up, files) {
+			plupload.each(files, function(file) {
+				var txt = '<tr>\
+								<td>' + file.name + '</td>\
+								<td id="'+file.id+'">0%</td>\
+								<td>' + plupload.formatSize(file.size) + '</td>\
+								<td><button type="button" onclick="delFile(this);" class="btn btn-minier btn-danger">删除</button></td>\
+							</tr>';
+				document.getElementById(filelistID).innerHTML += txt;
+			});
+		},
+		
+		BeforeUpload: function(up,file){
+			var sendTaskName = $("input[name='sendTaskName']").val();
+			var fileSize = file.size;
+			if(sendTaskName.trim().length==0){
+				uploader.stop();
+				alert("请输入分发任务名称!");
+			}
+			uploader.setOption("multipart_params",{"sendTaskName":sendTaskName,"fileSize":fileSize});
+		},
+
+		UploadProgress: function(up, file) {
+			document.getElementById(file.id).innerHTML = '<span>' + file.percent + "%</span>";
+			uploadNum = $("#filelist tr").length;
+		},
+
+		Error: function(up, err) {
+			document.getElementById('console').appendChild(document.createTextNode("\nError #" + err.code + ": " + err.message));
+		}
+	}
+});
+
+uploader.init();
+	
+}
+
+//使用easysearch 进行主机过滤
+$('#hostFilter').jSearch({ 
+    selector  : '#table',
+    child : 'tr > td',
+    minValLength: 0,
+    Before: function(){
+        $('#table tr').data('find','');
+    },
+    Found : function(elem){
+        $(elem).parent().data('find','true');
+        $(elem).parent().show();
+    },
+    NotFound : function(elem){
+        if (!$(elem).parent().data('find'));
+        $(elem).parent().hide();
+    },
+    After : function(t){
+        if (!t.val().length) $('#table tr').show();
+    }
+});
+
+//使用easysearch 进行文件过滤
+$('#fileFilter').jSearch({ 
+    selector  : '#fileTable',
+    child : 'tr > td',
+    minValLength: 0,
+    Before: function(){
+        $('#fileTable tr').data('find','');
+    },
+    Found : function(elem){
+        $(elem).parent().data('find','true');
+        $(elem).parent().show();
+    },
+    NotFound : function(elem){
+        if (!$(elem).parent().data('find'));
+        $(elem).parent().hide();
+    },
+    After : function(t){
+        if (!t.val().length) $('#fileTable tr').show();
+    }
+});
+
+//服务器全选，取消全选
+//备注：easysearch过滤的原理是使不匹配的元素不可见，所有在全选时需要先过滤掉不可见的元素
+function allChecked(obj,cls){
+	if($(obj).is(':checked')){
+		var visible_tr = $("."+cls+":visible");
+		for(var i=0;i<visible_tr.length;i++){
+			$(visible_tr[i]).find("input[type='checkbox']").prop('checked','true');
+		}
+	}else{
+		$(obj).find("input[type='checkbox']").removeAttr('checked','true');
+		$("."+cls+" input[type='checkbox']").removeAttr("checked");
+	}
+	
+}
+
+// 添加已选择服务器并从待选列表删除
+function addHost(){
+	var checked = $(".tr-select-modal:visible input[type='checkbox']:checked");
+	var currentobj = $("#checked-tbody").children().length;
+	$("#checked-num").text(checked.length+currentobj);
+	for(var i=0;i<checked.length;i++){
+		var checkTempObj = $($(checked[i]).parent().parent()).clone();
+		$(checkTempObj).children().eq(0).remove();
+		var del_txt="<td id='delButton' onclick='delChecked(this);'>删除</td>";
+		$(checkTempObj).append(del_txt);
+		$(checkTempObj).appendTo("#checked-tbody");
+		$("#checked-div").css('display','block');
+		$("#unSelect-div").css('display','none');
+		$(checked[i]).parent().parent().remove();
+	}
+	$("tbody input[type='checkbox']").removeAttr("checked");
+}
+
+// 删除已选择服务器并重新添加到待选列表
+function delChecked(obj){
+	var delTempObj = $(obj).parent().clone();
+	var check_txt="<td><input type='checkbox' /></td>";
+	$(delTempObj).children().eq(-1).remove();
+	$(delTempObj).prepend(check_txt);
+	$(delTempObj).appendTo("#table");
+	$(obj).parent().remove();
+	
+	var checkedObj = ($("#checked-tbody").children());
+	if(checkedObj.length==0){
+		$("#checked-div").css('display','none');
+		$("#unSelect-div").css('display','block');
+		$("#checked-num").text(0);
+	}else{
+		$("#checked-num").text(checkedObj.length);
+	}
+}
+
+//删除所有已选择服务器
+function cleanIP(){
+	var checkedObj = ($("#checked-tbody").children());
+	$("#checked-num").text(0);
+	for(var i=0;i<checkedObj.length;i++){
+		delChecked($(checkedObj[i]).children().eq(0));
+	}
+	$(checkedObj).remove();
+	$("#checked-div").css('display','none');
+	$("#unSelect-div").css('display','block');
+	
+}
+
+//删除已选择文件或已上传文件
+function delFile(obj){
+	var sendTaskName = $("input[name='sendTaskName']").val();
+	var filename = $(obj).parent().siblings().eq(0).text();
+	var percent = $(obj).parent().siblings().eq(1).text();
+	if(percent == '0%'){
+		$(obj).parent().parent().remove();
+	}else{
+		$.ajax({
+			type: 'POST',
+			url : '/file/add/delete/',
+			data: {'sendTaskName':sendTaskName,'filename':filename},
+			success: function(data){
+				if(data['code']==200){
+					$(obj).parent().parent().remove();
+				}
+			}
+		})
+	}
+}
+
+//选择文件来源
+function selectFileFrom(type){
+	if(type==2){
+		$("#local-div").css('display','none');
+		$("#had-div").css('display','block');
+		$("#url-div").css('display','none');
+	}else if(type==3){
+		$("#local-div").css('display','none');
+		$("#had-div").css('display','none');
+		$("#url-div").css('display','block');
+	}else{
+		$("#local-div").css('display','block');
+		$("#had-div").css('display','none');
+		$("#url-div").css('display','none');
+	}
+}
+
+//获取已选择的服务器IP和帐号,格式IP:Acount,IP:Acount
+function getHostAccount(){
+	var checkedHostObj = $("#checked-tbody").children();
+	var checked_host_array = new Array();
+	for(var i=0;i<checkedHostObj.length;i++){
+		var ip = $(checkedHostObj[i]).children().eq(3).text();
+		var accountObj = $(checkedHostObj[i]).children().eq(2);
+		var account = $(accountObj).children("select").find('option:selected').text();
+		checked_host_array.push(ip+':'+account);
+	}
+	return checked_host_array;
+}
+
+//获取已选择的要分发的“已有文件名”
+function getHadFileName(){
+	var checked_file_array = new Array();
+	var hadSelectedObj = $(".file-select-tr:visible input[type='checkbox']:checked");
+	for(var i=0;i<hadSelectedObj.length;i++){
+		var filename = $(hadSelectedObj[i]).parent().siblings().eq(0).text();
+		checked_file_array.push(filename);
+	}
+	return checked_file_array;
+}
+
+//实时验证任务名是否已存在
+function validateTaskName(){
+	var sendTaskName = $("input[name='sendTaskName']").val();
+	$.ajax({
+		type: 'POST',
+		url : '/file/add/validate/',
+		data: {'sendTaskName':sendTaskName},
+		success: function(data){
+			if(data['code']==400){
+				alert(sendTaskName+'任务名已存在!');
+			}
+		}
+	})
+}
+
+//开始分发文件到主机
+function sendFile(actionType){
+	var sendTaskName = $("input[name='sendTaskName']").val();
+	var remotePath = $("input[name='remotePath']").val();
+	var checked_host_array = getHostAccount();
+	var fileFrom = $("input[name='fileFrom']:checked").val();
+	var checked_file_array = getHadFileName();
+	var fileUrl = $("input[name='fileUrl']").val();
+	var fileSendType = $("input[name='fileSendType']:checked").val();
+	if(sendTaskName.trim().length==0){
+		alert("请输入分发任务名称!");
+		return false;
+	};
+	if(remotePath.trim().length==0){
+		alert("请输入远程路径!");
+		return false;
+	};
+	if(actionType=='send'){
+		if(checked_host_array.length==0){
+			alert("请选择目标主机!");
+			return false;
+		};
+	};
+	if(fileFrom==1 && uploadNum==0 ){
+		alert("还未上传本地文件!");
+		return false;
+	};
+	if(fileFrom==2 && checked_file_array.length==0){
+		alert("请选择已有要分发的文件!");
+		return false;
+	};
+	if(fileFrom==3 && fileUrl.trim().length==0){
+		alert("请填写要分发的文件地址!");
+		return false;
+	};
+	$.ajax({
+		type: 'POST',
+		url : '/file/add/'+actionType+'/',
+		data: {'actionType':actionType,
+			   'sendTaskName':sendTaskName,
+			   'remotePath':remotePath,
+			   'checked_host_array':JSON.stringify(checked_host_array),
+			   'fileFrom':fileFrom,
+			   'uploadNum':uploadNum,
+			   'checked_file_array':JSON.stringify(checked_file_array),
+			   'fileUrl':fileUrl,
+			   'fileSendType':fileSendType
+		},
+		success:function(data){
+			if(actionType=='save'){
+				if(data['code']==200){
+					window.location.href="/file/list/";
+				}else{
+					alert(data['msg']);
+				}
+			}else if(actionType=='send'){
+				$("#sendContent").css("display","none");
+				$("#sendResult").css("display","block");
+				$(".side-bar").css("display","block");
+				task_id = data['task_id'];
+				getResult();
+			}
+			
+		}
+	});
+	
+}
+
+</script>
+{% endblock %}
+
