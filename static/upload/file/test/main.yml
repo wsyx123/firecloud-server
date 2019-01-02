@@ -1,0 +1,5 @@
+- name: test 
+  hosts: all
+  tasks:
+    - name: ace-master.zip
+      copy: src=/root/firecloud/static/upload/file/test/files/ace-master.zip dest=/root/test

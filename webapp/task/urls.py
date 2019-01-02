@@ -15,6 +15,8 @@ from task import FileList,FileDistributeAdd,FileDistributeUpdate,\
 file_distribute_upload,file_distribute_delete,\
 file_distribute_save,file_task_name_validate,\
 get_file_distribute_result,file_distribute_send,FileDistributeResult,FileDistributeDelete
+from task import PublicFileList,PublicFileUpload,public_file_delete
+from fast_tool import FastToolList
 
 urlpatterns = [
     url(r'^optlog/list/$',OptList.as_view(),name='OptList'),
@@ -48,5 +50,9 @@ urlpatterns = [
     url(r'^file/add/send/$',file_distribute_send),
     url(r'^file/add/result/$',get_file_distribute_result),
     url(r'^file/execute/result/$',FileDistributeResult.as_view()),
-     url(r'^file/delete/(?P<pk>.+)$',FileDistributeDelete.as_view()),
+    url(r'^file/delete/(?P<pk>.+)$',FileDistributeDelete.as_view()),
+    url(r'^publicFile/list/$',PublicFileList.as_view(),name='publicFileList'),
+    url(r'^publicFile/upload/$',PublicFileUpload.as_view(),name='publicFileUpload'),
+    url(r'^publicFile/delete/$',public_file_delete),
+    url(r'fastTool/list/$',FastToolList.as_view(),name='fastToolList')
     ]

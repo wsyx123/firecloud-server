@@ -335,15 +335,25 @@ class FileModelExistList(models.Model):
     file_path = models.CharField(max_length=128)
     file_size = models.CharField(max_length=8)
     task_name = models.CharField(max_length=32)
+    owner = models.ForeignKey('SysUser')
+    file_type = models.CharField(max_length=8,default="private")
     
 class FileModelForHad(models.Model):
     task_name = models.CharField(max_length=32)
-    file_name = models.ForeignKey('FileModelExistList')
+    file_path = models.CharField(max_length=128)
 
 class FileModelForUrl(models.Model):
     task_name = models.CharField(max_length=32,unique=True)
     url = models.CharField(max_length=128)
-    
+
+class PublicFile(models.Model):
+    file_name = models.CharField(max_length=32)
+    file_path = models.CharField(max_length=128)
+    file_size = models.CharField(max_length=8)
+    owner = models.ForeignKey('SysUser')
+    create_time = models.DateTimeField(auto_now_add=True)
+    file_type = models.CharField(max_length=8,default="public")
+
 class PaasHost(models.Model):
     ip = models.GenericIPAddressField(verbose_name='IP地址')
     label = models.CharField(max_length=16,verbose_name='备注')

@@ -9,11 +9,12 @@ from django.views.generic import TemplateView,FormView,ListView,DeleteView,Updat
 from django.urls import reverse_lazy
 from webapp.models import AssetHost,ScriptModel,HostAccount,TaskLog, TaskHost,\
 AnsibleModel,SysUser,AnsibleLog,AnsibleHost,FileModel,FileModelExistList,\
-FileModelForHad,FileModelForUrl,FileLog,FileHost
+FileModelForHad,FileModelForUrl,FileLog,FileHost,PublicFile
 from forms import ScriptModelForm
 from utils.callback import PlaybookExecuteCallback,FileDistributeCallback,\
 ScriptExecuteCallback,FileCopyCallback
-from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,ANSIBLE_PROJECT_PATH,FILE_DISTRIBUTE_PATH
+from firecloud.constants import SCRIPT_SAVE_PATH,SCRIPT_PICKLE_PATH,\
+ANSIBLE_PROJECT_PATH,FILE_DISTRIBUTE_PATH,PUBLIC_FILE_PATH
 from django.http import JsonResponse
 from utils.ansibleAdHoc import myadhoc
 from utils.log_task_execute import log_task_execute
@@ -25,6 +26,7 @@ import sys,io,os
 import shutil
 import yaml
 import uuid
+from itertools import chain
 from datetime import datetime  
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
@@ -866,21 +868,23 @@ class FileDistributeAdd(TemplateView):
     template_name = 'task/file/FileDistributeAdd.html'
     def get_context_data(self, **kwargs):
         context = super(FileDistributeAdd, self).get_context_data(**kwargs)
-        if self.request.session.get('_user_id') == 1:
+        user_id = self.request.session.get('_user_id')
+        if user_id == 1:
             assetHostQuerySet = AssetHost.objects.all().order_by('private_ip')
         else:
-            assetHostQuerySet = AssetHost.objects.filter(owner_id=self.request.session.get('_user_id')).order_by('private_ip')
+            assetHostQuerySet = AssetHost.objects.filter(owner_id=user_id).order_by('private_ip')
         context['hosts'] = generate_host_list(assetHostQuerySet)
-        context['files'] = FileModelExistList.objects.all()
+        context['files'] = chain(FileModelExistList.objects.filter(owner_id=user_id),PublicFile.objects.all())
         context['total_host_count'] = len(context['hosts'])
-        
         return context
     
 def file_distribute_upload(request):
     if request.method == 'POST':
+        user_id = request.session.get('_user_id')
         f = request.FILES['file']
         task_name = request.POST.get('sendTaskName')
         file_size = request.POST.get('fileSize')
+        file_size = format_b_to_kb_mb(file_size)
         task_dir = os.path.join(FILE_DISTRIBUTE_PATH,task_name+'/files')
         file_name = f.name
         file_fullname = os.path.join(task_dir,file_name)
@@ -895,7 +899,7 @@ def file_distribute_upload(request):
             pass
         else:
             FileModelExistList.objects.create(file_name=file_name,file_path=file_fullname,
-                                           file_size=file_size,task_name=task_name)
+                                           file_size=file_size,task_name=task_name,owner_id=user_id)
     return JsonResponse({'code':200})
     
 def file_distribute_delete(request):
@@ -931,8 +935,8 @@ def file_distribute_save(request):
                                      file_from=file_from,
                                      send_model=send_model,owner_id=user_id)
             if file_from==2:
-                for file_id in files:
-                    FileModelForHad.objects.create(task_name=task_name,file_name_id=file_id)
+                for file_path in files:
+                    FileModelForHad.objects.create(task_name=task_name,file_path=file_path)
             if file_from==3:
                 FileModelForUrl.objects.create(task_name=task_name,url=file_url)
             return JsonResponse({'code':200})
@@ -956,7 +960,7 @@ def file_distribute_send(request):
                 files = []
                 hadFileObj = FileModelForHad.objects.filter(task_name=task_name)
                 for oneObj in hadFileObj:
-                    files.append(oneObj.file_name_id)
+                    files.append(oneObj.file_path)
                 upload_num = len(files)
             if file_from == 3:
                 urlFileObj = FileModelForUrl.objects.get(task_name=task_name)
@@ -1010,12 +1014,14 @@ def gen_main_file_distribute(task_name,file_from,remote_path,files=None):
             f.write('    - name: {}\n'.format(onefile))
             f.write('      copy: src={} dest={}\n'.format(file_full_name,remote_path))
     elif file_from == 2:
-        for file_id in files:
-            fileObj = FileModelExistList.objects.get(id=file_id)
-            file_short_name = fileObj.file_name
-            file_full_name = fileObj.file_path
+        for file_path in files:
+            try:
+                fileObj = FileModelExistList.objects.get(file_path=file_path)
+            except ObjectDoesNotExist:
+                fileObj = PublicFile.objects.get(file_path=file_path)
+            file_short_name = (fileObj.file_path).split('/')[-1]
             f.write('    - name: {}\n'.format(file_short_name))
-            f.write('      copy: src={} dest={}\n'.format(file_full_name,remote_path))
+            f.write('      copy: src={} dest={}\n'.format(fileObj.file_path,remote_path))
     elif file_from == 3:
         for url in files:
             file_name = url.split('/')[-1]
@@ -1102,26 +1108,55 @@ class FileDistributeUpdate(UpdateView):
         context['total_host_count'] = len(context['hosts'])
         return context
     
+    def post(self, request, *args, **kwargs):
+        task_name = request.POST.get('sendTaskName')
+        remote_path = request.POST.get('remotePath')
+        file_from = int(request.POST.get('fileFrom'))
+        send_model = int(request.POST.get('fileSendType'))
+        file_url = request.POST.get('fileUrl')
+        files = None
+        if file_from==2:
+            files = json.loads(str(request.POST.get('checked_file_array')))
+        if file_from==3:
+            files = file_url.strip().strip(',').split(',')
+        #生成main.yml文件
+        gen_main_file_distribute(task_name,file_from,remote_path,files)
+        try:
+            fileObj = FileModel.objects.get(id=kwargs['pk'])
+            old_task_name = fileObj.name
+            FileModelForHad.objects.filter(task_name=old_task_name).delete()
+            FileModelForUrl.objects.filter(task_name=old_task_name).delete()
+        except ObjectDoesNotExist:
+            return JsonResponse({'code':400,'msg':'{}任务不存在'.format(kwargs['pk'])})
+        else:
+            fileObj.name=task_name
+            fileObj.remote_path=remote_path
+            fileObj.file_from = file_from
+            fileObj.send_model = send_model
+            fileObj.save()
+            if file_from==2:
+                for file_path in files:
+                    FileModelForHad.objects.create(task_name=task_name,file_path=file_path)
+            if file_from==3:
+                FileModelForUrl.objects.create(task_name=task_name,url=file_url)
+            return JsonResponse({'code':200})
+    
 def get_file_distribute_update_info(fileObj):
     file_dict = model_to_dict(fileObj)
+    had_files_list = []
+    hadObj = FileModelForHad.objects.filter(task_name=fileObj.name)
+    #获取用户上传的和公共的文件(queryset)
+    allExistFile = chain(FileModelExistList.objects.filter(owner_id=fileObj.owner_id),PublicFile.objects.all())
+    for oneExist in allExistFile:
+        temp_file_dict = model_to_dict(oneExist)
+        temp_file_dict['checked']=False
+        for oneHad in hadObj:
+            if oneHad.file_path == oneExist.file_path:
+                temp_file_dict['checked']=True
+        had_files_list.append(temp_file_dict)
+    file_dict['had_files'] = had_files_list
     if fileObj.file_from == 1:
         file_dict['local_files'] = FileModelExistList.objects.filter(task_name=fileObj.name)
-    if fileObj.file_from == 2:
-        had_files_list = []
-        hadObj = FileModelForHad.objects.filter(task_name=fileObj.name)
-        allExistFile = FileModelExistList.objects.all()
-        for oneExist in allExistFile:
-            temp_file_dict = {}
-            temp_file_dict['id']=oneExist.id
-            temp_file_dict['file_size']=oneExist.file_size
-            temp_file_dict['file_name']=oneExist.file_name
-            for oneHad in hadObj:
-                if oneHad.file_name_id == oneExist.id:
-                    temp_file_dict['checked']=True
-                else:
-                    temp_file_dict['checked']=False
-            had_files_list.append(temp_file_dict)
-        file_dict['had_files'] = had_files_list
     if fileObj.file_from == 3:
         file_dict['url_files'] = FileModelForUrl.objects.get(task_name=fileObj.name).url
     return file_dict
@@ -1136,3 +1171,62 @@ def file_task_name_validate(request):
             return JsonResponse({'code':200})
         else:
             return JsonResponse({'code':400})
+
+class PublicFileList(TemplateView):
+    template_name = 'task/publicFile/publicFileList.html'
+    def get_context_data(self, **kwargs):
+        context = super(PublicFileList,self).get_context_data(**kwargs)
+        context['files'] = PublicFile.objects.all()
+        return context
+    
+class PublicFileUpload(TemplateView):
+    template_name = 'task/publicFile/publicFileUpload.html'
+    def post(self,request):
+        user_id = request.session.get('_user_id')
+        if request.method == 'POST':
+            f = request.FILES['file']
+            file_size = request.POST.get('fileSize')
+            file_size=format_b_to_kb_mb(file_size)
+            file_name = f.name
+            file_fullname = os.path.join(PUBLIC_FILE_PATH,file_name)
+            try:
+                destination = open(file_fullname, 'wb+')
+                for chunk in f.chunks():
+                    destination.write(chunk)
+                destination.close()
+            except:
+                pass
+            else:
+                PublicFile.objects.create(file_name=file_name,file_path=file_fullname,
+                                          file_size=file_size,owner_id=user_id)
+        return JsonResponse({'code':200})
+
+def format_b_to_kb_mb(file_size):
+    file_size = int(file_size)
+    if file_size < 1024:
+        return str(file_size)+'B'
+    if file_size > 1024 and file_size < 1048576:
+        return str(round(float(file_size)/1024,2))+'KB'
+    else:
+        return str(round(float(file_size)/1024/1024,2))+'MB'
+
+def public_file_delete(request):
+    if request.method == 'POST':
+        file_id = request.POST.get('file_id')
+        fileObj = PublicFile.objects.get(id=file_id)
+        file_name = fileObj.file_name
+        file_fullname = os.path.join(PUBLIC_FILE_PATH,file_name)
+        code = 200
+        msg = ''
+        if os.path.exists(file_fullname):
+            try:
+                os.remove(file_fullname)
+            except Exception as e:
+                code = 400
+                msg = str(e)
+            else:
+                fileObj.delete()
+        else:
+            fileObj.delete()
+        return JsonResponse({'code':code,'msg':msg})
+        

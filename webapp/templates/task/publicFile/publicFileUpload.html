@@ -1,0 +1,103 @@
+{% extends "base/base.html" %}
+{% block css %}
+<!-- custom css -->
+
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>作业中心</li>
+				<li><a href="{% url 'publicFileList' %}">公共文件</a></li>
+				<li class="active">上传文件</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+		<div class="page-content">
+			<div class="row">
+				<div class="col-xs-12">
+					<table class="table table-bordered">
+						<tr><th>文件名</th><th>状态</th><th>大小</th></tr>
+						<tbody id="filelist">
+							
+						</tbody>
+					</table>
+					<div class="center" id="filecontainer">
+						<a id="pickFile" href="javascript:;">
+							<button class="btn btn-white btn-info btn-xs btn-bold" type="button">选择文件</button>
+						</a>
+						<a id="uploadFile" href="javascript:;">
+							<button class="btn btn-white btn-info btn-xs btn-bold">上传文件</button>
+						</a>
+					</div>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<!-- page specific plugin scripts -->
+<script src="/static/plupload-2.3.6/js/plupload.full.min.js"></script>
+<script type="text/javascript">
+
+InitFileUpload('pickFile','filecontainer','filelist','uploadFile');
+
+//文件上传初始化
+function InitFileUpload(pickfileID,containerID,filelistID,uploadfileID){
+	var uploader = new plupload.Uploader({
+	runtimes : 'html5,flash,silverlight,html4',
+	browse_button : pickfileID, // you can pass an id...
+	container: document.getElementById(containerID), // ... or DOM Element itself
+	url : '/publicFile/upload/',
+	flash_swf_url : '/static/plupload-2.3.6/js/Moxie.swf',
+	silverlight_xap_url : '/static/plupload-2.3.6/js/Moxie.xap',
+	
+	filters : {
+		max_file_size : '500mb',
+		mime_types: [
+			{title : "Template files", extensions : "*"},
+		]
+	},
+
+	init: {
+		PostInit: function() {
+			document.getElementById(filelistID).innerHTML = '';
+			document.getElementById(uploadfileID).onclick = function() {
+				uploader.start();
+				return false;
+			};
+		},
+
+		FilesAdded: function(up, files) {
+			plupload.each(files, function(file) {
+				var txt = '<tr><td>' + file.name + '</td><td id="'+file.id+'">0%</td><td>' + plupload.formatSize(file.size) + '</td></tr>';
+				document.getElementById(filelistID).innerHTML += txt;
+			});
+		},
+		
+		BeforeUpload: function(up,file){
+			var fileSize = file.size;
+			uploader.setOption("multipart_params",{"fileSize":fileSize});
+		},
+
+		UploadProgress: function(up, file) {
+			document.getElementById(file.id).innerHTML = '<span>' + file.percent + "%</span>";
+		},
+
+		Error: function(up, err) {
+			document.getElementById('console').appendChild(document.createTextNode("\nError #" + err.code + ": " + err.message));
+		}
+	}
+});
+
+uploader.init();
+	
+}
+</script>
+{% endblock %}

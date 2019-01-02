@@ -1,19 +1,19 @@
 Q: celery run  ansible api return  none
-A: 1 ÔÚcelery µÄworkerÆô¶¯´°¿ÚÉèÖÃexport PYTHONOPTIMIZE=1 »ò´ò¿ªceleryÕâ¸ö²ÎÊı-O OPTIMIZATION
-              ÊÔÁË£¬Ö»ÓĞexport PYTHONOPTIMIZE=1 ÉúĞ§
-   2 disable python packet multiprocessing process.py line 120 (´ó¸Å¾ÍÊÇÕâ¸öÎ»ÖÃ)
-     CentOS 7.1.1503 µÄ/usr/lib64/python2.7/multiprocessing/process.py  124,125ĞĞ×¢ÊÍµô
+A: 1 åœ¨celery çš„workerå¯åŠ¨çª—å£è®¾ç½®export PYTHONOPTIMIZE=1 æˆ–æ‰“å¼€celeryè¿™ä¸ªå‚æ•°-O OPTIMIZATION
+              è¯•äº†ï¼Œåªæœ‰export PYTHONOPTIMIZE=1 ç”Ÿæ•ˆ
+   2 disable python packet multiprocessing process.py line 120 (å¤§æ¦‚å°±æ˜¯è¿™ä¸ªä½ç½®)
+     CentOS 7.1.1503 çš„/usr/lib64/python2.7/multiprocessing/process.py  124,125è¡Œæ³¨é‡Šæ‰
      
-    ½¨ÒéÊ¹ÓÃ ·½·¨1 
+    å»ºè®®ä½¿ç”¨ æ–¹æ³•1 
     
-Q: ace editor editor.removeLines();Ö»ÄÜÒÆ³ıÒ»ĞĞÄÚÈİ£¬ace.jsÖĞÕÒ²»µ½Çå³şÈ«²¿ĞĞµÄº¯Êı£¬ĞèÒª×Ô¼ºĞ´
-   Ã¿Ò»ĞĞÄÚÈİÊÇÓÃdiv  span°ü¹ü£¬ÈçÏÂ£¬ËùÒÔÖ»ĞèÒªËùÓĞµÄ  class="ace_line" µÄdiv
+Q: ace editor editor.removeLines();åªèƒ½ç§»é™¤ä¸€è¡Œå†…å®¹ï¼Œace.jsä¸­æ‰¾ä¸åˆ°æ¸…æ¥šå…¨éƒ¨è¡Œçš„å‡½æ•°ï¼Œéœ€è¦è‡ªå·±å†™
+   æ¯ä¸€è¡Œå†…å®¹æ˜¯ç”¨div  spanåŒ…è£¹ï¼Œå¦‚ä¸‹ï¼Œæ‰€ä»¥åªéœ€è¦æ‰€æœ‰çš„  class="ace_line" çš„div
     <div class="ace_line">
    		<span class="ace_comment"></span>
     </div>
  
- A£º 
- // Çå³ıace editorÖĞËùÓĞÄÚÈİ
+ Aï¼š 
+ // æ¸…é™¤ace editorä¸­æ‰€æœ‰å†…å®¹
 function removeAllLines(editor){
 	AllLines = $(".ace_line");
 	for(var i=0;i<AllLines.length;i++){
@@ -21,34 +21,34 @@ function removeAllLines(editor){
 	}
 }
 
-Q:pythonÈçºÎ²»Éú³ÉpycÎÄ¼ş£¨Á½ÖÖ·½Ê½£©
+Q:pythonå¦‚ä½•ä¸ç”Ÿæˆpycæ–‡ä»¶ï¼ˆä¸¤ç§æ–¹å¼ï¼‰
 
 A:
- 1 ÉèÖÃ»·¾³±äÁ¿ export PYTHONDONTWRITEBYTECODE=1
- 2 ÔÚµ¼ÈëµÄµØ·½Ğ´:
+ 1 è®¾ç½®ç¯å¢ƒå˜é‡ export PYTHONDONTWRITEBYTECODE=1
+ 2 åœ¨å¯¼å…¥çš„åœ°æ–¹å†™:
  import sys
  sys.dont_write_bytecode = True
  
- Q: git Ê¹ÓÃ (±È½Ï±¾µØ·ÖÖ§ÓëÔ¶³Ì·ÖÖ§²îÒì)
+ Q: git ä½¿ç”¨ (æ¯”è¾ƒæœ¬åœ°åˆ†æ”¯ä¸è¿œç¨‹åˆ†æ”¯å·®å¼‚)
  A:
-  1 Ê¹ÓÃgit  branch -a  ²é¿´ËùÓĞ·ÖÖ§£¨±¾µØ£¬Ô¶³Ì £¬  git branch Ö»ÏÔÊ¾±¾µØ·ÖÖ§£¬ git branch -r Ö»ÏÔÊ¾Ô¶³Ì·ÖÖ§£©
-  2 Ê¹ÓÃgit fetch firecloud master »ñÈ¡  firecloudÖ÷»úmaster·ÖÖ§
-  3 Ê¹ÓÃgit log  master..firecloud/master  ±È½Ï±¾µØmaster ÓëÔ¶¶Ëfirecloud/masterµÄ²îÒì
-           ËùÈ¡»ØµÄ¸üĞÂ£¬ÔÚ±¾µØÖ÷»úÉÏÒªÓÃ¡±Ô¶³ÌÖ÷»úÃû/·ÖÖ§Ãû¡±µÄĞÎÊ½¶ÁÈ¡£¬±ÈÈçfirecloudÖ÷»úµÄmaster·ÖÖ§£¬¾Í¿ÉÒÔÓÃfirecloud/master¶ÁÈ¡
+  1 ä½¿ç”¨git  branch -a  æŸ¥çœ‹æ‰€æœ‰åˆ†æ”¯ï¼ˆæœ¬åœ°ï¼Œè¿œç¨‹ ï¼Œ  git branch åªæ˜¾ç¤ºæœ¬åœ°åˆ†æ”¯ï¼Œ git branch -r åªæ˜¾ç¤ºè¿œç¨‹åˆ†æ”¯ï¼‰
+  2 ä½¿ç”¨git fetch firecloud master è·å–  firecloudä¸»æœºmasteråˆ†æ”¯
+  3 ä½¿ç”¨git log  master..firecloud/master  æ¯”è¾ƒæœ¬åœ°master ä¸è¿œç«¯firecloud/masterçš„å·®å¼‚
+           æ‰€å–å›çš„æ›´æ–°ï¼Œåœ¨æœ¬åœ°ä¸»æœºä¸Šè¦ç”¨â€è¿œç¨‹ä¸»æœºå/åˆ†æ”¯åâ€çš„å½¢å¼è¯»å–ï¼Œæ¯”å¦‚firecloudä¸»æœºçš„masteråˆ†æ”¯ï¼Œå°±å¯ä»¥ç”¨firecloud/masterè¯»å–
                                                
-  4 Ê¹ÓÃgit merge firecloud/master  ¸üĞÂ(ºÏ²¢)Ô¶¶Ëfirecloud/master·ÖÖ§ µ½µ±Ç°·ÖÖ§
+  4 ä½¿ç”¨git merge firecloud/master  æ›´æ–°(åˆå¹¶)è¿œç«¯firecloud/masteråˆ†æ”¯ åˆ°å½“å‰åˆ†æ”¯
   
  
- Q: Ö´ĞĞpython  manage.py makemigrations  ³öÏÖno changes detected
+ Q: æ‰§è¡Œpython  manage.py makemigrations  å‡ºç°no changes detected
  
  A:
-  1 ÏÈ  python manage.py makemigrations --empty webapp
-  2 ÔÙ python manage.py makemigrations
+  1 å…ˆ  python manage.py makemigrations --empty webapp
+  2 å† python manage.py makemigrations
   3 python manage.py migrate
   
-  Q:°²×°libtorrent 
-  A£º ĞèÒªÏÈ°²×°  yum install  boost-devel
-   1 ÏÂÔØlibtorrent-libtorrent_1_1_11.zip
+  Q:å®‰è£…libtorrent 
+  Aï¼š éœ€è¦å…ˆå®‰è£…  yum install  boost-devel
+   1 ä¸‹è½½libtorrent-libtorrent_1_1_11.zip
    2 ./autotool.sh
    3 ./configure --enable-python-binding
    4 make
@@ -57,15 +57,15 @@ A:
    7 python setup.py build
    8 python setup.py install
    9 cp /usr/local/lib/libtorrent-rasterbar.so.9  /lib64/
-   ±¸×¢: ldd  /usr/lib64/python2.7/site-packages/libtorrent.so  ¿ÉÒÔ²é¿´ÄÄĞ©¿â  not  found
+   å¤‡æ³¨: ldd  /usr/lib64/python2.7/site-packages/libtorrent.so  å¯ä»¥æŸ¥çœ‹å“ªäº›åº“  not  found
    
-  ÆäËüÖ÷»ú¿ÉÒÔÊ¹ÓÃ±àÒëºÃµÄ°ü£¬²Ù×÷ÈçÏÂ£º
-   ĞèÒªÏÈ°²×°  yum install  boost-devel
-  1 ÔÚfirecloud/libtorrent_python ÏÂÖ´ĞĞ  
+  å…¶å®ƒä¸»æœºå¯ä»¥ä½¿ç”¨ç¼–è¯‘å¥½çš„åŒ…ï¼Œæ“ä½œå¦‚ä¸‹ï¼š
+   éœ€è¦å…ˆå®‰è£…  yum install  boost-devel
+  1 åœ¨firecloud/libtorrent_python ä¸‹æ‰§è¡Œ  
    python setup.py build
    python setup.py install
    cp libtorrent-rasterbar.so.9  /lib64/
    
    
-Q£º P2PÎÄ¼ş·Ö·¢¿ÉÒÔÊ¹ÓÃTwitter µÄ murder
+Qï¼š P2Pæ–‡ä»¶åˆ†å‘å¯ä»¥ä½¿ç”¨Twitter çš„ murder
    

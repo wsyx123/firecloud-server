@@ -240,13 +240,15 @@
 												<tr>
 													<th><input type="checkbox" onclick="allChecked(this,'file-select-tr');"></th>
 													<th>ID</th>
+													<th>文件类型</th>
 													<th>大小</th>
 													<th>文件名</th>
 												</tr>
 												{% for file in files %}
 												<tr class="file-select-tr">
 													<td><input type="checkbox" /></td>
-													<th>{{file.id}}</th>
+													<td>{{file.id}}</td>
+													<td>{{file.file_type}}<input type="text" value="{{file.file_path}}" hidden /></td>
 													<td>{{file.file_size}}</td>
 													<td>{{file.file_name}}</td>
 												</tr>
@@ -581,12 +583,12 @@ function getHostAccount(){
 	return checked_host_array;
 }
 
-//获取已选择的要分发的“已有文件名”
+//获取已选择的要分发的“已有完整文件名”
 function getHadFileName(){
 	var checked_file_array = new Array();
 	var hadSelectedObj = $(".file-select-tr:visible input[type='checkbox']:checked");
 	for(var i=0;i<hadSelectedObj.length;i++){
-		var filename = $(hadSelectedObj[i]).parent().siblings().eq(0).text();
+		var filename = $(hadSelectedObj[i]).parent().siblings().eq(1).find('input').val();
 		checked_file_array.push(filename);
 	}
 	return checked_file_array;

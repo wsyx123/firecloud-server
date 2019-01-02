@@ -2,7 +2,6 @@
 
 {% block css %}
 <!-- custom css -->
-<link rel="stylesheet" href="/static/css/fontello/fontello.css" />
 <style>
 #checked-div,#file-selected-div,#had-div,#url-div{
 	display:none;
@@ -43,6 +42,7 @@
 					<div class="tabbable">
 						<div class="tab-content">
 							<form class="form-horizontal" method="POST" enctype="multipart/form-data">
+								<input type="text" name="fileid" value="{{file.id}}" hidden />
 								<div class="form-group">
 									<label for="inputWarning" class="col-xs-12 col-sm-1 control-label no-padding-right">
 										分发名称<span class="red">*</span>
@@ -174,6 +174,7 @@
 												<tr>
 													<th><input type="checkbox" onclick="allChecked(this,'file-select-tr');"></th>
 													<th>ID</th>
+													<th>文件类型</th>
 													<th>大小</th>
 													<th>文件名</th>
 												</tr>
@@ -184,7 +185,8 @@
 													{% else %}
 													<td><input type="checkbox"/></td>
 													{% endif %}
-													<th>{{hadfile.id}}</th>
+													<td>{{hadfile.id}}</td>
+													<td>{{hadfile.file_type}}<input type="text" value="{{hadfile.file_path}}" hidden /></td>
 													<td>{{hadfile.file_size}}</td>
 													<td>{{hadfile.file_name}}</td>
 												</tr>
@@ -224,9 +226,6 @@
 								<div class="center">
 									<button class="btn btn-sm btn-primary" type="button" onclick="sendFile('save');">
 										<i class="fa fa-floppy-o"></i>保存
-									</button>
-									<button class="btn btn-sm btn-success" type="button" onclick="sendFile('send');" id="sendButton">
-										<i class="glyphicon glyphicon-cog"></i>分发
 									</button>
 								</div>
 							</form>
@@ -527,12 +526,12 @@ function getHostAccount(){
 	return checked_host_array;
 }
 
-//获取已选择的要分发的“已有文件名”
+//获取已选择的要分发的“已有完整文件名”
 function getHadFileName(){
 	var checked_file_array = new Array();
 	var hadSelectedObj = $(".file-select-tr:visible input[type='checkbox']:checked");
 	for(var i=0;i<hadSelectedObj.length;i++){
-		var filename = $(hadSelectedObj[i]).parent().siblings().eq(0).text();
+		var filename = $(hadSelectedObj[i]).parent().siblings().eq(1).find('input').val();
 		checked_file_array.push(filename);
 	}
 	return checked_file_array;
@@ -555,6 +554,7 @@ function validateTaskName(){
 
 //开始分发文件到主机
 function sendFile(actionType){
+	var fileid = $("input[name='fileid']").val();
 	var sendTaskName = $("input[name='sendTaskName']").val();
 	var remotePath = $("input[name='remotePath']").val();
 	var checked_host_array = getHostAccount();
@@ -590,7 +590,7 @@ function sendFile(actionType){
 	};
 	$.ajax({
 		type: 'POST',
-		url : '/file/add/'+actionType+'/',
+		url : '/file/update/'+fileid,
 		data: {'actionType':actionType,
 			   'sendTaskName':sendTaskName,
 			   'remotePath':remotePath,
@@ -602,20 +602,11 @@ function sendFile(actionType){
 			   'fileSendType':fileSendType
 		},
 		success:function(data){
-			if(actionType=='save'){
-				if(data['code']==200){
-					window.location.href="/file/list/";
-				}else{
-					alert(data['msg']);
-				}
-			}else if(actionType=='send'){
-				$("#sendContent").css("display","none");
-				$("#sendResult").css("display","block");
-				$(".side-bar").css("display","block");
-				task_id = data['task_id'];
-				getResult();
+			if(data['code']==200){
+				window.location.href="/file/list/";
+			}else{
+				alert(data['msg']);
 			}
-			
 		}
 	});
 	

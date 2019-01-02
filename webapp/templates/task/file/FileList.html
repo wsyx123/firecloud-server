@@ -1,7 +1,6 @@
 {% extends "base/base.html" %}
 {% block css %}
 <!-- custom css -->
-<link rel="stylesheet" href="/static/css/task.css" />
 {% endblock %}
 {% block main %}
 <div class="main-content">
@@ -26,19 +25,13 @@
 
 			<div class="row">
 				<div class="col-xs-12">
-				
 					<div class="row">
 						<div class="col-xs-12">
-							
-
 							<div class="clearfix">
 								<a href="{% url 'FileAdd' %}"><button class="btn btn-xs btn-info">分发文件</button></a>
 								<div class="pull-right tableTools-container"></div>
 							</div>
-							
-
 							<!-- div.table-responsive -->
-
 							<!-- div.dataTables_borderWrap -->
 							<div>
 								<table id="dynamic-table" class="table table-striped table-bordered table-hover">
@@ -203,7 +196,6 @@
 {% block js %}
 <!-- page specific plugin scripts -->
 <script src="/static/js/jquery.easysearch.js"></script>
-
 <script src="/static/assets/js/jquery.dataTables.min.js"></script>
 <script src="/static/assets/js/jquery.dataTables.bootstrap.min.js"></script>
 <script src="/static/assets/js/dataTables.buttons.min.js"></script>

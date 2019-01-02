@@ -1,23 +1,22 @@
 # firecloud
 
-°²×°²½Öè:
-1 ĞŞ¸Äsettings.py ÖĞµÄmysql  redisÁ¬½ÓµØÖ·
+å®‰è£…æ­¥éª¤: 
+1 ä¿®æ”¹settings.py ä¸­çš„mysql redisè¿æ¥åœ°å€
 
-2 ´´½¨firecloud Êı¾İ¿â
+2 åˆ›å»ºfirecloud æ•°æ®åº“
 
 3 python manage.py makemigrations
 
 4 python manage.py migrate
 
-5 µ¼Èë1¼¶²Ëµ¥ÁĞ±íwebapp_level1menu.sql
+5 å¯¼å…¥1çº§èœå•åˆ—è¡¨webapp_level1menu.sql
 
-6 µ¼Èë2¼¶²Ëµ¥ÁĞ±íwebapp_level2menu.sql
+6 å¯¼å…¥2çº§èœå•åˆ—è¡¨webapp_level2menu.sql
 
-7 Ïòhomepage±í²åÈëÊı¾İ
-INSERT INTO `homepage` VALUES ('1', '¸ÅÀÀÃæ°å', '/', 'home/dashboard.html');
+7 å‘homepageè¡¨æ’å…¥æ•°æ® INSERT INTO homepage VALUES ('1', 'æ¦‚è§ˆé¢æ¿', '/', 'home/dashboard.html');
 
-8 ÔÚsysroleÖĞ´´½¨admin½ÇÉ«
+8 åœ¨sysroleä¸­åˆ›å»ºadminè§’è‰²
 
-9 ÔÚsysuserÖĞ´´½¨adminÓÃ»§
+9 åœ¨sysuserä¸­åˆ›å»ºadminç”¨æˆ·
 
-10 ÔËĞĞÓ¦ÓÃ¼´¿ÉÊ¹ÓÃ
+10 è¿è¡Œåº”ç”¨å³å¯ä½¿ç”¨

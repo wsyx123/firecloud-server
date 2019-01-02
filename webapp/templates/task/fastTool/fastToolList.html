@@ -1,0 +1,75 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style type="text/css">
+
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>作业中心</li>
+				<li class="active">快速工具</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-body">
+							<i class="fa fa-wrench fa-4x green" aria-hidden="true"></i>									
+						</div>
+						<div class="widget-header">
+							<h5>ping检查主机状态</h5>
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-body">
+							<i class="fa fa-wrench fa-4x green" aria-hidden="true"></i>									
+						</div>
+						<div class="widget-header">
+							<h5>用户管理</h5>
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-body">
+							<i class="fa fa-wrench fa-4x green" aria-hidden="true"></i>									
+						</div>
+						<div class="widget-header">
+							<h5>内存容量收集</h5>
+						</div>
+					</div>								
+				</div>
+				<div class="col-xs-12 col-sm-2">
+					<div class="widget-box center">
+						<div class="widget-body">
+							<i class="fa fa-wrench fa-4x green" aria-hidden="true"></i>									
+						</div>
+						<div class="widget-header">
+							<h5>主机目录采集</h5>
+						</div>
+					</div>								
+				</div>
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+	</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<!-- page specific plugin scripts -->
+
+{% endblock %}

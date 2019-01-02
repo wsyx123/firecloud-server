@@ -57,6 +57,7 @@ def get_assets_data(full_filename):
             asset['position'] = override_ceel_value(sheet.cell(i,17).value, str)
             asset['operate_status'] = override_ceel_value(sheet.cell(i,18).value, int)
             asset['department'] = override_ceel_value(sheet.cell(i,19).value, str)
+            asset['owner_id'] = override_ceel_value(sheet.cell(i,20).value, int)
             dataList.append(asset)
     except Exception,e:
         print e
