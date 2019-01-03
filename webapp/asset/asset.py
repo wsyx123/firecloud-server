@@ -6,17 +6,14 @@ Created on 2018年7月28日
 @author: yangxu
 '''
 from dwebsocket import accept_websocket
-from ssh_client.client import connect
-from django.shortcuts import render_to_response
-from django.views.generic import TemplateView,ListView,FormView,DeleteView,DetailView
-from django.views.generic.edit import UpdateView
-from webapp.models import AssetHost,HostGroup,HostImport,HostEvent,HostAccount
+from webapp.models import AssetHost,HostGroup,HostImport,HostEvent,HostAccount,SysUser
 from webapp.asset.forms import AssetHostForm,HostGroupForm
+from ssh_client.client import connect
+from django.shortcuts import render_to_response,HttpResponse
+from django.views.generic import TemplateView,ListView,FormView,DeleteView,DetailView,UpdateView
 from django.urls import reverse_lazy
 from django.db.models import ProtectedError
-from django.shortcuts import HttpResponse
 import json
-from webapp.models import SysUser
 import xlrd
 from webapp.tasks import process_asset_import,collect_host_info
 import os,sys

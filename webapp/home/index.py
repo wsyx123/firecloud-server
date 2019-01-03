@@ -5,7 +5,7 @@ Created on 2018年11月4日
 
 @author: yangxu
 '''
-from webapp.models import HomePage,SysUser,SysRole
+from webapp.models import  HomePage,SysUser,SysRole
 from django.views.generic import TemplateView
 from django.shortcuts import HttpResponseRedirect
 from get_home_page import get_home_page

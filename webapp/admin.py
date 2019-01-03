@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from models import PaasHost,MesosMaster,MesosCluster
+from webapp.models import PaasHost,MesosMaster,MesosCluster
 
 # Register your models here.
 

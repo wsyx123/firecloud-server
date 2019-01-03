@@ -1,0 +1,462 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/assets/css/select2.min.css" />
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>PAAS中心</li>
+				<li><a href="{% url 'MesosList' %}">mesos</a></li>
+				<li>创建集群</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+
+					<div class="widget-box">
+					
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="fuelux-wizard-container">
+									<div>
+										<ul class="steps">
+											<li data-step="1" class="active">
+												<span class="step">1</span>
+												<span class="title">Mesos Master</span>
+											</li>
+
+											<li data-step="2">
+												<span class="step">2</span>
+												<span class="title">Marathon</span>
+											</li>
+
+											<li data-step="3">
+												<span class="step">3</span>
+												<span class="title">Haproxy</span>
+											</li>
+											
+											<li data-step="4">
+												<span class="step">4</span>
+												<span class="title">Mesos Slave</span>
+											</li>
+
+											
+										</ul>
+									</div>
+
+									<hr />
+
+									<div class="step-content pos-rel">
+										<div class="step-pane active" data-step="1">
+
+											<form class="form-horizontal" id="must-info">
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">集群名称</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="clusterName" class="width-100" placeholder="只能是字母与数字组成" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												
+												<div class="form-group">
+													<label for="inputSuccess" class="col-xs-12 col-sm-3 control-label no-padding-right">节点数</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control" name="nodeNum">
+																<option value="1">1</option>
+																<option value="3">3</option>
+																<option value="5">5</option>
+															</select>
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="masterPort" class="width-100" value="5050" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Master镜像</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="masterImage" class="width-100" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Zookeeper镜像</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputWarning" class="width-100" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												<div class="form-group">
+													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
+																<option value="192.168.10.1">192.168.10.1</option>
+																<option value="192.168.10.2">192.168.10.2</option>
+																<option value="192.168.10.3">192.168.10.3</option>
+															</select>
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="center">
+													<label class="col-xs-12 col-sm-6 control-label no-padding-right red">备注:zookeeper默认与mesos master部署在一起。</label>
+													
+												</div>
+											</form>
+										</div>
+
+										<div class="step-pane" data-step="2">
+											<form class="form-horizontal" id="base-info">
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Marathon ID</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputWarning" class="width-100" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" value="8080" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Master ZK</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control">
+																<option>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/mesos01</option>
+															</select>
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Marathon镜像</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												<div class="form-group">
+													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
+																<option value="192.168.10.1">192.168.10.1</option>
+																<option value="192.168.10.2">192.168.10.2</option>
+																<option value="192.168.10.3">192.168.10.3</option>
+															</select>
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+											</form>
+										</div>
+
+										<div class="step-pane" data-step="3">
+											<form class="form-horizontal" id="addition-info">
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Haproxy ID</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputWarning" class="width-100" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">服务端口</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" value="80" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">状态端口</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" value="9000" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Bamboo 端口</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" value="8000" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Marathon地址</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control">
+																<option>192.168.10.1:8080,192.168.10.2:8080,192.168.10.3:8080</option>
+															</select>
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Haproxy镜像</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												<div class="form-group">
+													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
+																<option value="192.168.10.1">192.168.10.1</option>
+																<option value="192.168.10.2">192.168.10.2</option>
+																<option value="192.168.10.3">192.168.10.3</option>
+															</select>
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+											</form>
+										</div>
+										
+										<div class="step-pane" data-step="4">
+											<form class="form-horizontal" id="base-info">
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">标签</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputWarning" class="width-100" placeholder="mesos:slave" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" value="5051" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Master ZK</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control">
+																<option>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/mesos01</option>
+															</select>
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Slave镜像</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" id="inputError" class="width-100" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+												<div class="form-group">
+													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
+
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
+																<option value="192.168.10.1">192.168.10.1</option>
+																<option value="192.168.10.2">192.168.10.2</option>
+																<option value="192.168.10.3">192.168.10.3</option>
+															</select>
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+
+											</form>
+										</div>
+										
+									</div>
+								</div>
+
+								<hr />
+								<div class="wizard-actions">
+									<button class="btn btn-prev">
+										<i class="ace-icon fa fa-arrow-left"></i>
+										上一步
+									</button>
+
+									<button class="btn btn-success btn-next" data-last="完成">
+										下一步
+										<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+									</button>
+								</div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+	if('ontouchstart' in document.documentElement) document.write("<script src='/static/assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+</script>
+
+
+<!-- page specific plugin scripts -->
+<script src="/static/assets/js/wizard.min.js"></script>
+<script src="/static/assets/js/jquery.validate.min.js"></script>
+<script src="/static/assets/js/jquery-additional-methods.min.js"></script>
+<script src="/static/assets/js/bootbox.js"></script>
+<script src="/static/assets/js/jquery.maskedinput.min.js"></script>
+<script src="/static/assets/js/select2.min.js"></script>
+<script src="/static/assets/js/bootstrap-multiselect.min.js"></script>
+<script src="/static/assets/js/jquery-typeahead.js"></script>
+
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+	jQuery(function($) {
+	
+		$('#fuelux-wizard-container')
+		.ace_wizard({
+			//step: 2 //optional argument. wizard will jump to step "2" at first
+			//buttons: '.wizard-actions:eq(0)'
+		})
+		//.on('changed.fu.wizard', function() {
+		//})
+		.on('actionclicked.fu.wizard', function(e){
+			//alert('请填写完整');
+			//e.preventDefault();
+		})
+		.on('finished.fu.wizard', function(e) {
+			bootbox.dialog({
+				title: "部署结果",
+				message: "Thank you! Your information was successfully saved!", 
+				buttons: {
+					"success" : {
+						"label" : "OK",
+						"className" : "btn-sm btn-primary"
+					}
+				}
+			});
+			
+		}).on('stepclick.fu.wizard', function(e){
+			//e.preventDefault();//this will prevent clicking and selecting steps
+			
+		});
+	
+	
+		//select2
+		$('.select2').css('width','100%').select2({allowClear:false})
+		$('#select2-multiple-style .btn').on('click', function(e){
+			var target = $(this).find('input[type=radio]');
+			var which = parseInt(target.val());
+			if(which == 2) $('.select2').addClass('tag-input-style');
+			 else $('.select2').removeClass('tag-input-style');
+		});
+		
+		//////////////////
+		$('.multiselect').multiselect({
+		 enableFiltering: true,
+		 enableHTML: true,
+		 buttonClass: 'btn btn-white btn-primary',
+		 templates: {
+			button: '<button type="button" class="multiselect dropdown-toggle" data-toggle="dropdown"><span class="multiselect-selected-text"></span> &nbsp;<b class="fa fa-caret-down"></b></button>',
+			ul: '<ul class="multiselect-container dropdown-menu"></ul>',
+			filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="fa fa-search"></i></span><input class="form-control multiselect-search" type="text"></div></li>',
+			filterClearBtn: '<span class="input-group-btn"><button class="btn btn-default btn-white btn-grey multiselect-clear-filter" type="button"><i class="fa fa-times-circle red2"></i></button></span>',
+			li: '<li><a tabindex="0"><label></label></a></li>',
+			divider: '<li class="multiselect-item divider"></li>',
+			liGroup: '<li class="multiselect-item multiselect-group"><label></label></li>'
+		 }
+		});
+	
+	
+	})
+</script>
+{% endblock %}

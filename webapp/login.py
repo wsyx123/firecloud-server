@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from models import SysUser
+from webapp.models import SysUser
 from django.shortcuts import HttpResponseRedirect,render
 import time
 # Create your views here.

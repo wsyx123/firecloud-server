@@ -91,7 +91,7 @@
 				<li>
 					PAAS中心
 				</li>
-				<li><a href="{% url 'mesos' %}">mesos</a></li>
+				<li><a href="{% url 'MesosList' %}">mesos</a></li>
 				<li>{{ clsname }}</li>
 				
 			</ul><!-- /.breadcrumb -->
@@ -113,7 +113,7 @@
 						<div class='vertical-middle'>
 						  <label class='acc-label'>Leader</label> 192.168.10.3
 						</div>
-						<span><a href="{% url 'mesosdetail' clsname=clsname %}">查看集群配置</a></span>
+						<span><a href="{% url 'MesosDetail' clsname=clsname %}">查看集群配置</a></span>
 					</div>
 				 
 					

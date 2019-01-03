@@ -34,10 +34,10 @@ class K8sDetail(TemplateView):
         return context
    
 
-class Mesos(TemplateView):
-    template_name = 'paas/cluster/mesos/mesos.html'
+class MesosList(TemplateView):
+    template_name = 'paas/cluster/mesos/MesosList.html'
     def get_context_data(self, **kwargs):
-        context = super(Mesos, self).get_context_data(**kwargs)
+        context = super(MesosList, self).get_context_data(**kwargs)
         context['name'] = u'杨旭'
         context['clusters'] = [{'name':'mesos01','createtime':'2018-05-01 14:36:49',
                                 'manager':3,'node':3,'haproxy':3,
@@ -48,7 +48,7 @@ class Mesos(TemplateView):
         return context
 
 class MesosOverview(TemplateView):
-    template_name = 'paas/cluster/mesos/mesosOverview.html'
+    template_name = 'paas/cluster/mesos/MesosOverview.html'
     def get_context_data(self, **kwargs):
         context = super(MesosOverview, self).get_context_data(**kwargs)
         context['name'] = u'杨旭'
@@ -56,24 +56,24 @@ class MesosOverview(TemplateView):
         return context
 
 class MesosDetail(TemplateView):
-    template_name = 'paas/cluster/mesos/mesosDetail.html'
+    template_name = 'paas/cluster/mesos/MesosDetail.html'
     def get_context_data(self, **kwargs):
         context = super(MesosDetail, self).get_context_data(**kwargs)
         context['name'] = u'杨旭'
         context['clsname'] = kwargs['clsname']
         return context
     
-class MesosCreate(TemplateView):
-    template_name = 'paas/cluster/mesos/mesosCreate.html'
+class MesosAddCluster(TemplateView):
+    template_name = 'paas/cluster/mesos/MesosAddCluster.html'
     def get_context_data(self, **kwargs):
-        context = super(MesosCreate, self).get_context_data(**kwargs)
+        context = super(MesosAddCluster, self).get_context_data(**kwargs)
         context['name'] = u'杨旭'
         return context
     
-class MesosAdd(TemplateView):
-    template_name = 'paas/cluster/mesos/nodeAdd.html'
+class MesosAddNode(TemplateView):
+    template_name = 'paas/cluster/mesos/MesosAddNode.html'
     def get_context_data(self, **kwargs):
-        context = super(MesosAdd, self).get_context_data(**kwargs)
+        context = super(MesosAddNode, self).get_context_data(**kwargs)
         context['name'] = u'杨旭'
         return context     
     
@@ -88,19 +88,5 @@ class ListStorage(TemplateView):
     template_name = 'paas/resource/storage.html'
     def get_context_data(self, **kwargs):
         context = super(ListStorage, self).get_context_data(**kwargs)
-        context['name'] = u'杨旭'
-        return context  
-    
-class RepoHost(TemplateView):
-    template_name = 'paas/repository/repohost.html'
-    def get_context_data(self, **kwargs):
-        context = super(RepoHost, self).get_context_data(**kwargs)
-        context['name'] = u'杨旭'
-        return context  
-    
-class RepoImage(TemplateView):
-    template_name = 'paas/repository/repoimage.html'
-    def get_context_data(self, **kwargs):
-        context = super(RepoImage, self).get_context_data(**kwargs)
         context['name'] = u'杨旭'
         return context  
