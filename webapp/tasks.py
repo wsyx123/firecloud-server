@@ -8,7 +8,7 @@ Created on 2018年4月23日
 from __future__ import absolute_import
 from celery import task
 
-from webapp.models import HostImport,AssetHost,HostEvent, AnsibleLog
+from webapp.models import HostImport,AssetHost,HostEvent
 from utils.ansibleAdHoc import myadhoc
 from utils.ansibleplaybook import myplaybook
 from utils.callback import CollectAssetInfoCallback

@@ -349,8 +349,6 @@ input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].
 <!-- inline scripts related to this page -->
 <script type="text/javascript">
 	jQuery(function($) {
-	
-
 		var $validation = false;
 		$('#fuelux-wizard-container')
 		.ace_wizard({
@@ -360,10 +358,6 @@ input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].
 		//.on('changed.fu.wizard', function() {
 		//})
 		.on('finished.fu.wizard', function(e) {
-			var must_info = $('#must-info').serialize();
-			var base_info = $('#base-info').serialize();
-			var addition_info = $('#addition-info').serialize();
-			var datas = must_info+'&'+base_info+'&'+addition_info;
 			bootbox.dialog({
 				title: "添加主机资产",
 				message: "是否确定添加主机资产？", 
@@ -392,12 +386,7 @@ input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].
 		wizard.currentStep = 3;
 		wizard.setState();
 		*/
-	
-		//determine selected step
-		//wizard.selectedItem().step
-	
-	
-	
+
 		//hide or show the other form which requires validation
 		//this is for demo only, you usullay want just one form in your application
 		$('#auto-collect').removeAttr('checked').on('click', function(){
@@ -412,11 +401,7 @@ input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].
 				$('#base-info input').removeAttr('placeholder');
 				$("input[name='auto-collect']").val('no');
 			}
-		})
-	
-	
-	
-		
+		})	
 	})
 </script>
 {% endblock %}

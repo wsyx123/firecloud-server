@@ -2,6 +2,12 @@
 
 {% block css %}
 <link rel="stylesheet" href="/static/assets/css/select2.min.css" />
+<link rel="stylesheet" href="/static/xcConfirm/css/xcConfirm.css" />
+<style>
+.modal{
+	margin-top:60px;
+}
+</style>
 {% endblock %}
 
 {% block main %}
@@ -13,22 +19,15 @@
 					<i class="ace-icon fa fa-home home-icon"></i>
 					<a href="{% url 'dashboard' %}">Home</a>
 				</li>
-
 				<li>PAAS中心</li>
 				<li><a href="{% url 'MesosList' %}">mesos</a></li>
 				<li>创建集群</li>
-				
 			</ul><!-- /.breadcrumb -->
-
 		</div>
-
 		<div class="page-content">
-
 			<div class="row">
 				<div class="col-xs-12">
-
 					<div class="widget-box">
-					
 						<div class="widget-body">
 							<div class="widget-main">
 								<div id="fuelux-wizard-container">
@@ -53,17 +52,16 @@
 												<span class="step">4</span>
 												<span class="title">Mesos Slave</span>
 											</li>
-
-											
 										</ul>
 									</div>
 
 									<hr />
 
 									<div class="step-content pos-rel">
-										<div class="step-pane active" data-step="1">
-
-											<form class="form-horizontal" id="must-info">
+										<form class="form-horizontal" method="POST" id="mesosForm">
+											<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
+											<input name="status" type='text' value="1" hidden>
+											<div class="step-pane active" data-step="1">
 												<div class="form-group">
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">集群名称</label>
 													<div class="col-xs-12 col-sm-6">
@@ -73,14 +71,12 @@
 													</div>
 													<span class="red">*</span>
 												</div>
-
 												
 												<div class="form-group">
 													<label for="inputSuccess" class="col-xs-12 col-sm-3 control-label no-padding-right">节点数</label>
-
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select class="form-control" name="nodeNum">
+															<select class="form-control" name="masterNodeNum">
 																<option value="1">1</option>
 																<option value="3">3</option>
 																<option value="5">5</option>
@@ -90,8 +86,7 @@
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
 															<input type="text" name="masterPort" class="width-100" value="5050" />
@@ -114,7 +109,7 @@
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Zookeeper镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputWarning" class="width-100" />
+															<input type="text" name="zkImage" class="width-100" />
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -122,13 +117,12 @@
 
 												<div class="form-group">
 													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
-
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
-																<option value="192.168.10.1">192.168.10.1</option>
-																<option value="192.168.10.2">192.168.10.2</option>
-																<option value="192.168.10.3">192.168.10.3</option>
+															<select multiple="" name="masterDeploy" class="select2 width-400" data-placeholder="选择部署主机...">
+																{% for host in hosts %}
+																<option value="{{host.host.private_ip}}">{{host.host.private_ip}}</option>
+																{% endfor %}
 															</select>
 														</span>
 													</div>
@@ -136,41 +130,37 @@
 												</div>
 												
 												<div class="center">
-													<label class="col-xs-12 col-sm-6 control-label no-padding-right red">备注:zookeeper默认与mesos master部署在一起。</label>
-													
+													<label class="col-xs-12 col-sm-6 control-label no-padding-right red">备注:zookeeper(端口:2181)默认与mesos master部署在一起。</label>	
 												</div>
-											</form>
-										</div>
+											</div>
 
-										<div class="step-pane" data-step="2">
-											<form class="form-horizontal" id="base-info">
+											<div class="step-pane" data-step="2">
 												<div class="form-group">
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Marathon ID</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputWarning" class="width-100" />
+															<input type="text" name="marathonID" class="width-100" />
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
-
+													<label class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" value="8080" />
+															<input type="text" name="marathonPort" class="width-100" value="8080" />
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Master ZK</label>
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Master ZK</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select class="form-control">
-																<option>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/mesos01</option>
+															<select class="form-control" name="marathonZK">
+																<option></option>
 															</select>
 														</span>
 													</div>
@@ -178,11 +168,10 @@
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Marathon镜像</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Marathon镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" />
+															<input type="text" name="marathonImage" class="width-100" />
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -190,74 +179,66 @@
 
 												<div class="form-group">
 													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
-
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
-																<option value="192.168.10.1">192.168.10.1</option>
-																<option value="192.168.10.2">192.168.10.2</option>
-																<option value="192.168.10.3">192.168.10.3</option>
+															<select multiple="" name="marathonDeploy" class="select2 width-400" data-placeholder="选择部署主机...">
+																{% for host in hosts %}
+																<option value="{{host.host.private_ip}}">{{host.host.private_ip}}</option>
+																{% endfor %}
 															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
+											</div>
 
-											</form>
-										</div>
-
-										<div class="step-pane" data-step="3">
-											<form class="form-horizontal" id="addition-info">
+											<div class="step-pane" data-step="3">
 												<div class="form-group">
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Haproxy ID</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputWarning" class="width-100" />
+															<input type="text" name="haproxyID" class="width-100" />
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">服务端口</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">服务端口</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" value="80" />
-														</span>
-													</div>
-													<span class="red">*</span>
-												</div>
-												
-												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">状态端口</label>
-
-													<div class="col-xs-12 col-sm-6">
-														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" value="9000" />
+															<input type="text" name="servicePort" class="width-100" value="80" />
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Bamboo 端口</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">状态端口</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" value="8000" />
+															<input type="text" name="statusPort" class="width-100" value="9000" />
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Marathon地址</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Bamboo 端口</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select class="form-control">
-																<option>192.168.10.1:8080,192.168.10.2:8080,192.168.10.3:8080</option>
+															<input type="text" name="bambooPort" class="width-100" value="8000" />
+														</span>
+													</div>
+													<span class="red">*</span>
+												</div>
+												
+												<div class="form-group">
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Marathon地址</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control" name="haproxyMarathon">
+																<option></option>
 															</select>
 														</span>
 													</div>
@@ -265,11 +246,10 @@
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Haproxy镜像</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Haproxy镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" />
+															<input type="text" name="haproxImage" class="width-100" />
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -277,51 +257,46 @@
 
 												<div class="form-group">
 													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
-
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
-																<option value="192.168.10.1">192.168.10.1</option>
-																<option value="192.168.10.2">192.168.10.2</option>
-																<option value="192.168.10.3">192.168.10.3</option>
+															<select multiple="" name="haproxyDeploy" class="select2 width-400" data-placeholder="选择部署主机...">
+																{% for host in hosts %}
+																<option value="{{host.host.private_ip}}">{{host.host.private_ip}}</option>
+																{% endfor %}
 															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
-												
-											</form>
-										</div>
-										
-										<div class="step-pane" data-step="4">
-											<form class="form-horizontal" id="base-info">
+											</div>
+											
+											<div class="step-pane" data-step="4">
 												<div class="form-group">
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">标签</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputWarning" class="width-100" placeholder="mesos:slave" />
+															<input type="text" name="slaveLabel" class="width-100" placeholder="mesos:slave" />
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" value="5051" />
+															<input type="text" name="slavePort" class="width-100" value="5051" />
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Master ZK</label>
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Master ZK</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select class="form-control">
-																<option>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/mesos01</option>
+															<select class="form-control" name="slaveZK">
+																<option></option>
 															</select>
 														</span>
 													</div>
@@ -329,11 +304,10 @@
 												</div>
 												
 												<div class="form-group">
-													<label for="inputError" class="col-xs-12 col-sm-3  control-label no-padding-right">Slave镜像</label>
-
+													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Slave镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" id="inputError" class="width-100" />
+															<input type="text" name="slaveImage" class="width-100" />
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -341,23 +315,20 @@
 
 												<div class="form-group">
 													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
-
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<select multiple=""  class="select2 width-400" data-placeholder="Click to Choose...">
-																<option value="192.168.10.1">192.168.10.1</option>
-																<option value="192.168.10.2">192.168.10.2</option>
-																<option value="192.168.10.3">192.168.10.3</option>
+															<select multiple=""  name="slaveDeploy" class="select2 width-400" data-placeholder="选择部署主机...">
+																{% for host in hosts %}
+																<option value="{{host.host.private_ip}}">{{host.host.private_ip}}</option>
+																{% endfor %}
 															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
-
-											</form>
+											</div>
 										</div>
-										
-									</div>
+									</form>
 								</div>
 
 								<hr />
@@ -397,66 +368,283 @@
 <script src="/static/assets/js/select2.min.js"></script>
 <script src="/static/assets/js/bootstrap-multiselect.min.js"></script>
 <script src="/static/assets/js/jquery-typeahead.js"></script>
+<script src="/static/xcConfirm/js/xcConfirm.js"></script>
 
 <!-- inline scripts related to this page -->
 <script type="text/javascript">
-	jQuery(function($) {
-	
-		$('#fuelux-wizard-container')
-		.ace_wizard({
-			//step: 2 //optional argument. wizard will jump to step "2" at first
-			//buttons: '.wizard-actions:eq(0)'
-		})
-		//.on('changed.fu.wizard', function() {
-		//})
-		.on('actionclicked.fu.wizard', function(e){
-			//alert('请填写完整');
-			//e.preventDefault();
-		})
-		.on('finished.fu.wizard', function(e) {
-			bootbox.dialog({
-				title: "部署结果",
-				message: "Thank you! Your information was successfully saved!", 
-				buttons: {
-					"success" : {
-						"label" : "OK",
-						"className" : "btn-sm btn-primary"
-					}
-				}
-			});
-			
-		}).on('stepclick.fu.wizard', function(e){
-			//e.preventDefault();//this will prevent clicking and selecting steps
-			
-		});
-	
-	
-		//select2
-		$('.select2').css('width','100%').select2({allowClear:false})
-		$('#select2-multiple-style .btn').on('click', function(e){
-			var target = $(this).find('input[type=radio]');
-			var which = parseInt(target.val());
-			if(which == 2) $('.select2').addClass('tag-input-style');
-			 else $('.select2').removeClass('tag-input-style');
-		});
-		
-		//////////////////
-		$('.multiselect').multiselect({
-		 enableFiltering: true,
-		 enableHTML: true,
-		 buttonClass: 'btn btn-white btn-primary',
-		 templates: {
-			button: '<button type="button" class="multiselect dropdown-toggle" data-toggle="dropdown"><span class="multiselect-selected-text"></span> &nbsp;<b class="fa fa-caret-down"></b></button>',
-			ul: '<ul class="multiselect-container dropdown-menu"></ul>',
-			filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="fa fa-search"></i></span><input class="form-control multiselect-search" type="text"></div></li>',
-			filterClearBtn: '<span class="input-group-btn"><button class="btn btn-default btn-white btn-grey multiselect-clear-filter" type="button"><i class="fa fa-times-circle red2"></i></button></span>',
-			li: '<li><a tabindex="0"><label></label></a></li>',
-			divider: '<li class="multiselect-item divider"></li>',
-			liGroup: '<li class="multiselect-item multiselect-group"><label></label></li>'
-		 }
-		});
-	
-	
+//检查master info
+function checkMasterInfo(){
+	var clusterName = $("input[name='clusterName']").val();
+	var masterNodeNum = $("select[name='masterNodeNum']").val();
+	var masterPort = $("input[name='masterPort']").val();
+	var masterImage = $("input[name='masterImage']").val();
+	var zkImage = $("input[name='zkImage']").val();
+	var masterDeploy = $("select[name='masterDeploy']").val();
+	if(clusterName.trim().length==0){
+		var txt=  "请填写集群名称,只能是字母与数字组成!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(masterPort.trim().length==0){
+		var txt=  "请填写master端口!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(masterImage.trim().length==0){
+		var txt=  "请填写master镜像!<br />格式:192.168.10.3:5000/mesos-master:1.6.1-rc2";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(zkImage.trim().length==0){
+		var txt=  "请填写zookeeper镜像!<br />格式:192.168.10.3:5000/mesos-master:1.6.1-rc2";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(masterDeploy==null){
+		var txt=  "请选择部署master的主机!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(masterNodeNum != masterDeploy.length){
+		var txt=  "节点数与主机数不一致!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	}
+	genZkUrl(masterDeploy,clusterName);
+	return true;
+}
+
+//根据master选择的主机生成zk  url
+function genZkUrl(masterDeploy,clusterName){
+	var zkStr = 'zk://';
+	for(var i=0;i<masterDeploy.length;i++){
+		if(i==(masterDeploy.length-1)){
+			zkStr = zkStr+masterDeploy[i]+':2181/'+clusterName;
+		}else{
+			zkStr = zkStr+masterDeploy[i]+':2181,'
+		}
+	}
+	$("select[name='marathonZK'] option").text(zkStr);
+	$("select[name='slaveZK'] option").text(zkStr);
+	//<option>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/mesos01</option>
+}
+
+//检查marathon info
+function checkMarathonInfo(){
+	var marathonID = $("input[name='marathonID']").val();
+	var marathonPort = $("input[name='marathonPort']").val();
+	var marathonImage = $("input[name='marathonImage']").val();
+	var marathonDeploy = $("select[name='marathonDeploy']").val();
+	if(marathonID.trim().length==0){
+		var txt=  "请填写marathon ID!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(marathonPort.trim().length==0){
+		var txt=  "请填写marathon 端口!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(marathonImage.trim().length==0){
+		var txt=  "请填写marathon 镜像!<br />格式:192.168.10.3:5000/mesos-master:1.6.1-rc2";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(marathonDeploy==null){
+		var txt=  "请选择部署marathon 的主机!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	genmarathonUrl(marathonDeploy,marathonPort);
+	return true;
+}
+
+//为haproxy生成marathon注册url
+function genmarathonUrl(marathonDeploy,marathonPort){
+	var marathonStr = '';
+	for(var i=0;i<marathonDeploy.length;i++){
+		if(i==(marathonDeploy.length-1)){
+			marathonStr = marathonStr+"http://"+marathonDeploy[i]+":"+marathonPort;
+		}else{
+			marathonStr = marathonStr+"http://"+marathonDeploy[i]+":"+marathonPort+",";
+		}
+	}
+	$("select[name='haproxyMarathon'] option").text(marathonStr);
+	//http://marathon1:8080,http://marathon2:8080,http://marathon3:8080
+}
+
+//检查haproxy info
+function checkHaproxyInfo(){
+	var haproxyID = $("input[name='haproxyID']").val();
+	var servicePort = $("input[name='servicePort']").val();
+	var statusPort = $("input[name='statusPort']").val();
+	var bambooPort = $("input[name='bambooPort']").val();
+	var haproxImage = $("input[name='haproxImage']").val();
+	var haproxyDeploy = $("select[name='haproxyDeploy']").val();
+	if(haproxyID.trim().length==0){
+		var txt=  "请填写haproxy ID!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(servicePort.trim().length==0){
+		var txt=  "请填写haproxy 服务端口!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(statusPort.trim().length==0){
+		var txt = "请填写haproxy 状态端口!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(bambooPort.trim().length==0){
+		var txt = "请填写bamboo 端口!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(haproxImage.trim().length==0){
+		var txt=  "请填写haproxy 镜像!<br />格式:192.168.10.3:5000/mesos-master:1.6.1-rc2";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(haproxyDeploy==null){
+		var txt = "请选择部署haproxy 的主机!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	return true;
+}
+
+function checkSlaveInfo(){
+	var slaveLabel = $("input[name='slaveLabel']").val();
+	var slavePort = $("input[name='slavePort']").val();
+	var slaveImage = $("input[name='slaveImage']").val();
+	var slaveDeploy = $("select[name='slaveDeploy']").val();
+	if(slaveLabel.trim().length==0){
+		var txt = "请填写slave 标签!<br />格式:slave:pool1<br />标签用来划分资源池";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(slavePort.trim().length==0){
+		var txt = "请填写slave 端口!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(slaveImage.trim().length==0){
+		var txt = "请填写slave 镜像!<br />格式:192.168.10.3:5000/mesos-master:1.6.1-rc2";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(slaveDeploy==null){
+		var txt = "请选择部署slave 的主机!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	return true;
+}
+
+jQuery(function($) {
+	$('#fuelux-wizard-container')
+	.ace_wizard({
+		//step: 2 //optional argument. wizard will jump to step "2" at first
+		//buttons: '.wizard-actions:eq(0)'
 	})
+	//.on('changed.fu.wizard', function() {
+	//})
+	.on('actionclicked.fu.wizard', function(e,info){
+		if(info.step==1){
+			if(!checkMasterInfo()){
+				e.preventDefault();
+			}
+		}else if(info.step==2){
+			if(!checkMarathonInfo()){
+				e.preventDefault();
+			}
+		}else if(info.step==3){
+			if(!checkHaproxyInfo()){
+				e.preventDefault();
+			}
+		}else if(info.step==4){
+			if(!checkSlaveInfo()){
+				e.preventDefault();
+			}
+		}
+		
+		//alert('请填写完整');
+	})
+	.on('finished.fu.wizard', function(e) {
+		var cluster_name = $("input[name='clusterName']").val();
+		bootbox.dialog({
+			title: "创建mesos集群",
+			message: "是否创建mesos集群:"+cluster_name+"？", 
+			buttons: {
+				"info" : {
+					"label" : "保存",
+					"className" : "btn-sm btn-info",
+					"callback": function(){
+						$.ajax({
+							type: 'POST',
+							data: $("form").serialize(),
+							success: function(data){
+								if(data['status']){
+									window.wxc.xcConfirm(cluster_name+'创建成功!', window.wxc.xcConfirm.typeEnum.success,{
+										onOk:function(){
+											window.location.href='/mesos/list/';
+										}
+									});
+								}else{
+									var txt = JSON.stringify(data['msg']);
+									window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.error);
+								}
+							}
+						})
+					}
+				},
+				"success" : {
+					"label" : "部署",
+					"className" : "btn-sm btn-success",
+					"callback": function(){
+						$("input[name='status']").val(2);
+						$("#mesosForm").submit();
+					}
+				},
+				"cancel": {
+					"label": "取消",
+					"className": "btn-sm btn-warning"
+				}
+			}
+		});
+	}).on('stepclick.fu.wizard', function(e){
+		//e.preventDefault();//this will prevent clicking and selecting steps
+		
+	});
+
+
+	//select2
+	$('.select2').css('width','100%').select2({allowClear:false})
+	$('#select2-multiple-style .btn').on('click', function(e){
+		var target = $(this).find('input[type=radio]');
+		var which = parseInt(target.val());
+		if(which == 2) $('.select2').addClass('tag-input-style');
+		 else $('.select2').removeClass('tag-input-style');
+	});
+	
+	//////////////////
+	$('.multiselect').multiselect({
+	 enableFiltering: true,
+	 enableHTML: true,
+	 buttonClass: 'btn btn-white btn-primary',
+	 templates: {
+		button: '<button type="button" class="multiselect dropdown-toggle" data-toggle="dropdown"><span class="multiselect-selected-text"></span> &nbsp;<b class="fa fa-caret-down"></b></button>',
+		ul: '<ul class="multiselect-container dropdown-menu"></ul>',
+		filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="fa fa-search"></i></span><input class="form-control multiselect-search" type="text"></div></li>',
+		filterClearBtn: '<span class="input-group-btn"><button class="btn btn-default btn-white btn-grey multiselect-clear-filter" type="button"><i class="fa fa-times-circle red2"></i></button></span>',
+		li: '<li><a tabindex="0"><label></label></a></li>',
+		divider: '<li class="multiselect-item divider"></li>',
+		liGroup: '<li class="multiselect-item multiselect-group"><label></label></li>'
+	 }
+	});
+
+
+})
 </script>
 {% endblock %}

@@ -1,9 +1,16 @@
 {% extends "base/base.html" %}
+{% load mesos %}
 {% block css %}
 <style type="text/css">
-	.gray{
-		color:#8B959C;
-	}
+.gray{
+	color:#C0C0C0;
+}
+#disabled{
+	cursor:not-allowed;
+}
+#enabled{
+	cursor:pointer;
+}
 </style>
 {% endblock %}
 {% block main %}
@@ -35,6 +42,7 @@
 							
 
 							<div class="clearfix">
+								<a href="{% url 'MesosIdleHostList' %}"><button class="btn btn-xs btn-info">空闲主机</button></a>
 								<a href="{% url 'MesosAddCluster' %}"><button class="btn btn-xs btn-info">创建集群</button></a>
 								<a href="{% url 'MesosAddNode' %}"><button class="btn btn-xs btn-info">添加节点</button></a>
 								<div class="pull-right tableTools-container"></div>
@@ -57,23 +65,25 @@
 											<th class="hidden-xs">存储</th>
 											<th>状态</th>
 											<th class="hidden-xs"><i class="ace-icon fa fa-clock-o"></i>创建时间</th>
-											
+											<th>操作</th>
 										</tr>
 									</thead>
 
 									<tbody>
-										{% for cluster in clusters %}
+										{% for cluster in cluster_list %}
 										<tr>
-											<td><a href="{% url 'MesosOverview' clsname=cluster.name %}">{{ cluster.name }}</a></td>
-											<td>{{ cluster.manager }}</td>
-											<td>{{ cluster.node }}</td>
-											<td>{{ cluster.haproxy }}</td>
-											<td class="hidden-xs">{{ cluster.cpu.use }}/{{cluster.cpu.total }} Cores <span class="gray">({{cluster.cpu.percent}}%)</span></td>
-											<td class="hidden-xs">{{ cluster.memory.use }}/{{cluster.memory.total }} GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
-											<td class="hidden-xs">{{ cluster.memory.use }}/{{cluster.memory.total }} GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
-											<td><label class="label label-sm label-danger">{{ cluster.status}}</label></td>
-											<td class="hidden-xs">2018/04/25 11:35:04</td>
-											
+											<td><a href="{% url 'MesosOverview' clsname=cluster.clusterName %}">{{ cluster.clusterName }}</a></td>
+											<td>{{ cluster.masterNodeNum }}</td>
+											<td>{{ cluster.slaveDeploy|countNode }}</td>
+											<td>{{ cluster.haproxyDeploy|countNode }}</td>
+											<td class="hidden-xs">/ Cores <span class="gray">({{cluster.cpu.percent}}%)</span></td>
+											<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
+											<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
+											<td><label class="label label-sm {{cluster.status|returnClass}} ">{{ cluster.get_status_display}}</label></td>
+											<td class="hidden-xs">{{ cluster.create_time|date:"Y-m-d H:i:s"}}</td>
+											<td>
+												{% opp_td cluster.status %}
+											</td>											
 										</tr>
 										{% endfor %}
 
@@ -113,7 +123,7 @@
 			bAutoWidth: false,
 			"aoColumns": [
 			  { "bSortable": false },
-			  null, null,null, null, null,null,null,
+			  null, null,null, null, null,null,null,null,
 			  { "bSortable": false }
 			],
 			"aaSorting": [],

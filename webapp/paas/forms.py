@@ -6,9 +6,14 @@ Created on 2019年1月4日 下午3:16:03
 '''
 
 from django import forms
-from webapp.models import RepositoryHost
+from webapp.models import RepositoryHost,MesosCluster
 
 class RepositoryHostForm(forms.ModelForm):
     class Meta:
         model = RepositoryHost
+        fields = "__all__"
+
+class MesosClusterForm(forms.ModelForm):
+    class Meta:
+        model = MesosCluster
         fields = "__all__"
