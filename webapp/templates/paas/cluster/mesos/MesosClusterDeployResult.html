@@ -1,0 +1,174 @@
+{% extends "base/base.html" %}
+{% load menu %}
+{% block css %}
+<link rel="stylesheet" href="/static/css/fontello/fontello.css" />
+<link rel="stylesheet" href="/static/xcConfirm/css/xcConfirm.css" />
+<style>
+.health::before{
+	color: #00AA00;
+}
+.unhealth::before{
+	color: #FF0000;
+}
+#deplayDetail td{
+	border:none;
+}
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>PAAS中心</li>
+				<li>
+					<a href="{% url 'MesosList' %}">mesos集群</a>
+				</li>
+				<li>部署详情</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<input name="clusterName" value="{{cluster.clusterName}}" hidden />
+					<table class="table table-bordered">
+						<tr>
+							<th class="col-sm-1">集群名称</th><td class="col-sm-2">{{cluster.clusterName}}</td>
+							<th class="col-sm-1">状态</th><td class="col-sm-2" id="deployStatus">正在部署...</td>
+						</tr>
+						<tr>
+							<th class="col-sm-1">master节点</th><td class="col-sm-2">{{cluster.masterDeploy}}</td>
+							<th class="col-sm-1">marathon节点</th><td class="col-sm-2">{{cluster.masterDeploy}}</td>
+						</tr>
+						<tr>
+							<th class="col-sm-1">haproxy 节点</th><td class="col-sm-2">{{cluster.masterDeploy}}</td>
+							<th class="col-sm-1">slave 节点</th><td class="col-sm-2">{{cluster.masterDeploy}}</td>
+						</tr>
+						<tr>
+							<td colspan="6">
+								<table class="table" id="deplayDetail">
+									<tbody>
+										<tr id="checkCon">
+											<td class="col-sm-2"><i class="fa fa-caret-right fa-lg green"></i> 主机联通性检查</td>
+											<td><span class="label label-sm">等待中...</span></td>
+											<td>-</td>
+											<td>-</td>
+											<td>N/A</td>
+										</tr>
+										<tr id="imgDownload">
+											<td><i class="fa fa-caret-right fa-lg green"></i> 镜像下载</td>
+											<td><span class="label label-sm">等待中...</span></td>
+											<td>-</td>
+											<td>-</td>
+											<td>N/A</td>
+										</tr>
+										<tr id="deployZK">
+											<td><i class="fa fa-caret-right fa-lg green"></i> 部署zookeeper</td>
+											<td><span class="label label-sm">等待中...</span></td>
+											<td>-</td>
+											<td>-</td>
+											<td>N/A</td>
+										</tr>
+										<tr id="deployMaster">
+											<td><i class="fa fa-caret-right fa-lg green"></i> 部署mesos master</td>
+											<td><span class="label label-sm">等待中...</span></td>
+											<td>-</td>
+											<td>-</td>
+											<td>N/A</td>
+										</tr>
+										<tr id="deployMT">
+											<td><i class="fa fa-caret-right fa-lg green"></i> 部署marathon</td>
+											<td><span class="label label-sm">等待中...</span></td>
+											<td>-</td>
+											<td>-</td>
+											<td>N/A</td>
+										</tr>
+										<tr id="deployHA">
+											<td><i class="fa fa-caret-right fa-lg green"></i> 部署haproxy</td>
+											<td><span class="label label-sm">等待中...</span></td>
+											<td>-</td>
+											<td>-</td>
+											<td>N/A</td>
+										</tr>
+										<tr id="deploySlave">
+											<td><i class="fa fa-caret-right fa-lg green"></i> 部署mesos slave</td>
+											<td><span class="label label-sm">等待中...</span></td>
+											<td>-</td>
+											<td>-</td>
+											<td>N/A</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</table>
+					
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/xcConfirm/js/xcConfirm.js"></script>
+<script type="text/javascript">
+
+getDeployResult();
+
+function getDeployResult(){
+	var clusterName = $("input[name='clusterName']").val();
+	var interval = setInterval(function(){
+		$.ajax({
+			type: 'POST',
+			url : '/mesos/add/deploy/result/',
+			data: {'clusterName':clusterName},
+			success: function(data){
+				var id = data['data']['step_name'];
+				if(data['status']=='running'){
+					if(data['data']['status']==2){
+						$("#"+id).children().eq(1).html('<span class="label label-sm label-info">进行中...</span>');
+						$("#"+id).children().eq(2).text(data['data']['start_time']);
+						$("#"+id).children().eq(3).html('<img src="/static/images/waiting.gif" />');
+					}else if(data['data']['status']==3){
+						$("#"+id).children().eq(1).html('<span class="label label-success">已完成</span>');
+						$("#"+id).children().eq(2).text(data['data']['start_time']);
+						$("#"+id).children().eq(3).html('<i class="fa fa-check-circle fa-lg health"></i>');
+					}else if(data['data']['status']==4){
+						$("#"+id).children().eq(1).html('<span class="label label-success">已完成</span>');
+						$("#"+id).children().eq(2).text(data['data']['start_time']);
+						$("#"+id).children().eq(3).html('<i class="icon-cancel-circled fa-lg red"></i>');
+						$("#"+id).children().eq(4).html('<span class="red">'+data['data']['msg']+'</span>');
+					}
+				}else if(data['status']=='finished'){
+					if(data['data']['status']==4){
+						$("#"+id).children().eq(1).html('<span class="label label-success">已完成</span>');
+						$("#"+id).children().eq(2).text(data['data']['start_time']);
+						$("#"+id).children().eq(3).html('<i class="icon-cancel-circled fa-lg red"></i>');
+						$("#"+id).children().eq(4).html('<span class="red">'+data['data']['msg']+'</span>');
+						$("#deployStatus").html('<span class="label label-danger">部署失败</span>');
+						clearInterval(interval);
+						window.wxc.xcConfirm(clusterName+'集群已部署失败!', window.wxc.xcConfirm.typeEnum.error);
+					}else{
+						$("#deployStatus").html('<span class="label label-success">部署完成</span>');
+						clearInterval(interval);
+						window.wxc.xcConfirm(clusterName+'集群已部署成功!', window.wxc.xcConfirm.typeEnum.success);
+					}
+				}
+			}
+		})
+	},1000)
+}
+</script>
+{% endblock %}

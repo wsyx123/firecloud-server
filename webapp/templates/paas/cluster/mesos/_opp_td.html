@@ -1,7 +1,7 @@
 {% ifequal status 1 %}
 <div class="action-buttons">
-	<span class="green" id="enabled">
-		<i class="fa fa-telegram bigger-130" title="部署"></i>
+	<span class="green" id="enabled" onclick="deployCluster(this);">
+		<i class="fa fa-telegram bigger-130" title="部署" data-toggle="modal" data-target="#mydeploy"></i>
 	</span>
 	<span class="gray" id="disabled">
 		<i class="fa fa-play-circle bigger-130" title="启动"></i>
@@ -30,28 +30,13 @@
 	</span>
 </div>
 {% endifequal %}
-{% ifequal status 3 %}
-<div class="action-buttons">
-	<span class="green" id="enabled">
-		<i class="fa fa-telegram bigger-130" title="部署"></i>
-	</span>
-	<span class="gray" id="disabled">
-		<i class="fa fa-play-circle bigger-130" title="启动"></i>
-	</span>
-	<span class="gray" id="disabled">
-		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
-	</span>
-	<span class="red" id="enabled">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
-	</span>
-</div>
-{% endifequal %}
+
 {% ifequal status 4 %}
 <div class="action-buttons">
-	<span class="green" id="enabled">
+	<span class="gray" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="blue" id="enabled">
+	<span class="gray" id="disabled">
 		<i class="fa fa-play-circle bigger-130" title="启动"></i>
 	</span>
 	<span class="red" id="enabled">
@@ -62,31 +47,16 @@
 	</span>
 </div>
 {% endifequal %}
-{% ifequal status 5 %}
+
+{% ifequal status 7 %}
 <div class="action-buttons">
-	<span class="green" id="enabled">
+	<span class="gray" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
 	<span class="blue" id="enabled">
 		<i class="fa fa-play-circle bigger-130" title="启动"></i>
 	</span>
-	<span class="red" id="enabled">
-		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
-	</span>
-	<span class="red" id="enabled">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
-	</span>
-</div>
-{% endifequal %}
-{% ifequal status 6 %}
-<div class="action-buttons">
-	<span class="green" id="enabled">
-		<i class="fa fa-telegram bigger-130" title="部署"></i>
-	</span>
-	<span class="blue" id="enabled">
-		<i class="fa fa-play-circle bigger-130" title="启动"></i>
-	</span>
-	<span class="red" id="enabled">
+	<span class="gray" id="disabled">
 		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
 	</span>
 	<span class="red" id="enabled">

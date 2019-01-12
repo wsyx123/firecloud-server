@@ -1,0 +1,282 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<style>
+.table > tbody > tr >td{
+	border-top: none;
+}
+
+.master,.marathon,.zookeeper{
+	display:none;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>PAAS中心</li>
+				<li><a href="{% url 'MesosList' %}">mesos</a></li>
+				<li>{{ clsname }}</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<h4 class="header smaller lighter blue">
+						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						管理节点状态
+					</h4>
+					<table class="table table-bordered">
+						<tr>
+							<th>类型</th>
+							<th>所在主机</th>
+							<th>容器名称</th>
+							<th>容器状态</th>
+							<th>服务状态</th>
+							<th>操作</th>
+						</tr>
+						<tr>
+							<td>mesos</td>
+							<td>192.168.10.3</td>
+							<td>mesos-master01</td>
+							<td><span class="label label-sm label-success">运行</span></td>
+							<td><span class="label label-sm label-success">运行</span></td>
+							<td>
+								<div class="action-buttons">
+									<a href="#" class="blue">
+										<i class="fa fa-play-circle bigger-130" title="启动"></i>
+									</a>
+									<a href="#" class="red">
+										<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+									</a>
+									<a href="#" class="green">
+										<i class="fa fa-info-circle bigger-130" title="日志"></i>
+									</a>
+									<a href="#" class="red">
+										<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+									</a>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>zookeeper</td>
+							<td>192.168.10.3</td>
+							<td>zookeeper01</td>
+							<td><span class="label label-sm label-success">运行</span></td>
+							<td><span class="label label-sm label-success">运行</span></td>
+							<td>
+								<div class="action-buttons">
+									<a href="#" class="blue">
+										<i class="fa fa-play-circle bigger-130" title="启动"></i>
+									</a>
+									<a href="#" class="red">
+										<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+									</a>
+									<a href="#" class="green">
+										<i class="fa fa-info-circle bigger-130" title="日志"></i>
+									</a>
+									<a href="#" class="red">
+										<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+									</a>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>marathon</td>
+							<td>192.168.10.3</td>
+							<td>marathon01</td>
+							<td><span class="label label-sm label-success">运行</span></td>
+							<td><span class="label label-sm label-danger">停止</span></td>
+							<td>
+								<div class="action-buttons">
+									<a href="#" class="blue">
+										<i class="fa fa-play-circle bigger-130" title="启动"></i>
+									</a>
+									<a href="#" class="red">
+										<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+									</a>
+									<a href="#" class="green">
+										<i class="fa fa-info-circle bigger-130" title="日志"></i>
+									</a>
+									<a href="#" class="red">
+										<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+									</a>
+								</div>
+							</td>
+						</tr>
+					</table>
+					<!-- mesos master configure -->
+					<h4 class="header smaller lighter blue">
+						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						Master 运行配置
+						<span class="pull-right"><i class="fa fa-angle-double-down"></i></span>
+					</h4>
+					<table class="table master">
+					  <tbody>
+						<tr>
+						  <td class="col-sm-3">VERSION</td>
+						  <td>1.6.1-rc2</td>
+						</tr>
+						<tr>
+						  <td>IMAGE</td>
+						  <td>mesosphere/mesos-master:1.6.1-rc2</td>
+						</tr>
+						<tr>
+						  <td>HOST</td>
+						  <td>192.168.10.1,192.168.10.2,192.168.10.3</td>
+						</tr>
+						<tr>
+						  <td>LEADER</td>
+						  <td>192.168.10.1</td>
+						</tr>
+						<tr>
+						  <td>PORT</td>
+						  <td>5050</td>
+						</tr>
+						<tr>
+						  <td>MESOS_ZK</td>
+						  <td>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/mesos</td>
+						</tr>
+						<tr>
+						  <td>MESOS_CLUSTER</td>
+						  <td>dcos</td>
+						</tr>
+						<tr>
+						  <td>MESOS_LOG_DIR</td>
+						  <td>/var/log/mesos</td>
+						</tr>
+						<tr>
+						  <td>MESOS_WORK_DIR</td>
+						  <td>/var/tmp/mesos</td>
+						</tr>
+						<tr>
+						  <td>Documentation</td>
+						  <td><a href="https://github.com/mesosphere/docker-containers/tree/master/mesos" target="view_window">Readme</a></td>
+						</tr>
+					  </tbody>
+					</table>
+					<!-- zookeeper configure -->
+					<h4 class="header smaller lighter blue">
+						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						Zookeeper 运行配置
+						<span class="pull-right"><i class="fa fa-angle-double-down"></i></span>
+					</h4>
+					
+					<table class="table zookeeper">
+					  <tbody>
+						<tr>
+						  <td class="col-sm-3">VERSION</td>
+						  <td>3.4.13</td>
+						</tr>
+						<tr>
+						  <td>IMAGE</td>
+						  <td>zookeeper:3.4.13</td>
+						</tr>
+						<tr>
+						  <td>HOST</td>
+						  <td>192.168.10.1,192.168.10.2,192.168.10.3</td>
+						</tr>
+						<tr>
+						  <td>LEADER</td>
+						  <td>192.168.10.1</td>
+						</tr>
+						<tr>
+						  <td>PORT</td>
+						  <td>2181,2888,3888</td>
+						</tr>
+						<tr>
+						  <td>Datadir</td>
+						  <td>/data</td>
+						</tr>
+						<tr>
+						  <td>Confdir</td>
+						  <td>/conf</td>
+						</tr>
+						<tr>
+						  <td>Documentation</td>
+						  <td><a href="https://hub.docker.com/_/zookeeper/" target="view_window">Readme</a></td>
+						</tr>
+					  </tbody>
+					</table>
+					
+					<!-- marathon configure -->
+					<h4 class="header smaller lighter blue">
+						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						Marathon 运行配置
+						<span class="pull-right"><i class="fa fa-angle-double-down"></i></span>
+					</h4>
+					
+					<table class="table marathon">
+					  <tbody>
+						<tr>
+						  <td class="col-sm-3">VERSION</td>
+						  <td>v1.7.50</td>
+						</tr>
+						<tr>
+						  <td>IMAGE</td>
+						  <td>mesosphere/marathon:v1.7.50</td>
+						</tr>
+						<tr>
+						  <td>HOST</td>
+						  <td>192.168.10.1,192.168.10.2,192.168.10.3</td>
+						</tr>
+						<tr>
+						  <td>LEADER</td>
+						  <td>192.168.10.1</td>
+						</tr>
+						<tr>
+						  <td>PORT</td>
+						  <td>8080</td>
+						</tr>
+						<tr>
+						  <td>MARATHON_MASTER</td>
+						  <td>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/mesos</td>
+						</tr>
+						<tr>
+						  <td>MARATHON_ZK</td>
+						  <td>zk://192.168.10.1:2181,192.168.10.2:2181,192.168.10.3:2181/marathon</td>
+						</tr>
+						<tr>
+						  <td>Documentation</td>
+						  <td><a href="https://mesosphere.github.io/marathon/" target="view_window">Readme</a></td>
+						</tr>
+					  </tbody>
+					</table>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+$("[data-toggle='popover']").popover({
+		trigger:'click', //触发方式
+		
+		title:"标题",//设置 弹出框 的标题
+		html: true, // 为true的话，data-content里就能放html代码了
+		content:ContentMethod('txt'),//这里可以直接写字符串，也可以 是一个函数，该函数返回一个字符串；
+})
+function ContentMethod(txt) {
+	return '<table class="table table-bordered">\
+	<tr><th>序号</th><th>时间</th><th>变更人</th><th>变更内容</th></tr>\
+	<tr><td>1</td><td>2018/8/1 07:12:21</td><td>杨旭</td><td>端口(22 -> 22989)</td></tr>\
+	</table>';
+}
+</script>
+{% endblock %}
+

@@ -22,12 +22,17 @@ def return_class(status_num):
                   3:'label-danger',
                   4:'label-success',
                   5:'label-danger',
-                  6:'label-warning'
+                  6:'label-warning',
+                  7:'label-default'
                   }
     return status_map[int(status_num)]
 
 @register.inclusion_tag('paas/cluster/mesos/_opp_td.html')
 def opp_td(status_num):
+    if status_num in [1,3]:
+        status_num = 1
+    if status_num in [4,5,6]:
+        status_num = 4
     return {'status':status_num}
     
     

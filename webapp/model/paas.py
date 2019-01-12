@@ -29,7 +29,8 @@ class MesosCluster(models.Model):
                      (3,'部署失败'),
                      (4,'集群正常'),
                      (5,'集群错误'),
-                     (6,'集群异常')
+                     (6,'集群异常'),
+                     (7,'还未启动')
                      )
     #master
     clusterName = models.CharField(max_length=32,unique=True)
@@ -50,7 +51,7 @@ class MesosCluster(models.Model):
     statusPort = models.IntegerField()
     bambooPort = models.IntegerField()
     haproxyMarathon = models.CharField(max_length=128)
-    haproxImage = models.CharField(max_length=128)
+    haproxyImage = models.CharField(max_length=128)
     haproxyDeploy = models.CharField(max_length=256)
     #slave
     slaveLabel = models.CharField(max_length=32)
@@ -63,29 +64,20 @@ class MesosCluster(models.Model):
     status = models.IntegerField(choices=clusterStatus,default=1)
     create_time = models.DateTimeField(auto_now_add=True)
     
-
-    
-class MesosCluster1(models.Model):
-    c_status = (
-                (1,'health'),
-                (2,'warning'),
-                (3,'danger')
-                )
-    name = models.CharField(max_length=32,verbose_name='名称')
-    master_nodes = models.IntegerField(verbose_name='管理节点')
-    slave_nodes = models.IntegerField(verbose_name='计算节点')
-    haproxy_nodes = models.IntegerField(verbose_name='Haproxy节点')
-    cpu_used = models.FloatField(verbose_name='CPU使用核数')
-    cpu_total = models.FloatField(verbose_name='CPU总核数')
-    memory_used = models.FloatField(verbose_name='已使用内存')
-    memory_total = models.FloatField(verbose_name='内存总量')
-    disk_used = models.FloatField(verbose_name='已使用存储')
-    disk_total = models.FloatField(verbose_name='存储总量')
-    status = models.IntegerField(choices=c_status,verbose_name='状态')
-    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
-    provider = models.CharField(max_length=32,verbose_name='供应商')
-    def __unicode__(self):
-        return '%s' %(self.name)
+class MesosDeployLog(models.Model):
+    deployStatus = (
+                    (1,'等待中'),
+                    (2,'进行中'),
+                    (3,'成功'),
+                    (4,'失败')
+                    )
+    celery_id = models.CharField(max_length=64)
+    cluster_name = models.CharField(max_length=32)
+    step_name = models.CharField(max_length=32)
+    start_time = models.DateTimeField(null=True,blank=True)
+    status = models.IntegerField(choices=deployStatus,default=1)
+    is_read = models.BooleanField(default=False)
+    msg = models.TextField(null=True,blank=True)
       
 class MesosMaster(models.Model):
     m_status = (

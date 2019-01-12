@@ -1,7 +1,8 @@
 from django.conf.urls import url
 from webapp.paas.paas import Kubernetes,K8sOverview,K8sDetail,\
 MesosList,MesosOverview,MesosDetail,MesosAddCluster,MesosAddNode,\
-ListNetwork,ListStorage,MesosIdleHostList,mesos_idle_host_add,MesosIdleHostDelete
+ListNetwork,ListStorage,MesosIdleHostList,mesos_idle_host_add,MesosIdleHostDelete,\
+MesosMasterDetail,mesos_cluster_deploy,MesosClusterDeployResult
 from webapp.paas.repository import RepositoryHostList,RepositoryImageList,\
 RepositoryHostAdd,RepositoryHostDelete,repositor_refresh
 
@@ -13,8 +14,11 @@ urlpatterns = [
     url(r'^mesos/list/idle/$',MesosIdleHostList.as_view(),name='MesosIdleHostList'),
     url(r'^mesos/list/$',MesosList.as_view(),name='MesosList'),
     url(r'^mesos/list/detail/(?P<clsname>.+)$',MesosDetail.as_view(),name='MesosDetail'),
+    url(r'^mesos/list/master/(?P<clsname>.+)$',MesosMasterDetail.as_view(),name='MesosMasterDetail'),
     url(r'^mesos/list/overview/(?P<clsname>.+)/$',MesosOverview.as_view(),name='MesosOverview'),
     url(r'^mesos/add/cluster/$',MesosAddCluster.as_view(),name='MesosAddCluster'),
+    url(r'^mesos/add/deploy/$',mesos_cluster_deploy),
+    url(r'^mesos/add/deploy/result/$',MesosClusterDeployResult.as_view()),
     url(r'^mesos/add/node/$',MesosAddNode.as_view(),name='MesosAddNode'),
     url(r'^mesos/add/idle/$',mesos_idle_host_add),
     url(r'^mesos/delete/idle/(?P<pk>.+)$',MesosIdleHostDelete.as_view()),

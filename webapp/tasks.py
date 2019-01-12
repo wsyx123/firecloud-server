@@ -12,9 +12,11 @@ from webapp.models import HostImport,AssetHost,HostEvent
 from utils.ansibleAdHoc import myadhoc
 from utils.ansibleplaybook import myplaybook
 from utils.callback import CollectAssetInfoCallback
+from utils.mesos_deploy import MesosDeploy
 import xlrd
 from django.core.validators import validate_ipv4_address
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from datetime import datetime
 import time
 
@@ -191,6 +193,52 @@ def playbook_execute_task(task_id,playbook_full_name,playbook_full_host,callback
         obj.msg = execute_host_count # exception msg
         obj.save()
 
+#to initialize mesos cluster deploy log table
+def init_deploy_log_table(celery_id,cluster_name,deploy_model):
+    deploy_model.objects.filter(cluster_name=cluster_name).delete()
+    step_name_list = ["checkCon","imgDownload",
+                      "deployZK","deployMaster",
+                      "deployMT","deployHA","deploySlave"]
+    MesosDeployLogList = []
+    for step_name in step_name_list:
+        deployLog = deploy_model(celery_id=celery_id,cluster_name=cluster_name,step_name=step_name)
+        MesosDeployLogList.append(deployLog)
+    deploy_model.objects.bulk_create(MesosDeployLogList)
+
+@task(name='mesos_cluster_deploy_task',bind=True)
+def mesos_cluster_deploy_task(self,clsObj,deploy_model):
+    celery_id = self.request.id
+    clusterName = clsObj.clusterName
+    #to insert into MesosDeployLog
+    init_deploy_log_table(celery_id, clusterName, deploy_model)
+    #Check the host connectivity
+    deploy_obj = deploy_model.objects.get(Q(cluster_name=clusterName),Q(step_name='checkCon'))
+    deploy_obj.status = 2
+    deploy_obj.save()
+    deploy_cls_instance = MesosDeploy(clsObj,deploy_model)
+    check_con_result = deploy_cls_instance.check_con(deploy_obj)
+    if not check_con_result:
+        return 'failed'
+        
+    #download docker image
+    deploy_obj = deploy_model.objects.get(Q(cluster_name=clusterName),Q(step_name='imgDownload'))
+    deploy_obj.status = 2
+    deploy_obj.save()
+    img_download_result = deploy_cls_instance.img_download(deploy_obj)
+    if not img_download_result:
+        return 'failed'
+    #create container
+    step_name_list = ["deployZK","deployMaster","deployMT","deployHA","deploySlave"]
+    for step_name in step_name_list:
+        deploy_obj = deploy_model.objects.get(Q(cluster_name=clusterName),Q(step_name=step_name))
+        deploy_obj.status = 2
+        deploy_obj.save()
+        create_container_result = deploy_cls_instance.create_container(deploy_obj,step_name)
+        if not create_container_result:
+            return 'failed'
+    return True
+    
+    
 # @shared_task(name='test_celery')
 # def test_celery():
 #     print 'test_celery'

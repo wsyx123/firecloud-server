@@ -578,7 +578,7 @@ jQuery(function($) {
 			message: "是否创建mesos集群:"+cluster_name+"？", 
 			buttons: {
 				"info" : {
-					"label" : "保存",
+					"label" : "创建",
 					"className" : "btn-sm btn-info",
 					"callback": function(){
 						$.ajax({
@@ -597,14 +597,6 @@ jQuery(function($) {
 								}
 							}
 						})
-					}
-				},
-				"success" : {
-					"label" : "部署",
-					"className" : "btn-sm btn-success",
-					"callback": function(){
-						$("input[name='status']").val(2);
-						$("#mesosForm").submit();
 					}
 				},
 				"cancel": {

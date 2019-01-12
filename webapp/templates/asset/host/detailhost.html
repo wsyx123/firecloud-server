@@ -7,6 +7,10 @@
 .unhealth::before{
 	color: #FF0000;
 }
+.header {
+    margin-top:0px;
+}
+
 </style>
 {% endblock %}
 {% block main %}
@@ -32,11 +36,13 @@
 		</div>
 
 		<div class="page-content">
-			<h3 class="header smaller lighter blue">
-			<i class="fa fa-hand-o-right" aria-hidden="true"></i>
-			{{detailhost.private_ip}}详细信息</h3>
+			
 			<div class="row">
 				<div class="col-xs-12">
+					<h4 class="header smaller lighter blue">
+						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						{{detailhost.private_ip}}详细信息
+					</h4>
 					<div class="tabbable">
 						<ul class="nav nav-tabs" id="myTab4">
 							<li class="active">

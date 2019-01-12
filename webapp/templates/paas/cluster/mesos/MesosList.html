@@ -1,6 +1,7 @@
 {% extends "base/base.html" %}
 {% load mesos %}
 {% block css %}
+<link rel="stylesheet" href="/static/xcConfirm/css/xcConfirm.css" />
 <style type="text/css">
 .gray{
 	color:#C0C0C0;
@@ -33,72 +34,88 @@
 		</div>
 
 		<div class="page-content">
-
 			<div class="row">
 				<div class="col-xs-12">
-				
-					<div class="row">
-						<div class="col-xs-12">
-							
-
-							<div class="clearfix">
-								<a href="{% url 'MesosIdleHostList' %}"><button class="btn btn-xs btn-info">空闲主机</button></a>
-								<a href="{% url 'MesosAddCluster' %}"><button class="btn btn-xs btn-info">创建集群</button></a>
-								<a href="{% url 'MesosAddNode' %}"><button class="btn btn-xs btn-info">添加节点</button></a>
-								<div class="pull-right tableTools-container"></div>
-							</div>
-							
-
-							<!-- div.table-responsive -->
-
-							<!-- div.dataTables_borderWrap -->
-							<div>
-								<table id="dynamic-table" class="table table-striped table-bordered table-hover">
-									<thead>
-										<tr>
-											<th>名称</th>
-											<th>管理节点</th>
-											<th>计算节点</th>
-											<th>Haproxy节点</th>
-											<th class="hidden-xs">CPU</th>
-											<th class="hidden-xs">内存</th>
-											<th class="hidden-xs">存储</th>
-											<th>状态</th>
-											<th class="hidden-xs"><i class="ace-icon fa fa-clock-o"></i>创建时间</th>
-											<th>操作</th>
-										</tr>
-									</thead>
-
-									<tbody>
-										{% for cluster in cluster_list %}
-										<tr>
-											<td><a href="{% url 'MesosOverview' clsname=cluster.clusterName %}">{{ cluster.clusterName }}</a></td>
-											<td>{{ cluster.masterNodeNum }}</td>
-											<td>{{ cluster.slaveDeploy|countNode }}</td>
-											<td>{{ cluster.haproxyDeploy|countNode }}</td>
-											<td class="hidden-xs">/ Cores <span class="gray">({{cluster.cpu.percent}}%)</span></td>
-											<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
-											<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
-											<td><label class="label label-sm {{cluster.status|returnClass}} ">{{ cluster.get_status_display}}</label></td>
-											<td class="hidden-xs">{{ cluster.create_time|date:"Y-m-d H:i:s"}}</td>
-											<td>
-												{% opp_td cluster.status %}
-											</td>											
-										</tr>
-										{% endfor %}
-
-									</tbody>
-								</table>
-							</div>
-						</div>
+			
+					<div class="clearfix">
+						<a href="{% url 'MesosIdleHostList' %}"><button class="btn btn-xs btn-info">空闲主机</button></a>
+						<a href="{% url 'MesosAddCluster' %}"><button class="btn btn-xs btn-info">创建集群</button></a>
+						<a href="{% url 'MesosAddNode' %}"><button class="btn btn-xs btn-info">添加节点</button></a>
+						<div class="pull-right tableTools-container"></div>
 					</div>
-				
-					<!-- PAGE CONTENT ENDS -->
+
+					<table id="dynamic-table" class="table table-striped table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>名称</th>
+								<th>管理节点</th>
+								<th>计算节点</th>
+								<th>Haproxy节点</th>
+								<th class="hidden-xs">CPU</th>
+								<th class="hidden-xs">内存</th>
+								<th class="hidden-xs">存储</th>
+								<th>状态</th>
+								<th class="hidden-xs"><i class="ace-icon fa fa-clock-o"></i>创建时间</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+
+						<tbody>
+							{% for cluster in cluster_list %}
+							<tr>
+								<td>{{ cluster.id }}</td>
+								<td><a href="{% url 'MesosOverview' clsname=cluster.clusterName %}">{{ cluster.clusterName }}</a></td>
+								<td><a href="{% url 'MesosMasterDetail' clsname=cluster.clusterName %}">{{ cluster.masterNodeNum }}</a></td>
+								<td><a href="{% url 'MesosOverview' clsname=cluster.clusterName %}">{{ cluster.slaveDeploy|countNode }}</a></td>
+								<td><a href="{% url 'MesosOverview' clsname=cluster.clusterName %}">{{ cluster.haproxyDeploy|countNode }}</a></td>
+								<td class="hidden-xs">/ Cores <span class="gray">({{cluster.cpu.percent}}%)</span></td>
+								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
+								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
+								<td><label class="label label-sm {{cluster.status|returnClass}} ">{{ cluster.get_status_display}}</label></td>
+								<td class="hidden-xs">{{ cluster.create_time|date:"Y-m-d H:i:s"}}</td>
+								<td>
+									{% opp_td cluster.status %}
+								</td>											
+							</tr>
+							{% endfor %}
+
+						</tbody>
+					</table>
 				</div><!-- /.col -->
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
+		<!-- 刷新模态框（Modal） -->
+		<div class="modal fade" id="mydeploy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>确认窗口</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div style="padding-left:80px;">
+							<label>是否部署: <span id="refresh_name"></span> 集群?</label>
+						</div>
+						<div style="padding-left:80px;">
+							<strong id="refreshFailMsg" style="color: red;"></strong>
+						</div>
+					</div>
+					<div class="modal-footer center">
+						<button type="button" class="btn btn-success" onclick="deployClusterAck();" data-dismiss="modal" >
+							<i class="fa fa-telegram bigger-130">部署</i>
+						</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+		
 	</div>
-	</div><!-- /.main-content -->
+</div><!-- /.main-content -->
 {% endblock %}
 
 {% block js %}
@@ -112,8 +129,30 @@
 <script src="/static/assets/js/buttons.print.min.js"></script>
 <script src="/static/assets/js/buttons.colVis.min.js"></script>
 <script src="/static/assets/js/dataTables.select.min.js"></script>
-
+<script src="/static/xcConfirm/js/xcConfirm.js"></script>
 <script type="text/javascript">
+function deployCluster(obj){
+	host_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var host_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	$("#refresh_name").text(host_name);
+};
+function deployClusterAck(){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/add/deploy/",
+		data: {"cluster_id":host_id},
+		success: function(data){
+			if(data['status']==200){
+				txt = '正在后台部署...<br />查看部署过程:<a href="/mesos/add/deploy/result/?cluster_id='+host_id+'" target="_blank">点我查看</a>';
+				window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.success);
+			}else{	
+				window.wxc.xcConfirm(data['msg'], window.wxc.xcConfirm.typeEnum.error);
+			}
+		}
+	});
+	
+};
+
 	jQuery(function($) {
 		//initiate dataTables plugin
 		var myTable = 
@@ -123,7 +162,7 @@
 			bAutoWidth: false,
 			"aoColumns": [
 			  { "bSortable": false },
-			  null, null,null, null, null,null,null,null,
+			  null, null,null, null, null,null,null,null,null,
 			  { "bSortable": false }
 			],
 			"aaSorting": [],

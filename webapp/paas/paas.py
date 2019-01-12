@@ -8,10 +8,12 @@ Created on 2018年8月9日
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.forms.models import model_to_dict
 import json
 from django.views.generic import TemplateView,DeleteView,FormView,ListView
-from webapp.models import AssetHost,PaasHost,MesosCluster
+from webapp.models import AssetHost,PaasHost,MesosCluster,MesosDeployLog
 from .forms import MesosClusterForm
+from webapp.tasks import mesos_cluster_deploy_task
 
 class Kubernetes(TemplateView):
     template_name = 'paas/cluster/kubernetes/kubernetes.html'
@@ -94,7 +96,9 @@ class MesosOverview(TemplateView):
 
 class MesosDetail(TemplateView):
     template_name = 'paas/cluster/mesos/MesosDetail.html'
-   
+
+class MesosMasterDetail(TemplateView):
+    template_name = 'paas/cluster/mesos/MesosMasterDetail.html'   
     
 class MesosAddCluster(FormView):
     form_class = MesosClusterForm
@@ -119,7 +123,45 @@ class MesosAddCluster(FormView):
         else:
             status = False
         return JsonResponse({'status':status,'msg':form.errors})
-        
+
+def mesos_cluster_deploy(request):
+    if request.method == 'POST':
+        cluster_id = request.POST.get('cluster_id')
+        clusterObj = MesosCluster.objects.get(id=cluster_id)
+        mesos_cluster_deploy_task.apply_async(args=(clusterObj,MesosDeployLog))
+    return JsonResponse({'status':200})
+
+class MesosClusterDeployResult(TemplateView):
+    template_name = 'paas/cluster/mesos/MesosClusterDeployResult.html'
+    def get_context_data(self, **kwargs):
+        cluster_id = self.request.GET.get('cluster_id')
+        clusterObj = MesosCluster.objects.get(id=cluster_id)
+        cluster_dict = model_to_dict(clusterObj)
+        kwargs['cluster'] = cluster_dict
+        return TemplateView.get_context_data(self, **kwargs)
+    
+    def post(self,request):
+        clusterName = self.request.POST.get('clusterName')
+        #first: to get the record of status=3 (finished)
+        successObj = MesosDeployLog.objects.filter(Q(cluster_name=clusterName),Q(is_read=False),Q(status=3))
+        runObj = MesosDeployLog.objects.filter(Q(cluster_name=clusterName),Q(status=2))
+        failObj = MesosDeployLog.objects.filter(Q(cluster_name=clusterName),Q(status=4))
+        if len(successObj) != 0:
+            status = 'running'
+            oneObj = successObj[0]
+            oneObj.is_read = True
+            oneObj.save()
+            data = model_to_dict(oneObj)
+        elif len(runObj) != 0:
+            status = 'running'
+            data = model_to_dict(runObj[0])
+        elif len(failObj) != 0:
+            status = 'finished'
+            data = model_to_dict(failObj[0])
+        else:
+            status = 'finished'
+            data = ''
+        return JsonResponse({'status':status,'data':data})
         
     
 class MesosAddNode(TemplateView):

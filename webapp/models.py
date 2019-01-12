@@ -14,7 +14,8 @@ from model.task import ScriptModel,TaskLog,TaskHost,AnsibleModel,AnsibleLog,Ansi
 FileModel,FileLog,FileHost,FileModelExistList,FileModelForHad,FileModelForUrl,PublicFile
 
 # import paas model
-from model.paas import RepositoryHost,RepositoryImage,PaasHost,MesosCluster,MesosMaster
+from model.paas import RepositoryHost,RepositoryImage,PaasHost,MesosCluster,MesosMaster,\
+MesosDeployLog
 
 # Create your models here.
 '''
