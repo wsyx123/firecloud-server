@@ -89,7 +89,7 @@ class MesosDeploy():
                 sock.images.pull(img)
             except Exception as e:
                 msg = str(e)
-                status_dict['msg'] = "{} download {} fail:{}".format(host,img,msg)
+                status_dict['msg'] = "{} download {} Fail:{}".format(host,img,msg)
                 status_dict['status'] = False
         return status_dict
                 
@@ -114,11 +114,11 @@ class MesosDeploy():
                          'ZOO_SYNC_LIMIT=2',
                          'ZOO_MAX_CLIENT_CNXNS=60',
                          'ZOO_ADMIN_ENABLESERVER=false']
-        img = self.clsObj.zkImage
+        img = str(self.clsObj.zkImage)
         hosts = self.master_host_list
         ZOO_SERVERS = ''
         for i in range(len(hosts)):
-            ZOO_SERVERS = ZOO_SERVERS + "server.{}={}:2888:3888:participant;0.0.0.0:2181 ".format(i+1,hosts[i])
+            ZOO_SERVERS = ZOO_SERVERS + "server.{}={}:2888:3888:participant ".format(i+1,hosts[i])
             
         for i in range(len(hosts)):
             zookeeper_env = self.zookeeper_env
@@ -128,7 +128,7 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(self, img,detach=True,
+                sock.containers.run(img,detach=True,
                                     name='mesos-zookeeper',
                                     user='root',
                                     tty=True,
@@ -136,12 +136,12 @@ class MesosDeploy():
                                     stdout=True,
                                     environment=zookeeper_env,
                                     network_mode='host',
-                                    restart_policy='always')
+                                    restart_policy={"Name": "always"})
             except Exception as e:
                 msg = str(e)
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 4
-                deploy_obj.msg = msg
+                deploy_obj.msg = hosts[i]+' Deployment zookeeper failure:'+msg
                 deploy_obj.save()
                 return False
             else:
@@ -170,7 +170,7 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(self, img,detach=True,
+                sock.containers.run(img,detach=True,
                                     name='mesos-master',
                                     user='root',
                                     tty=True,
@@ -179,12 +179,12 @@ class MesosDeploy():
                                     environment=[MESOS_ZK,MESOS_CLUSTER,MESOS_HOSTNAME,
                                                  MESOS_HOSTNAME_LOOKUP,MESOS_IP,MESOS_QUORUM],
                                     network_mode='host',
-                                    restart_policy='always')
+                                    restart_policy={"Name": "always"})
             except Exception as e:
                 msg = str(e)
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 4
-                deploy_obj.msg = msg
+                deploy_obj.msg = hosts[i]+' Deployment master failure:'+msg
                 deploy_obj.save()
                 return False
             else:
@@ -205,7 +205,7 @@ class MesosDeploy():
                 marathon_zk = marathon_zk + hosts[i]+':2181,'
         MARATHON_ZK = "MARATHON_ZK={}".format(marathon_zk)
         MARATHON_MASTER = "MARATHON_MASTER={}".format(self.clsObj.marathonZK)
-        MARATHON_EVENT_SUBSCRIBER = "MARATHON_EVENT_SUBSCRIBER=http_callback"
+        #MARATHON_EVENT_SUBSCRIBER = "MARATHON_EVENT_SUBSCRIBER=http_callback"  v1.7.50 is deprecated
         for i in range(len(hosts)):
             MARATHON_HOSTNAME = "MARATHON_HOSTNAME={}".format(hosts[i])
             MARATHON_HTTP_ADDRESS = "MARATHON_HTTP_ADDRESS={}".format(hosts[i])
@@ -214,21 +214,21 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(self, img,detach=True,
+                sock.containers.run(img,detach=True,
                                     name='mesos-marathon',
                                     user='root',
                                     tty=True,
                                     stderr=True,
                                     stdout=True,
-                                    environment=[MARATHON_ZK,MARATHON_MASTER,MARATHON_EVENT_SUBSCRIBER,
-                                                 MARATHON_HOSTNAME,MARATHON_HTTP_ADDRESS,MARATHON_HTTPS_ADDRESS],
+                                    environment=[MARATHON_ZK,MARATHON_MASTER,MARATHON_HOSTNAME,
+                                                 MARATHON_HTTP_ADDRESS,MARATHON_HTTPS_ADDRESS],
                                     network_mode='host',
-                                    restart_policy='always')
+                                    restart_policy={"Name": "always"})
             except Exception as e:
                 msg = str(e)
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 4
-                deploy_obj.msg = msg
+                deploy_obj.msg = hosts[i]+' Deployment marathon failure:'+msg
                 deploy_obj.save()
                 return False
             else:
@@ -239,7 +239,7 @@ class MesosDeploy():
      
     def deploy_haproxy(self,deploy_obj):
         #https://github.com/QubitProducts/bamboo
-        img = self.clsObj.haproxImage
+        img = self.clsObj.haproxyImage
         hosts = self.haproxy_host_list
         zk_hosts = self.master_host_list
         servicePort = self.clsObj.servicePort
@@ -265,7 +265,7 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(self, img,detach=True,
+                sock.containers.run(img,detach=True,
                                     name='haproxy-bamboo',
                                     user='root',
                                     tty=True,
@@ -274,13 +274,13 @@ class MesosDeploy():
                                     ports=map_port,
                                     environment=[BAMBOO_ZK_HOST,BAMBOO_ZK_PATH,MARATHON_ENDPOINT,
                                                  BIND,CONFIG_PATH,BAMBOO_DOCKER_AUTO_HOST,BAMBOO_ENDPOINT],
-                                    network_mode='host',
-                                    restart_policy='always')
+                                    network_mode='bridge',
+                                    restart_policy={"Name": "always"})
             except Exception as e:
                 msg = str(e)
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 4
-                deploy_obj.msg = msg
+                deploy_obj.msg = hosts[i]+' Deployment haproxy failure:'+msg
                 deploy_obj.save()
                 return False
             else:
@@ -294,6 +294,7 @@ class MesosDeploy():
         hosts = self.slave_host_list
         MESOS_MASTER = "MESOS_MASTER={}".format(self.clsObj.slaveZK)
         MESOS_WORK_DIR = "MESOS_WORK_DIR=/data/mesos/workdir"
+        MESOS_CONTAINERIZERS =  "MESOS_CONTAINERIZERS=docker,mesos"
         MESOS_ATTRIBUTES = "MESOS_ATTRIBUTES={}".format(self.clsObj.slaveLabel)
         MESOS_SYSTEMD_ENABLE_SUPPORT = "MESOS_SYSTEMD_ENABLE_SUPPORT=false"
         for i in range(len(hosts)):
@@ -304,31 +305,30 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(self, img,detach=True,
+                sock.containers.run(img,detach=True,
                                     name='mesos-slave',
                                     user='root',
                                     tty=True,
                                     stderr=True,
                                     stdout=True,
                                     privileged=True,
-                                    environment=[MESOS_MASTER,MESOS_WORK_DIR,MESOS_ATTRIBUTES,
+                                    environment=[MESOS_MASTER,MESOS_WORK_DIR,MESOS_ATTRIBUTES,MESOS_CONTAINERIZERS,
                                                  MESOS_SYSTEMD_ENABLE_SUPPORT,MESOS_HOSTNAME,MESOS_IP],
                                     volumes={'/sys/fs/cgroup': {'bind': '/sys/fs/cgroup', 'mode': 'rw'},
                                              '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'},
                                              '/data/mesos/workdir': {'bind': '/data/mesos/workdir', 'mode': 'rw'},
                                              },
                                     network_mode='host',
-                                    restart_policy='always')
+                                    restart_policy={"Name": "always"})
             except Exception as e:
                 msg = str(e)
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 4
-                deploy_obj.msg = msg
+                deploy_obj.msg = hosts[i]+' Deployment slave failure:'+msg
                 deploy_obj.save()
                 return False
             else:
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 3
                 deploy_obj.save()
-                return True   
-        
+                return True      

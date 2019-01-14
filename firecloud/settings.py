@@ -164,7 +164,7 @@ CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_ENABLE_UTC = False # 不是用UTC
 CELERY_TIMEZONE = 'Asia/Shanghai'
 CELERY_TASK_RESULT_EXPIRES = 10 #任务结果的失效时间
-
+#CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 
 '''
 django 日志配置

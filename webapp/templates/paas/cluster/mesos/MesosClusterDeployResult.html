@@ -58,52 +58,56 @@
 						<tr>
 							<td colspan="6">
 								<table class="table" id="deplayDetail">
+									
 									<tbody>
+										<tr>
+											<td>步骤</td><td>说明</td><td>完成时间</td><td>状态</td><td>错误信息</td>
+										</tr>
 										<tr id="checkCon">
 											<td class="col-sm-2"><i class="fa fa-caret-right fa-lg green"></i> 主机联通性检查</td>
-											<td><span class="label label-sm">等待中...</span></td>
+											<td><span class="label">等待中....</span></td>
 											<td>-</td>
 											<td>-</td>
 											<td>N/A</td>
 										</tr>
 										<tr id="imgDownload">
 											<td><i class="fa fa-caret-right fa-lg green"></i> 镜像下载</td>
-											<td><span class="label label-sm">等待中...</span></td>
+											<td><span class="label">等待中....</span></td>
 											<td>-</td>
 											<td>-</td>
 											<td>N/A</td>
 										</tr>
 										<tr id="deployZK">
 											<td><i class="fa fa-caret-right fa-lg green"></i> 部署zookeeper</td>
-											<td><span class="label label-sm">等待中...</span></td>
+											<td><span class="label">等待中....</span></td>
 											<td>-</td>
 											<td>-</td>
 											<td>N/A</td>
 										</tr>
 										<tr id="deployMaster">
 											<td><i class="fa fa-caret-right fa-lg green"></i> 部署mesos master</td>
-											<td><span class="label label-sm">等待中...</span></td>
+											<td><span class="label">等待中....</span></td>
 											<td>-</td>
 											<td>-</td>
 											<td>N/A</td>
 										</tr>
 										<tr id="deployMT">
 											<td><i class="fa fa-caret-right fa-lg green"></i> 部署marathon</td>
-											<td><span class="label label-sm">等待中...</span></td>
+											<td><span class="label">等待中....</span></td>
 											<td>-</td>
-											<td>-</td>
+											<td class="col-sm-1">-</td>
 											<td>N/A</td>
 										</tr>
 										<tr id="deployHA">
 											<td><i class="fa fa-caret-right fa-lg green"></i> 部署haproxy</td>
-											<td><span class="label label-sm">等待中...</span></td>
+											<td><span class="label">等待中....</span></td>
 											<td>-</td>
 											<td>-</td>
 											<td>N/A</td>
 										</tr>
 										<tr id="deploySlave">
 											<td><i class="fa fa-caret-right fa-lg green"></i> 部署mesos slave</td>
-											<td><span class="label label-sm">等待中...</span></td>
+											<td><span class="label">等待中....</span></td>
 											<td>-</td>
 											<td>-</td>
 											<td>N/A</td>
@@ -115,6 +119,9 @@
 					</table>
 					
 				</div><!-- /.col -->
+				<div class="col-xs-12 center">
+					<button type="button" class="btn btn-danger" id="termiAll">终止并一键清除环境</button>
+				</div>
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
 	</div>
@@ -138,32 +145,33 @@ function getDeployResult(){
 				var id = data['data']['step_name'];
 				if(data['status']=='running'){
 					if(data['data']['status']==2){
-						$("#"+id).children().eq(1).html('<span class="label label-sm label-info">进行中...</span>');
+						$("#"+id).children().eq(1).html('<span class="label label-info">进行中....</span>');
 						$("#"+id).children().eq(2).text(data['data']['start_time']);
 						$("#"+id).children().eq(3).html('<img src="/static/images/waiting.gif" />');
 					}else if(data['data']['status']==3){
-						$("#"+id).children().eq(1).html('<span class="label label-success">已完成</span>');
+						$("#"+id).children().eq(1).html('<span class="label label-success">执行成功</span>');
 						$("#"+id).children().eq(2).text(data['data']['start_time']);
 						$("#"+id).children().eq(3).html('<i class="fa fa-check-circle fa-lg health"></i>');
 					}else if(data['data']['status']==4){
-						$("#"+id).children().eq(1).html('<span class="label label-success">已完成</span>');
+						$("#"+id).children().eq(1).html('<span class="label label-danger">执行失败</span>');
 						$("#"+id).children().eq(2).text(data['data']['start_time']);
 						$("#"+id).children().eq(3).html('<i class="icon-cancel-circled fa-lg red"></i>');
 						$("#"+id).children().eq(4).html('<span class="red">'+data['data']['msg']+'</span>');
 					}
 				}else if(data['status']=='finished'){
 					if(data['data']['status']==4){
-						$("#"+id).children().eq(1).html('<span class="label label-success">已完成</span>');
+						$("#"+id).children().eq(1).html('<span class="label label-danger">执行失败</span>');
 						$("#"+id).children().eq(2).text(data['data']['start_time']);
 						$("#"+id).children().eq(3).html('<i class="icon-cancel-circled fa-lg red"></i>');
 						$("#"+id).children().eq(4).html('<span class="red">'+data['data']['msg']+'</span>');
 						$("#deployStatus").html('<span class="label label-danger">部署失败</span>');
 						clearInterval(interval);
-						window.wxc.xcConfirm(clusterName+'集群已部署失败!', window.wxc.xcConfirm.typeEnum.error);
+						window.wxc.xcConfirm(clusterName+'集群部署失败!', window.wxc.xcConfirm.typeEnum.error);
 					}else{
 						$("#deployStatus").html('<span class="label label-success">部署完成</span>');
 						clearInterval(interval);
-						window.wxc.xcConfirm(clusterName+'集群已部署成功!', window.wxc.xcConfirm.typeEnum.success);
+						$("#termiAll").attr("disabled","disabled");
+						window.wxc.xcConfirm(clusterName+'集群部署成功!', window.wxc.xcConfirm.typeEnum.success);
 					}
 				}
 			}

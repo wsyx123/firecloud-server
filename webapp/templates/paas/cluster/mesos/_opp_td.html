@@ -1,6 +1,6 @@
 {% ifequal status 1 %}
 <div class="action-buttons">
-	<span class="green" id="enabled" onclick="deployCluster(this);">
+	<span class="green" id="enabled" onclick="deployCluster(this,'deploy_name');">
 		<i class="fa fa-telegram bigger-130" title="部署" data-toggle="modal" data-target="#mydeploy"></i>
 	</span>
 	<span class="gray" id="disabled">
@@ -9,8 +9,8 @@
 	<span class="gray" id="disabled">
 		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
 	</span>
-	<span class="red" id="enabled">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+	<span class="red" id="enabled" onclick="deployCluster(this,'delete_name');">
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
 	</span>
 </div>
 {% endifequal %}
@@ -39,11 +39,11 @@
 	<span class="gray" id="disabled">
 		<i class="fa fa-play-circle bigger-130" title="启动"></i>
 	</span>
-	<span class="red" id="enabled">
-		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+	<span class="red" id="enabled" onclick="deployCluster(this,'stop_name');">
+		<i class="fa fa-stop-circle bigger-130" title="停止" data-toggle="modal" data-target="#mystop"></i>
 	</span>
-	<span class="red" id="enabled">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+	<span class="red" id="enabled" onclick="deployCluster(this,'delete_name');">
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
 	</span>
 </div>
 {% endifequal %}
@@ -53,14 +53,14 @@
 	<span class="gray" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="blue" id="enabled">
-		<i class="fa fa-play-circle bigger-130" title="启动"></i>
+	<span class="blue" id="enabled" onclick="deployCluster(this,'start_name');">
+		<i class="fa fa-play-circle bigger-130" title="启动" data-toggle="modal" data-target="#mystart"></i>
 	</span>
 	<span class="gray" id="disabled">
 		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
 	</span>
-	<span class="red" id="enabled">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+	<span class="red" id="enabled" onclick="deployCluster(this,'delete_name');">
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
 	</span>
 </div>
 {% endifequal %}

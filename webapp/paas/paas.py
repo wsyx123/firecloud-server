@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 import json
 from django.views.generic import TemplateView,DeleteView,FormView,ListView
-from webapp.models import AssetHost,PaasHost,MesosCluster,MesosDeployLog
+from webapp.models import AssetHost,PaasHost,MesosDeployLog,MesosCluster
 from .forms import MesosClusterForm
 from webapp.tasks import mesos_cluster_deploy_task
 
@@ -47,10 +47,13 @@ class MesosIdleHostList(TemplateView):
         context = super(MesosIdleHostList, self).get_context_data(**kwargs)
         user_id = self.request.session.get('_user_id')
         if user_id == 1:
-            assetHostQuerySet = PaasHost.objects.all()
+            assetHostQuerySet = AssetHost.objects.all()
+            paasHostQuerySet = PaasHost.objects.all()
         else:
-            assetHostQuerySet = PaasHost.objects.filter(owner_id=user_id)
-        context['hosts'] = assetHostQuerySet
+            assetHostQuerySet = AssetHost.objects.filter(owner_id=user_id)
+            paasHostQuerySet = PaasHost.objects.filter(owner_id=user_id)
+        context['assethosts'] = assetHostQuerySet
+        context['paashosts'] = paasHostQuerySet
         context['total_host_count'] = len(assetHostQuerySet)
         return context
 
@@ -127,9 +130,37 @@ class MesosAddCluster(FormView):
 def mesos_cluster_deploy(request):
     if request.method == 'POST':
         cluster_id = request.POST.get('cluster_id')
+        deployOption = request.POST.get('deployOption')
+        if deployOption == 'yes':
+            print deployOption
         clusterObj = MesosCluster.objects.get(id=cluster_id)
+        clusterObj.status = 2
+        clusterObj.save()
         mesos_cluster_deploy_task.apply_async(args=(clusterObj,MesosDeployLog))
     return JsonResponse({'status':200})
+
+def mesos_cluster_start(request):
+    if request.method == 'POST':
+        cluster_id = request.POST.get('cluster_id')
+    return JsonResponse({'status':200})
+
+def mesos_cluster_stop(request):
+    if request.method == 'POST':
+        cluster_id = request.POST.get('cluster_id')
+    return JsonResponse({'status':200})
+
+def mesos_cluster_delete(request):
+    if request.method == 'POST':
+        cluster_id = int(request.POST.get('cluster_id'))
+        try:
+            MesosCluster.objects.get(id=cluster_id).delete()
+        except Exception as e:
+            status = 400
+            msg = str(e)
+        else:
+            status = 200
+            msg = ''
+    return JsonResponse({'status':status,'msg':msg})
 
 class MesosClusterDeployResult(TemplateView):
     template_name = 'paas/cluster/mesos/MesosClusterDeployResult.html'

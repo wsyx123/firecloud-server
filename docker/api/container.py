@@ -399,7 +399,6 @@ class ContainerApiMixin(object):
         """
         if isinstance(volumes, six.string_types):
             volumes = [volumes, ]
-
         config = self.create_container_config(
             image, command, hostname, user, detach, stdin_open, tty,
             ports, environment, volumes,

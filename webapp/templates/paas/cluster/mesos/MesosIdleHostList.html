@@ -45,7 +45,7 @@
 							</thead>
 
 							<tbody>
-								{% for host in hosts %}
+								{% for host in paashosts %}
 								<tr>
 									<td>{{host.id}}</td>
 									<td>{{host.host.private_ip}}</td>
@@ -120,19 +120,19 @@
 									<th>状态</th>
 									<th>IP</th>
 								</tr>
-								{% for host in hosts %}
+								{% for host in assethosts %}
 								<tr class="tr-select-modal">
 									<td><input type="checkbox" onclick="oneChecked(this);"/></td>
-									<td>{{ host.host.hostname }}</td>
-									<td>{{ host.host.cpu_no }}</td>
-									<td>{{ host.host.memory }}</td>
-									<td>{{ host.host.disk }}</td>
-									{% ifequal host.host.host_status 1 %}
+									<td>{{ host.hostname }}</td>
+									<td>{{ host.cpu_no }}</td>
+									<td>{{ host.memory }}</td>
+									<td>{{ host.disk }}</td>
+									{% ifequal host.host_status 1 %}
 									<td><span class="label label-sm label-success">在线</span></td>
 									{% else %}
 									<td><span class="label label-sm label-danger">离线</span></td>
 									{% endifequal %}
-									<td>{{host.host.private_ip}}</td>
+									<td>{{host.private_ip}}</td>
 								</tr>
 								{% endfor %}
 							</table>

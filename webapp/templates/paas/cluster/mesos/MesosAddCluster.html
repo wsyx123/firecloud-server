@@ -249,7 +249,7 @@
 													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Haproxy镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="haproxImage" class="width-100" />
+															<input type="text" name="haproxyImage" class="width-100" />
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -479,7 +479,7 @@ function checkHaproxyInfo(){
 	var servicePort = $("input[name='servicePort']").val();
 	var statusPort = $("input[name='statusPort']").val();
 	var bambooPort = $("input[name='bambooPort']").val();
-	var haproxImage = $("input[name='haproxImage']").val();
+	var haproxyImage = $("input[name='haproxyImage']").val();
 	var haproxyDeploy = $("select[name='haproxyDeploy']").val();
 	if(haproxyID.trim().length==0){
 		var txt=  "请填写haproxy ID!";
@@ -501,7 +501,7 @@ function checkHaproxyInfo(){
 		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
 		return false;
 	};
-	if(haproxImage.trim().length==0){
+	if(haproxyImage.trim().length==0){
 		var txt=  "请填写haproxy 镜像!<br />格式:192.168.10.3:5000/mesos-master:1.6.1-rc2";
 		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
 		return false;

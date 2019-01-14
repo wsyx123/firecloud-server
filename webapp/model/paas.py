@@ -64,6 +64,9 @@ class MesosCluster(models.Model):
     status = models.IntegerField(choices=clusterStatus,default=1)
     create_time = models.DateTimeField(auto_now_add=True)
     
+    def __unicode__(self):
+        return '%s' %(self.clusterName)
+    
 class MesosDeployLog(models.Model):
     deployStatus = (
                     (1,'等待中'),
@@ -78,6 +81,9 @@ class MesosDeployLog(models.Model):
     status = models.IntegerField(choices=deployStatus,default=1)
     is_read = models.BooleanField(default=False)
     msg = models.TextField(null=True,blank=True)
+    
+    def __unicode__(self):
+        return '%s' %(self.cluster_name)
       
 class MesosMaster(models.Model):
     m_status = (

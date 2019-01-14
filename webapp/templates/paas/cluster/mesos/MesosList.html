@@ -29,14 +29,24 @@
 				</li>
 				<li class="active">mesos</li>
 			</ul><!-- /.breadcrumb -->
-
-			
 		</div>
 
 		<div class="page-content">
+			<div class="alert alert-success hide" id="successBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>成功！</strong><span id="okMsg"></span>。
+			</div>
+			<div class="alert alert-danger hide" id="dangerBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>失败！</strong><span id="failMsg"></span>。
+			</div>
+		
 			<div class="row">
 				<div class="col-xs-12">
-			
 					<div class="clearfix">
 						<a href="{% url 'MesosIdleHostList' %}"><button class="btn btn-xs btn-info">空闲主机</button></a>
 						<a href="{% url 'MesosAddCluster' %}"><button class="btn btn-xs btn-info">创建集群</button></a>
@@ -85,7 +95,7 @@
 				</div><!-- /.col -->
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
-		<!-- 刷新模态框（Modal） -->
+		<!-- 部署模态框（Modal） -->
 		<div class="modal fade" id="mydeploy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -94,26 +104,117 @@
 							&times;
 						</button>
 						<h4>
-							<span>确认窗口</span>
+							<span>部署 <strong class="blue" id="deploy_name"></strong> 集群</span>
 						</h4>
 					</div>
 					<div class="modal-body">
 						<div style="padding-left:80px;">
-							<label>是否部署: <span id="refresh_name"></span> 集群?</label>
+							<label>部署选项(是否删除存在容器):</label>
+							<label class="control-label no-padding-right">
+								<input type="radio" name="deployOption" value="yes" />
+								<span class="lbl">是</span>
+							</label>
+							<label class="control-label no-padding-right">
+								<input type="radio" name="deployOption" value="no" checked />
+								<span class="lbl">否</span>
+							</label>
 						</div>
 						<div style="padding-left:80px;">
 							<strong id="refreshFailMsg" style="color: red;"></strong>
 						</div>
 					</div>
 					<div class="modal-footer center">
-						<button type="button" class="btn btn-success" onclick="deployClusterAck();" data-dismiss="modal" >
-							<i class="fa fa-telegram bigger-130">部署</i>
-						</button>
+						<button type="button" class="btn btn-success" data-dismiss="modal" onclick="deployClusterAck();">部署</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
 					</div>
 				</div><!-- /.modal-content -->
 			</div><!-- /.modal -->
 		</div>
 		
+		<!-- 启动模态框（Modal） -->
+		<div class="modal fade" id="mystart" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>启动 <strong class="blue" id="start_name"></strong> 集群</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="center">
+							<label>是否启动?</label>
+						</div>
+						<div style="padding-left:80px;">
+							<strong id="refreshFailMsg" style="color: red;"></strong>
+						</div>
+					</div>
+					<div class="modal-footer center">
+						<button type="button" class="btn btn-info" data-dismiss="modal" onclick="stopClusterAck();">启动</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+		
+		<!-- 停止模态框（Modal） -->
+		<div class="modal fade" id="mystop" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>停止 <strong class="blue" id="stop_name"></strong> 集群</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="center">
+							<label>停止集群?</label>
+						</div>
+						<div style="padding-left:80px;">
+							<strong id="refreshFailMsg" style="color: red;"></strong>
+						</div>
+					</div>
+					<div class="modal-footer center">
+						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="stopClusterAck();">停止</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+		
+		<!-- 删除模态框（Modal） -->
+		<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>删除 <strong class="blue" id="delete_name"></strong> 集群</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="center">
+							<label><strong>是否删除(</strong><span class="red">一旦删除动作启动,将不可逆</span>)?</label>
+						</div>
+						<div style="padding-left:80px;">
+							<strong id="refreshFailMsg" style="color: red;"></strong>
+						</div>
+					</div>
+					<div class="modal-footer center">
+						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteClusterAck();">删除</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+			
 	</div>
 </div><!-- /.main-content -->
 {% endblock %}
@@ -131,19 +232,22 @@
 <script src="/static/assets/js/dataTables.select.min.js"></script>
 <script src="/static/xcConfirm/js/xcConfirm.js"></script>
 <script type="text/javascript">
-function deployCluster(obj){
-	host_id = $($(obj).parent().parent()).siblings().eq(0).text();
-	var host_name = $($(obj).parent().parent()).siblings().eq(1).text();
-	$("#refresh_name").text(host_name);
+function deployCluster(obj,id){
+    clusterObj = obj;
+	cluster_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	cluster_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	$("#"+id).text(cluster_name);
 };
+
 function deployClusterAck(){
+	var deployOption = $("input[name='deployOption']:checked").val();
 	$.ajax({
 		method: "POST",
 		url: "/mesos/add/deploy/",
-		data: {"cluster_id":host_id},
+		data: {"cluster_id":cluster_id,"deployOption":deployOption},
 		success: function(data){
 			if(data['status']==200){
-				txt = '正在后台部署...<br />查看部署过程:<a href="/mesos/add/deploy/result/?cluster_id='+host_id+'" target="_blank">点我查看</a>';
+				txt = '正在后台部署...<br />查看部署过程:<a href="/mesos/add/deploy/result/?cluster_id='+cluster_id+'" target="_blank">点我查看</a>';
 				window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.success);
 			}else{	
 				window.wxc.xcConfirm(data['msg'], window.wxc.xcConfirm.typeEnum.error);
@@ -152,6 +256,66 @@ function deployClusterAck(){
 	});
 	
 };
+
+function startClusterAck(){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/add/start/",
+		data: {"cluster_id":cluster_id},
+		success: function(data){
+			if(data['status']==200){
+				var txt = '集群:'+cluster_name+'启动成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+	
+};
+
+function stopClusterAck(){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/add/stop/",
+		data: {"cluster_id":cluster_id},
+		success: function(data){
+			if(data['status']==200){
+				var txt = '集群:'+cluster_name+'停止成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+};
+
+function deleteClusterAck(){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/delete/",
+		data: {"cluster_id":cluster_id},
+		success: function(data){
+			if(data['status']==200){
+				$(clusterObj).parent().parent().parent().parent().remove();
+				var txt = '集群:'+cluster_name+'删除成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+};
+
+function closeBlock(obj){
+	$(obj).parent().addClass('hide');
+}
 
 	jQuery(function($) {
 		//initiate dataTables plugin

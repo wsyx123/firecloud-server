@@ -218,6 +218,8 @@ def mesos_cluster_deploy_task(self,clsObj,deploy_model):
     deploy_cls_instance = MesosDeploy(clsObj,deploy_model)
     check_con_result = deploy_cls_instance.check_con(deploy_obj)
     if not check_con_result:
+        clsObj.status = 3
+        clsObj.save()
         return 'failed'
         
     #download docker image
@@ -226,6 +228,8 @@ def mesos_cluster_deploy_task(self,clsObj,deploy_model):
     deploy_obj.save()
     img_download_result = deploy_cls_instance.img_download(deploy_obj)
     if not img_download_result:
+        clsObj.status = 3
+        clsObj.save()
         return 'failed'
     #create container
     step_name_list = ["deployZK","deployMaster","deployMT","deployHA","deploySlave"]
@@ -235,7 +239,11 @@ def mesos_cluster_deploy_task(self,clsObj,deploy_model):
         deploy_obj.save()
         create_container_result = deploy_cls_instance.create_container(deploy_obj,step_name)
         if not create_container_result:
+            clsObj.status = 3
+            clsObj.save()
             return 'failed'
+    clsObj.status = 4
+    clsObj.save()
     return True
     
     
