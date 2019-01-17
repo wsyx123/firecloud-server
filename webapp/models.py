@@ -15,7 +15,7 @@ FileModel,FileLog,FileHost,FileModelExistList,FileModelForHad,FileModelForUrl,Pu
 
 # import paas model
 from webapp.model.paas import MesosCluster,MesosDeployLog,PaasHost,RepositoryHost,\
-RepositoryImage,MesosMaster
+RepositoryImage,MesosClusterOverview,MesosClusterDetail
 
 # Create your models here.
 '''

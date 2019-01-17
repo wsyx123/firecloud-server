@@ -206,7 +206,7 @@ def init_deploy_log_table(celery_id,cluster_name,deploy_model):
     deploy_model.objects.bulk_create(MesosDeployLogList)
 
 @task(name='mesos_cluster_deploy_task',bind=True)
-def mesos_cluster_deploy_task(self,clsObj,deploy_model):
+def mesos_cluster_deploy_task(self,clsObj,deploy_model,detail_model):
     celery_id = self.request.id
     clusterName = clsObj.clusterName
     #to insert into MesosDeployLog
@@ -237,7 +237,7 @@ def mesos_cluster_deploy_task(self,clsObj,deploy_model):
         deploy_obj = deploy_model.objects.get(Q(cluster_name=clusterName),Q(step_name=step_name))
         deploy_obj.status = 2
         deploy_obj.save()
-        create_container_result = deploy_cls_instance.create_container(deploy_obj,step_name)
+        create_container_result = deploy_cls_instance.create_container(deploy_obj,step_name,detail_model)
         if not create_container_result:
             clsObj.status = 3
             clsObj.save()

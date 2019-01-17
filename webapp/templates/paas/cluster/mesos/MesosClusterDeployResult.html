@@ -29,7 +29,7 @@
 
 				<li>PAAS中心</li>
 				<li>
-					<a href="{% url 'MesosList' %}">mesos集群</a>
+					<a href="{% url 'MesosClusterList' %}">mesos集群</a>
 				</li>
 				<li>部署详情</li>
 				
@@ -119,9 +119,6 @@
 					</table>
 					
 				</div><!-- /.col -->
-				<div class="col-xs-12 center">
-					<button type="button" class="btn btn-danger" id="termiAll">终止并一键清除环境</button>
-				</div>
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
 	</div>
@@ -170,7 +167,6 @@ function getDeployResult(){
 					}else{
 						$("#deployStatus").html('<span class="label label-success">部署完成</span>');
 						clearInterval(interval);
-						$("#termiAll").attr("disabled","disabled");
 						window.wxc.xcConfirm(clusterName+'集群部署成功!', window.wxc.xcConfirm.typeEnum.success);
 					}
 				}

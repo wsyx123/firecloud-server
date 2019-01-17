@@ -1,0 +1,64 @@
+{% extends "base/base.html" %}
+{% load mesos %}
+
+{% block css %}
+<style>
+.header {
+    margin-top:0px;
+}
+
+.tabbable{
+	display:none;
+}
+
+.pull-right{
+	cursor:pointer;
+}
+
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>PAAS中心</li>
+				<li><a href="{% url 'MesosClusterList' %}">mesos</a></li>
+				<li>{{ clsname }}</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+
+		<div class="page-content">
+			
+			<div class="row">
+				{% master_detail clusterObj masterNodes %}
+				{% zookeeper_detail clusterObj zookeeperNodes %}
+				{% marathon_detail clusterObj marathonNodes %}
+				{% haproxy_detail clusterObj haproxyNodes %}
+				{% slave_detail clusterObj slaveNodes %}
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+function collapseExpand(obj){
+	classStr = $(obj).text();
+	if(classStr == '显示'){
+		$(obj).text('隐藏');
+		$(obj).parent().next().css('display','block');
+	}else{
+		$(obj).text('显示');
+		$(obj).parent().next().css('display','none');
+	}
+}
+</script>
+{% endblock %}
+

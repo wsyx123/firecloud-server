@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-
+{% load mesos %}
 {% block css %}
 <style>
 .acc-label{
@@ -14,10 +14,9 @@
   color: #34495E;
   margin:10px 1px 20px 1px;
 }
-.banner>.vertical-middle,.banner>.vertical-middle-right {
-  width:30%;
+.banner>.vertical-middle {
+  width:28%;
   text-align: center;
- 
   border-right: solid 2px #78C9CF;
   vertical-align: middle;
   display: inline-block;
@@ -43,6 +42,14 @@
   background: #eefbf4;
   border-left: none;
   padding:5px 10px 0px;
+}
+
+.unknown-i{
+	background: #DDD;
+}
+
+.unknown-m{
+  border: 1px solid #DDD;
 }
 
 .health-i{
@@ -88,10 +95,8 @@
 					<a href="{% url 'dashboard' %}">Home</a>
 				</li>
 
-				<li>
-					PAAS中心
-				</li>
-				<li><a href="{% url 'MesosList' %}">mesos</a></li>
+				<li>PAAS中心</li>
+				<li><a href="{% url 'MesosClusterList' %}">mesos</a></li>
 				<li>{{ clsname }}</li>
 				
 			</ul><!-- /.breadcrumb -->
@@ -105,77 +110,67 @@
 					
 					<div class='banner row'>
 						<div class='vertical-middle'>
-						  <label class='acc-label'>供应商</label> Apache Mesos
+						  <label class='acc-label'>供应商</label> {{clsObj.vendor}}
 						</div>
 						<div class='vertical-middle'>
-						  <label class='acc-label'>版本</label> v1.6.1-rc2
+						  <label class='acc-label'>版本</label> {{clsObj.version}}
 						</div>
 						<div class='vertical-middle'>
-						  <label class='acc-label'>Leader</label> 192.168.10.3
+						  <label class='acc-label'>Leader</label> {{clsObj.leader}}
 						</div>
-						<span><a href="{% url 'MesosDetail' clsname=clsname %}">查看集群配置</a></span>
+						<label class='acc-label'>容器数</label> {{clsObj.total_container}}
 					</div>
-				 
-					
-					
+
 					<div class="row">
 						<div class="col-xs-12 col-sm-4 center">
-							<div class="easy-pie-chart percentage" data-percent="20" data-color="#3497da">
+							<div class="easy-pie-chart percentage" data-percent="{{clsObj.cpu_use}}" data-color="#3497da">
 								<span class="percent">
 									<span>CPU </span>
-									<span style="font-size:50px;">60</span>%
+									<span style="font-size:50px;">{{clsObj.cpu_use}}</span>%
 								</span>
 							</div>
 						</div><!-- /.col -->
 						
 						<div class="col-xs-12 col-sm-4 center">
-							<div class="easy-pie-chart percentage" data-percent="25" data-color="#3497da">
+							<div class="easy-pie-chart percentage" data-percent="{{clsObj.memory_use}}" data-color="#3497da">
 								<span>Memory </span>
-								<span style="font-size:50px;">25</span>%
+								<span style="font-size:50px;">{{clsObj.memory_use}}</span>%
 							</div>
 						</div><!-- /.col -->
 						
 						<div class="col-xs-12 col-sm-4 center">
-							<div class="easy-pie-chart percentage" data-percent="49" data-color="#3497da">
+							<div class="easy-pie-chart percentage" data-percent="{{clsObj.disk_use}}" data-color="#3497da">
 								<span>Disk </span>
-								<span style="font-size:50px;">49</span>%
+								<span style="font-size:50px;">{{clsObj.disk_use}}</span>%
 							</div>
 						</div><!-- /.col -->
-
 						
 					</div><!-- /.row -->
-					
 
 					<div class="status-banner row">
 						<div class="col-xs-12 col-sm-3">
-						  <div class="status-banner-icon health-i"><i class="glyphicon glyphicon-ok"></i></div>
-						  <div class="status-banner-message health-m"><p>Mesos-master</p></div>
+						  {% return_overview_div clsObj.master_status 'Mesos-master' %}
 						</div>
 						
 						<div class="col-xs-12 col-sm-3">
-						  <div class="status-banner-icon warning-i"><i class="fa fa-exclamation-triangle fa-lg" aria-hidden="true"></i></div>
-						  <div class="status-banner-message warning-m"><p>Zookeeper</p></div>
+						  {% return_overview_div clsObj.zookeeper_status 'Zookeeper' %}
 						</div>
 						
 						<div class="col-xs-12 col-sm-3">
-						  <div class="status-banner-icon health-i"><i class="glyphicon glyphicon-ok"></i></div>
-						  <div class="status-banner-message health-m"><p>Marathon</p></div>
+						  {% return_overview_div clsObj.marathon_status 'Marathon' %}
 						</div>
 						
 						<div class="col-xs-12 col-sm-3">
-						  <div class="status-banner-icon health-i"><i class="glyphicon glyphicon-ok"></i></div>
-						  <div class="status-banner-message health-m"><p>Mesos-slave</p></div>
+						  {% return_overview_div clsObj.slave_status 'Mesos-slave' %}
 						</div>
 					</div>
 					
 					<div class="status-banner row">
 						<div class="col-xs-12 col-sm-6">
-						  <div class="status-banner-icon health-i"><i class="glyphicon glyphicon-ok"></i></div>
-						  <div class="status-banner-message health-m"><p>Haproxy</p></div>
+						  {% return_overview_div clsObj.haproxy_status 'Haproxy' %}
 						</div>
 						<div class="col-xs-12 col-sm-6">
-						  <div class="status-banner-icon danger-i"><i class="fa fa-times fa-lg" aria-hidden="true"></i></div>
-						  <div class="status-banner-message danger-m"><p>Bamboo</p></div>
+						  {% return_overview_div clsObj.bamboo_status 'Bamboo' %}
 						</div>
 					</div>
 				  

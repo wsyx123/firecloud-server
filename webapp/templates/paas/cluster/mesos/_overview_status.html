@@ -1,0 +1,19 @@
+{% ifequal status 1 %}
+	<div class="status-banner-icon health-i"><i class="glyphicon glyphicon-ok"></i></div>
+	<div class="status-banner-message health-m"><p>{{name}}</p></div>
+{% endifequal %}
+	
+{% ifequal status 2 %}
+	<div class="status-banner-icon warning-i"><i class="fa fa-exclamation-triangle fa-lg"></i></div>
+	<div class="status-banner-message warning-m"><p>{{name}}</p></div>
+{% endifequal %}
+
+{% ifequal status 3 %}
+	<div class="status-banner-icon danger-i"><i class="fa fa-times fa-lg"></i></div>
+	<div class="status-banner-message danger-m"><p>{{name}}</p></div>
+{% endifequal %}
+
+{% ifequal status 4 %}
+	<div class="status-banner-icon unknown-i"><i class="fa fa-question"></i></div>
+	<div class="status-banner-message unknown-m"><p>{{name}}</p></div>
+{% endifequal %}

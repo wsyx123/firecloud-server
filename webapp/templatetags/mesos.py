@@ -27,12 +27,36 @@ def return_class(status_num):
                   }
     return status_map[int(status_num)]
 
+@register.inclusion_tag('paas/cluster/mesos/_overview_status.html')
+def return_overview_div(status_num,name):
+    return {'status':status_num,'name':name}
+
 @register.inclusion_tag('paas/cluster/mesos/_opp_td.html')
-def opp_td(status_num):
+def opp_td(status_num,clusterName):
     if status_num in [1,3]:
         status_num = 1
     if status_num in [4,5,6]:
         status_num = 4
-    return {'status':status_num}
+    return {'status':status_num,'clusterName':clusterName}
+
+@register.inclusion_tag('paas/cluster/mesos/detail/_master_detail.html')
+def master_detail(clusterObj,masterNodes):
+    return {'clusterObj':clusterObj,'masterNodes':masterNodes}
+
+@register.inclusion_tag('paas/cluster/mesos/detail/_zookeeper_detail.html')
+def zookeeper_detail(clusterObj,zookeeperNodes):
+    return {'clusterObj':clusterObj,'zookeeperNodes':zookeeperNodes}
+
+@register.inclusion_tag('paas/cluster/mesos/detail/_marathon_detail.html')
+def marathon_detail(clusterObj,marathonNodes):
+    return {'clusterObj':clusterObj,'marathonNodes':marathonNodes}
+
+@register.inclusion_tag('paas/cluster/mesos/detail/_haproxy_detail.html')
+def haproxy_detail(clusterObj,haproxyNodes):
+    return {'clusterObj':clusterObj,'haproxyNodes':haproxyNodes}
+
+@register.inclusion_tag('paas/cluster/mesos/detail/_slave_detail.html')
+def slave_detail(clusterObj,slaveNodes):
+    return {'clusterObj':clusterObj,'slaveNodes':slaveNodes}
     
     

@@ -93,21 +93,21 @@ class MesosDeploy():
                 status_dict['status'] = False
         return status_dict
                 
-    def create_container(self,deploy_obj,step_name):
+    def create_container(self,deploy_obj,step_name,detail_model):
         if step_name == "deployZK":
-            return self.deploy_zookeeper(deploy_obj)
+            return self.deploy_zookeeper(deploy_obj,detail_model)
         elif step_name == 'deployMaster':
-            return self.deploy_master(deploy_obj)
+            return self.deploy_master(deploy_obj,detail_model)
         elif step_name == 'deployMT':
-            return self.deploy_marathon(deploy_obj)
+            return self.deploy_marathon(deploy_obj,detail_model)
         elif step_name == 'deployHA':
-            return self.deploy_haproxy(deploy_obj)
+            return self.deploy_haproxy(deploy_obj,detail_model)
         elif step_name == 'deploySlave':
-            return self.deploy_slave(deploy_obj)
+            return self.deploy_slave(deploy_obj,detail_model)
         else:
             return False
             
-    def deploy_zookeeper(self,deploy_obj):
+    def deploy_zookeeper(self,deploy_obj,detail_model):
         self.zookeeper_env = ['ZOO_INIT_LIMIT=10',
                          'ZOO_TICK_TIME=3000',
                          'ZOO_INIT_LIMIT=5',
@@ -145,12 +145,14 @@ class MesosDeploy():
                 deploy_obj.save()
                 return False
             else:
+                detail_model.objects.create(clusterName=self.clsObj.clusterName,
+                                            nodeType=2,host=hosts[i],containerName='mesos-zookeeper')
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 3
                 deploy_obj.save()
                 return True
             
-    def deploy_master(self,deploy_obj):
+    def deploy_master(self,deploy_obj,detail_model):
         img = self.clsObj.masterImage
         hosts = self.master_host_list
         mesos_zk = 'zk://'
@@ -161,6 +163,9 @@ class MesosDeploy():
                 mesos_zk = mesos_zk + hosts[i]+':2181,'
         MESOS_ZK = "MESOS_ZK={}".format(mesos_zk)
         MESOS_CLUSTER = "MESOS_CLUSTER={}".format(self.clsObj.clusterName)
+        MESOS_PORT = "MESOS_PORT={}".format(self.clsObj.masterPort)
+        MESOS_LOG_DIR = "MESOS_LOG_DIR=/var/log/mesos"
+        MESOS_WORK_DIR = "MESOS_WORK_DIR=/var/tmp/mesos"
         MESOS_HOSTNAME_LOOKUP = "MESOS_HOSTNAME_LOOKUP=false"
         for i in range(len(hosts)):
             MESOS_HOSTNAME = "MESOS_HOSTNAME={}".format(hosts[i])
@@ -176,8 +181,12 @@ class MesosDeploy():
                                     tty=True,
                                     stderr=True,
                                     stdout=True,
-                                    environment=[MESOS_ZK,MESOS_CLUSTER,MESOS_HOSTNAME,
+                                    environment=[MESOS_ZK,MESOS_CLUSTER,MESOS_HOSTNAME,MESOS_PORT,
+                                                 MESOS_LOG_DIR,MESOS_WORK_DIR,
                                                  MESOS_HOSTNAME_LOOKUP,MESOS_IP,MESOS_QUORUM],
+                                    volumes={'/data/mesos-master/log': {'bind': '/var/log/mesos', 'mode': 'rw'},
+                                             '/data/mesos-master/workdir': {'bind': '/var/tmp/mesos', 'mode': 'rw'},
+                                             },
                                     network_mode='host',
                                     restart_policy={"Name": "always"})
             except Exception as e:
@@ -188,13 +197,15 @@ class MesosDeploy():
                 deploy_obj.save()
                 return False
             else:
+                detail_model.objects.create(clusterName=self.clsObj.clusterName,
+                                            nodeType=1,host=hosts[i],containerName='mesos-master')
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 3
                 deploy_obj.save()
                 return True
             
     
-    def deploy_marathon(self,deploy_obj):
+    def deploy_marathon(self,deploy_obj,detail_model):
         img = self.clsObj.marathonImage
         hosts = self.marathon_host_list
         marathon_zk = 'zk://'
@@ -232,12 +243,14 @@ class MesosDeploy():
                 deploy_obj.save()
                 return False
             else:
+                detail_model.objects.create(clusterName=self.clsObj.clusterName,
+                                            nodeType=3,host=hosts[i],containerName='mesos-marathon')
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 3
                 deploy_obj.save()
                 return True
      
-    def deploy_haproxy(self,deploy_obj):
+    def deploy_haproxy(self,deploy_obj,detail_model):
         #https://github.com/QubitProducts/bamboo
         img = self.clsObj.haproxyImage
         hosts = self.haproxy_host_list
@@ -284,16 +297,19 @@ class MesosDeploy():
                 deploy_obj.save()
                 return False
             else:
+                detail_model.objects.create(clusterName=self.clsObj.clusterName,
+                                            nodeType=4,host=hosts[i],containerName='haproxy-bamboo')
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 3
                 deploy_obj.save()
                 return True
             
-    def deploy_slave(self,deploy_obj):
+    def deploy_slave(self,deploy_obj,detail_model):
         img = self.clsObj.slaveImage
         hosts = self.slave_host_list
         MESOS_MASTER = "MESOS_MASTER={}".format(self.clsObj.slaveZK)
-        MESOS_WORK_DIR = "MESOS_WORK_DIR=/data/mesos/workdir"
+        MESOS_WORK_DIR = "MESOS_WORK_DIR=/var/tmp/mesos"
+        MESOS_LOG_DIR = "MESOS_LOG_DIR=/var/log/mesos"
         MESOS_CONTAINERIZERS =  "MESOS_CONTAINERIZERS=docker,mesos"
         MESOS_ATTRIBUTES = "MESOS_ATTRIBUTES={}".format(self.clsObj.slaveLabel)
         MESOS_SYSTEMD_ENABLE_SUPPORT = "MESOS_SYSTEMD_ENABLE_SUPPORT=false"
@@ -312,11 +328,13 @@ class MesosDeploy():
                                     stderr=True,
                                     stdout=True,
                                     privileged=True,
-                                    environment=[MESOS_MASTER,MESOS_WORK_DIR,MESOS_ATTRIBUTES,MESOS_CONTAINERIZERS,
+                                    environment=[MESOS_MASTER,MESOS_WORK_DIR,MESOS_ATTRIBUTES,
+                                                 MESOS_CONTAINERIZERS,MESOS_LOG_DIR,
                                                  MESOS_SYSTEMD_ENABLE_SUPPORT,MESOS_HOSTNAME,MESOS_IP],
                                     volumes={'/sys/fs/cgroup': {'bind': '/sys/fs/cgroup', 'mode': 'rw'},
                                              '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'},
-                                             '/data/mesos/workdir': {'bind': '/data/mesos/workdir', 'mode': 'rw'},
+                                             '/data/mesos-slave/workdir': {'bind': '/var/tmp/mesos', 'mode': 'rw'},
+                                             '/data/mesos-slave/log': {'bind': '/var/log/mesos', 'mode': 'rw'},
                                              },
                                     network_mode='host',
                                     restart_policy={"Name": "always"})
@@ -328,6 +346,8 @@ class MesosDeploy():
                 deploy_obj.save()
                 return False
             else:
+                detail_model.objects.create(clusterName=self.clsObj.clusterName,
+                                            nodeType=5,host=hosts[i],containerName='mesos-slave')
                 deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 deploy_obj.status = 3
                 deploy_obj.save()

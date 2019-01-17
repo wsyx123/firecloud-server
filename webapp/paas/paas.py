@@ -11,35 +11,21 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 import json
 from django.views.generic import TemplateView,DeleteView,FormView,ListView
-from webapp.models import AssetHost,PaasHost,MesosDeployLog,MesosCluster
+from webapp.models import AssetHost,PaasHost,MesosDeployLog,MesosCluster,MesosClusterOverview,\
+MesosClusterDetail
 from .forms import MesosClusterForm
 from webapp.tasks import mesos_cluster_deploy_task
+from docker import DockerClient
 
 class Kubernetes(TemplateView):
     template_name = 'paas/cluster/kubernetes/kubernetes.html'
-    def get_context_data(self, **kwargs):
-        context = super(Kubernetes, self).get_context_data(**kwargs)
-        context['name'] = u'杨旭'
-        context['clusters'] = [
-{'name':'k8s01','createtime':'2018-05-01 14:36:49','manager':3,'node':3,'status':'unreachable','cpu':{'use':0.4,'total':2,'percent':22},'memory':{'use':0.4,'total':2,'percent':28}},
-        ]
-        return context
-    
+   
 class K8sOverview(TemplateView):
     template_name = 'paas/cluster/kubernetes/k8sOverview.html'
-    def get_context_data(self, **kwargs):
-        context = super(K8sOverview, self).get_context_data(**kwargs)
-        context['name'] = u'杨旭'
-        context['clsinfo'] = {'clsname':kwargs['clsname'],'provide':'kubernetes','version':'v1.10.1','node':3}
-        return context
+    
     
 class K8sDetail(TemplateView):
     template_name = 'paas/cluster/kubernetes/k8sDetail.html'
-    def get_context_data(self, **kwargs):
-        context = super(K8sDetail, self).get_context_data(**kwargs)
-        context['name'] = u'杨旭'
-        context['clsinfo'] = {'clsname':kwargs['clsname'],'provide':'kubernetes','version':'v1.10.1','node':3}
-        return context
    
 class MesosIdleHostList(TemplateView):
     template_name = 'paas/cluster/mesos/MesosIdleHostList.html'
@@ -88,20 +74,30 @@ class MesosIdleHostDelete(DeleteView):
             status = False
         return JsonResponse({'status':status,'msg':msg})
 
-class MesosList(ListView):
+class MesosClusterList(ListView):
     model = MesosCluster
     context_object_name = 'cluster_list'
-    template_name = 'paas/cluster/mesos/MesosList.html'
+    template_name = 'paas/cluster/mesos/MesosClusterList.html'
 
 class MesosOverview(TemplateView):
-    template_name = 'paas/cluster/mesos/MesosOverview.html'
-   
+    template_name = 'paas/cluster/mesos/MesosClusterOverview.html'
+    def get_context_data(self, **kwargs):
+        context = super(MesosOverview,self).get_context_data(**kwargs)
+        context['clsObj'] = MesosClusterOverview.objects.get(clusterName=kwargs['clsname'])
+        return context
 
-class MesosDetail(TemplateView):
-    template_name = 'paas/cluster/mesos/MesosDetail.html'
-
-class MesosMasterDetail(TemplateView):
-    template_name = 'paas/cluster/mesos/MesosMasterDetail.html'   
+class MesosClsDetail(TemplateView):
+    template_name = 'paas/cluster/mesos/MesosClusterDetail.html'
+    def get_context_data(self, **kwargs):
+        context = super(MesosClsDetail,self).get_context_data(**kwargs)
+        clsname = kwargs['clsname']
+        context['clusterObj'] = MesosCluster.objects.get(clusterName=clsname)
+        context['masterNodes'] = MesosClusterDetail.objects.filter(Q(clusterName=clsname),Q(nodeType=1))
+        context['zookeeperNodes'] = MesosClusterDetail.objects.filter(Q(clusterName=clsname),Q(nodeType=2))
+        context['marathonNodes'] = MesosClusterDetail.objects.filter(Q(clusterName=clsname),Q(nodeType=3))
+        context['haproxyNodes'] = MesosClusterDetail.objects.filter(Q(clusterName=clsname),Q(nodeType=4))
+        context['slaveNodes'] = MesosClusterDetail.objects.filter(Q(clusterName=clsname),Q(nodeType=5))
+        return context
     
 class MesosAddCluster(FormView):
     form_class = MesosClusterForm
@@ -118,11 +114,12 @@ class MesosAddCluster(FormView):
         return context
     
     def post(self, request, *args, **kwargs):
-        status = int(request.POST.get('status'))
         form = self.get_form()
+        clusterName = request.POST.get('clusterName')
         if form.is_valid():
             status = True
             form.save(commit=True)
+            MesosClusterOverview.objects.create(clusterName=clusterName)
         else:
             status = False
         return JsonResponse({'status':status,'msg':form.errors})
@@ -130,13 +127,10 @@ class MesosAddCluster(FormView):
 def mesos_cluster_deploy(request):
     if request.method == 'POST':
         cluster_id = request.POST.get('cluster_id')
-        deployOption = request.POST.get('deployOption')
-        if deployOption == 'yes':
-            print deployOption
         clusterObj = MesosCluster.objects.get(id=cluster_id)
         clusterObj.status = 2
         clusterObj.save()
-        mesos_cluster_deploy_task.apply_async(args=(clusterObj,MesosDeployLog))
+        mesos_cluster_deploy_task.apply_async(args=(clusterObj,MesosDeployLog,MesosClusterDetail))
     return JsonResponse({'status':200})
 
 def mesos_cluster_start(request):
@@ -148,6 +142,22 @@ def mesos_cluster_stop(request):
     if request.method == 'POST':
         cluster_id = request.POST.get('cluster_id')
     return JsonResponse({'status':200})
+
+def mesos_cluster_clean(request):
+    if request.method == 'POST':
+        cluster_name = request.POST.get('cluster_name')
+        detailObjs = MesosClusterDetail.objects.filter(clusterName=cluster_name)
+        for obj in detailObjs:
+            try:
+                sock = DockerClient(base_url=obj.host+':6071')
+                sock.api.remove_container(obj.containerName, v=True, force=True)
+                obj.delete()
+            except Exception as e:
+                msg = str(e)
+                return JsonResponse({'status':400,'msg':msg})
+        MesosCluster.objects.filter(clusterName=cluster_name).update(status=1)
+        return JsonResponse({'status':200})
+
 
 def mesos_cluster_delete(request):
     if request.method == 'POST':

@@ -20,7 +20,7 @@
 					<a href="{% url 'dashboard' %}">Home</a>
 				</li>
 				<li>PAAS中心</li>
-				<li><a href="{% url 'MesosList' %}">mesos</a></li>
+				<li><a href="{% url 'MesosClusterList' %}">mesos</a></li>
 				<li>创建集群</li>
 			</ul><!-- /.breadcrumb -->
 		</div>
@@ -130,7 +130,7 @@
 												</div>
 												
 												<div class="center">
-													<label class="col-xs-12 col-sm-6 control-label no-padding-right red">备注:zookeeper(端口:2181)默认与mesos master部署在一起。</label>	
+													<strong class="red">备注:</strong><i class="blue">zookeeper(端口:2181)默认与mesos master部署在一起。</i>	
 												</div>
 											</div>
 
@@ -189,6 +189,9 @@
 														</span>
 													</div>
 													<span class="red">*</span>
+												</div>
+												<div class="center">
+													<strong class="red">备注:</strong><i class="blue">Marathon集群使用zookeeper选举, node name就是Marathon ID。</i>	
 												</div>
 											</div>
 
@@ -267,6 +270,9 @@
 														</span>
 													</div>
 													<span class="red">*</span>
+												</div>
+												<div class="center">
+													<strong class="red">备注:</strong><i class="blue">Bamboo集群使用zookeeper选举, node name 就是Haproxy ID。</i>	
 												</div>
 											</div>
 											

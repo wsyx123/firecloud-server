@@ -1,31 +1,43 @@
 {% ifequal status 1 %}
 <div class="action-buttons">
-	<span class="green" id="enabled" onclick="deployCluster(this,'deploy_name');">
-		<i class="fa fa-telegram bigger-130" title="部署" data-toggle="modal" data-target="#mydeploy"></i>
+	<span class="green" id="enabled" onclick="deployCluster(this);">
+		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-play-circle bigger-130" title="启动"></i>
 	</span>
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
 	</span>
-	<span class="red" id="enabled" onclick="deployCluster(this,'delete_name');">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
+	<span class="blue" id="enabled">
+		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
+	</span>
+	<span class="orange" id="enabled" onclick="cleanCluster(this);">
+		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
+	</span>
+	<span class="red" id="enabled" onclick="deleteCluster(this);">
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
 	</span>
 </div>
 {% endifequal %}
 {% ifequal status 2 %}
 <div class="action-buttons">
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-play-circle bigger-130" title="启动"></i>
 	</span>
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
 	</span>
-	<span class="gray" id="disabled">
+	<span class="blue" id="enabled">
+		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
+	</span>
+	<span class="" id="enabled" onclick="cleanCluster(this);">
+		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
+	</span>
+	<span class="light-grey" id="disabled">
 		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
 	</span>
 </div>
@@ -33,34 +45,46 @@
 
 {% ifequal status 4 %}
 <div class="action-buttons">
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-play-circle bigger-130" title="启动"></i>
 	</span>
-	<span class="red" id="enabled" onclick="deployCluster(this,'stop_name');">
-		<i class="fa fa-stop-circle bigger-130" title="停止" data-toggle="modal" data-target="#mystop"></i>
+	<span class="red" id="enabled" onclick="stopCluster(this);">
+		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
 	</span>
-	<span class="red" id="enabled" onclick="deployCluster(this,'delete_name');">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
+	<span class="blue" id="enabled">
+		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
+	</span>
+	<span class="" id="enabled" onclick="cleanCluster(this);">
+		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
+	</span>
+	<span class="red" id="enabled" onclick="deleteCluster(this);">
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
 	</span>
 </div>
 {% endifequal %}
 
 {% ifequal status 7 %}
 <div class="action-buttons">
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="blue" id="enabled" onclick="deployCluster(this,'start_name');">
-		<i class="fa fa-play-circle bigger-130" title="启动" data-toggle="modal" data-target="#mystart"></i>
+	<span class="blue" id="enabled" onclick="startCluster(this);">
+		<i class="fa fa-play-circle bigger-130" title="启动"></i>
 	</span>
-	<span class="gray" id="disabled">
+	<span class="light-grey" id="disabled">
 		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
 	</span>
-	<span class="red" id="enabled" onclick="deployCluster(this,'delete_name');">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
+	<span class="blue" id="enabled">
+		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
+	</span>
+	<span class="" id="enabled" onclick="cleanCluster(this);">
+		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
+	</span>
+	<span class="red" id="enabled" onclick="deleteCluster(this);">
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
 	</span>
 </div>
 {% endifequal %}

@@ -1,0 +1,383 @@
+{% extends "base/base.html" %}
+{% load mesos %}
+{% block css %}
+<link rel="stylesheet" href="/static/xcConfirm/css/xcConfirm.css" />
+<style type="text/css">
+#disabled{
+	cursor:not-allowed;
+}
+#enabled{
+	cursor:pointer;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					PAAS中心
+				</li>
+				<li class="active">mesos</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+
+		<div class="page-content">
+			<div class="alert alert-success hide" id="successBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>成功！</strong><span id="okMsg"></span>。
+			</div>
+			<div class="alert alert-danger hide" id="dangerBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>失败！</strong><span id="failMsg"></span>。
+			</div>
+		
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="clearfix">
+						<a href="{% url 'MesosIdleHostList' %}"><button class="btn btn-xs btn-info">空闲主机</button></a>
+						<a href="{% url 'MesosAddCluster' %}"><button class="btn btn-xs btn-info">创建集群</button></a>
+						<a href="{% url 'MesosAddNode' %}"><button class="btn btn-xs btn-info">添加节点</button></a>
+						<div class="pull-right tableTools-container"></div>
+					</div>
+
+					<table id="dynamic-table" class="table table-striped table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>名称</th>
+								<th>管理节点</th>
+								<th>计算节点</th>
+								<th>Haproxy节点</th>
+								<th class="hidden-xs">CPU</th>
+								<th class="hidden-xs">内存</th>
+								<th class="hidden-xs">存储</th>
+								<th>状态</th>
+								<th class="hidden-xs"><i class="ace-icon fa fa-clock-o"></i>创建时间</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+
+						<tbody>
+							{% for cluster in cluster_list %}
+							<tr>
+								<td>{{ cluster.id }}</td>
+								<td><a href="{% url 'MesosOverview' clsname=cluster.clusterName %}">{{ cluster.clusterName }}</a></td>
+								<td>{{ cluster.masterNodeNum }}</td>
+								<td>{{ cluster.slaveDeploy|countNode }}</td>
+								<td>{{ cluster.haproxyDeploy|countNode }}</td>
+								<td class="hidden-xs">/ Cores <span class="gray">({{cluster.cpu.percent}}%)</span></td>
+								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
+								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
+								<td><label class="label label-sm {{cluster.status|returnClass}} ">{{ cluster.get_status_display}}</label></td>
+								<td class="hidden-xs">{{ cluster.create_time|date:"Y-m-d H:i:s"}}</td>
+								<td>
+									{% opp_td cluster.status cluster.clusterName %}
+								</td>											
+							</tr>
+							{% endfor %}
+
+						</tbody>
+					</table>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->		
+		
+		<!-- 删除模态框（Modal） -->
+		<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4>
+							<span>删除 <strong class="blue" id="delete_name"></strong> 集群</span>
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="center">
+							<label><strong>是否删除(</strong><span class="red">删除前请确保集群上已无应用,一旦删除动作启动,将不可逆</span>)?</label>
+						</div>
+						<div style="padding-left:80px;">
+							<strong id="refreshFailMsg" style="color: red;"></strong>
+						</div>
+					</div>
+					<div class="modal-footer center">
+						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteClusterAck();">删除</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+			
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<!-- page specific plugin scripts -->
+<script src="/static/assets/js/jquery.dataTables.min.js"></script>
+<script src="/static/assets/js/jquery.dataTables.bootstrap.min.js"></script>
+<script src="/static/assets/js/dataTables.buttons.min.js"></script>
+<script src="/static/assets/js/buttons.flash.min.js"></script>
+<script src="/static/assets/js/buttons.html5.min.js"></script>
+<script src="/static/assets/js/buttons.print.min.js"></script>
+<script src="/static/assets/js/buttons.colVis.min.js"></script>
+<script src="/static/assets/js/dataTables.select.min.js"></script>
+<script src="/static/xcConfirm/js/xcConfirm.js"></script>
+<script type="text/javascript">
+
+function deployCluster(obj){
+	var cluster_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var cluster_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	var option = {
+		title: "部署集群",
+		btn: parseInt("0011",2),
+		onOk: function(){
+			deployClusterAck(cluster_id,cluster_name);
+		}
+	}
+	window.wxc.xcConfirm('确定部署 '+cluster_name+' 集群 ?', window.wxc.xcConfirm.typeEnum.confirm,option);
+};
+
+function startCluster(obj){
+	var cluster_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var cluster_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	var option = {
+		title: "启动集群",
+		btn: parseInt("0011",2),
+		onOk: function(){
+			startClusterAck(cluster_id,cluster_name);
+		}
+	}
+	window.wxc.xcConfirm('确定启动 '+cluster_name+' 集群 ?', window.wxc.xcConfirm.typeEnum.confirm,option);
+};
+
+function stopCluster(obj){
+	var cluster_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var cluster_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	var option = {
+		title: "停止集群",
+		btn: parseInt("0011",2),
+		onOk: function(){
+			stopClusterAck(cluster_id,cluster_name);
+		}
+	}
+	window.wxc.xcConfirm('确定停止 '+cluster_name+' 集群 ?', window.wxc.xcConfirm.typeEnum.warning,option);
+};
+
+function cleanCluster(obj){
+	var cluster_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var cluster_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	var option = {
+		title: "清理集群",
+		btn: parseInt("0011",2),
+		onOk: function(){
+			cleanClusterAck(cluster_id,cluster_name);
+		}
+	}
+	window.wxc.xcConfirm('确定清理 '+cluster_name+' 上已创建的组件容器 ?', window.wxc.xcConfirm.typeEnum.warning,option);
+};
+
+function deleteCluster(obj){
+	var cluster_id = $($(obj).parent().parent()).siblings().eq(0).text();
+	var cluster_name = $($(obj).parent().parent()).siblings().eq(1).text();
+	var option = {
+		title: "删除集群",
+		btn: parseInt("0011",2),
+		onOk: function(){
+			deleteClusterAck(obj,cluster_id,cluster_name);
+		}
+	}
+	window.wxc.xcConfirm('确定删除 '+cluster_name+' 集群 ?<br /><span class="red">删除前确保集群上已没应用，删除动作不可逆!</span>', window.wxc.xcConfirm.typeEnum.warning,option);
+};
+
+function deployClusterAck(cluster_id,cluster_name){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/add/deploy/",
+		data: {"cluster_id":cluster_id},
+		success: function(data){
+			if(data['status']==200){
+				var txt = '集群:'+cluster_name+'正在后台部署...<a href="/mesos/add/deploy/result/?cluster_id='+cluster_id+'" target="_blank">点我查看部署过程</a>';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").html(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+};
+
+function startClusterAck(){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/add/start/",
+		data: {"cluster_id":cluster_id},
+		success: function(data){
+			if(data['status']==200){
+				var txt = '集群:'+cluster_name+'启动成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+	
+};
+
+function stopClusterAck(){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/add/stop/",
+		data: {"cluster_id":cluster_id},
+		success: function(data){
+			if(data['status']==200){
+				var txt = '集群:'+cluster_name+'停止成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+};
+
+function cleanClusterAck(cluster_id,cluster_name){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/add/clean/",
+		data: {"cluster_name":cluster_name},
+		success: function(data){
+			if(data['status']==200){
+				var txt = '集群:'+cluster_name+'组件容器已全部清除成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+};
+
+function deleteClusterAck(clusterObj,cluster_id,cluster_name){
+	$.ajax({
+		method: "POST",
+		url: "/mesos/delete/",
+		data: {"cluster_id":cluster_id},
+		success: function(data){
+			if(data['status']==200){
+				$(clusterObj).parent().parent().parent().parent().remove();
+				var txt = '集群:'+cluster_name+'删除成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{	
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	});
+};
+
+function closeBlock(obj){
+	$(obj).parent().addClass('hide');
+}
+
+jQuery(function($) {
+	//initiate dataTables plugin
+	var myTable = 
+	$('#dynamic-table')
+	//.wrap("<div class='dataTables_borderWrap' />")   //if you are applying horizontal scrolling (sScrollX)
+	.DataTable( {
+		bAutoWidth: false,
+		"aoColumns": [
+		  { "bSortable": false },
+		  null, null,null, null, null,null,null,null,null,
+		  { "bSortable": false }
+		],
+		"aaSorting": [],
+		"oLanguage": {
+		  "sLengthMenu": "显示 _MENU_ 条",
+		  "sSearch": "查找",
+		  "sInfo": "共 _TOTAL_ , 显示 (_START_ - _END_)",
+		  "oPaginate": {
+				   "sFirst":    "第一页",  
+				   "sPrevious": " 上一页 ",  
+				   "sNext":     " 下一页 ",  
+				   "sLast":     " 最后一页 "  
+			}  
+		},
+		
+	} );
+	
+	$.fn.dataTable.Buttons.defaults.dom.container.className = 'dt-buttons btn-overlap btn-group btn-overlap';
+	
+	new $.fn.dataTable.Buttons( myTable, {
+		buttons: [
+		  {
+			"extend": "colvis",
+			"text": "<i class='fa fa-search bigger-110 blue'></i> <span class='hidden'>Show/hide columns</span>",
+			"className": "btn btn-white btn-primary btn-bold",
+			columns: ':not(:first):not(:last)'
+			//columns: ':not(:first):not(:last)'
+		  },
+		  {
+			"extend": "copy",
+			"text": "<i class='fa fa-copy bigger-110 pink'></i> <span class='hidden'>Copy to clipboard</span>",
+			"className": "btn btn-white btn-primary btn-bold"
+		  },
+		  {
+			"extend": "csv",
+			"text": "<i class='fa fa-file-excel-o bigger-110 green'></i> <span class='hidden'>Export to CSV</span>",
+			"className": "btn btn-white btn-primary btn-bold"
+		  },
+		  
+		  
+		  {
+			"extend": "print",
+			"text": "<i class='fa fa-print bigger-110 grey'></i> <span class='hidden'>Print</span>",
+			"className": "btn btn-white btn-primary btn-bold",
+			autoPrint: false,
+			message: 'This print was produced using the Print button for DataTables'
+		  }		  
+		]
+	} );
+	myTable.buttons().container().appendTo( $('.tableTools-container') );
+	
+	//style the message box
+	var defaultCopyAction = myTable.button(1).action();
+	myTable.button(1).action(function (e, dt, button, config) {
+		defaultCopyAction(e, dt, button, config);
+		$('.dt-button-info').addClass('gritter-item-wrapper gritter-info gritter-center white');
+	});
+
+	var defaultColvisAction = myTable.button(0).action();
+	myTable.button(0).action(function (e, dt, button, config) {
+		
+		defaultColvisAction(e, dt, button, config);
+		if($('.dt-button-collection > .dropdown-menu').length == 0) {
+			$('.dt-button-collection')
+			.wrapInner('<ul class="dropdown-menu dropdown-light dropdown-caret dropdown-caret" />')
+			.find('a').attr('href', '#').wrap("<li />")
+		}
+		$('.dt-button-collection').appendTo('.tableTools-container .dt-buttons')
+	});
+});
+</script>
+{% endblock %}

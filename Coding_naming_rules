@@ -8,3 +8,7 @@ GLOBAL_VAR_NAME,
 instance_var_name, 
 function_parameter_name, 
 local_var_name.
+
+
+函数，类  所需要的参数（全局变量，model等）必须显示传递，禁止 直接进入，
+如： mesos集群部署，需要记录部署日志，需要用到MesosDeployLog 数据库， MesosDeployLog 禁止直接import

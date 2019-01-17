@@ -84,29 +84,48 @@ class MesosDeployLog(models.Model):
     
     def __unicode__(self):
         return '%s' %(self.cluster_name)
-      
-class MesosMaster(models.Model):
-    m_status = (
-                (1,'health'),
-                (2,'warning'),
-                (3,'danger')
+
+class MesosClusterOverview(models.Model):
+    status = (
+            (1,'health'),
+            (2,'warning'),
+            (3,'danger'),
+            (4,'unknown')
+            )
+    clusterName = models.CharField(max_length=32,unique=True)
+    vendor = models.CharField(max_length=16,default='Apache Mesos')
+    version = models.CharField(max_length=16,default='v1.6.1-rc2')
+    leader = models.GenericIPAddressField(null=True,blank=True)
+    total_container = models.IntegerField(default=0)
+    cpu_use = models.IntegerField(default=0)
+    memory_use = models.IntegerField(default=0)
+    disk_use = models.IntegerField(default=0)
+    master_status = models.IntegerField(choices=status,default=4)
+    zookeeper_status = models.IntegerField(choices=status,default=4)
+    marathon_status = models.IntegerField(choices=status,default=4)
+    haproxy_status = models.IntegerField(choices=status,default=4)
+    bamboo_status = models.IntegerField(choices=status,default=4)
+    slave_status = models.IntegerField(choices=status,default=4)
+    
+class MesosClusterDetail(models.Model):
+    nodetype = (
+                (1,'master'),
+                (2,'zookeeper'),
+                (3,'marathon'),
+                (4,'haproxy'),
+                (5,'slave')
                 )
-    cluster = models.ForeignKey('MesosCluster',verbose_name='集群')
-    version = models.CharField(max_length=32,verbose_name='版本')
-    image = models.CharField(max_length=128,verbose_name='镜像')
-    hosts = models.ManyToManyField('PaasHost',verbose_name='主机')
-    leader = models.GenericIPAddressField(verbose_name='leader地址')
-    port = models.IntegerField(verbose_name='端口')
-    zk = models.CharField(max_length=255,verbose_name='ZK地址')
-    log_dir = models.CharField(max_length=255,verbose_name='日志目录')
-    work_dir = models.CharField(max_length=255,verbose_name='工作目录')
-    documentation = models.CharField(max_length=255,verbose_name='参考链接')
-    status = models.IntegerField(choices=m_status,verbose_name='状态')
-    def hosts_list(self):
-        return ', '.join([a.ip for a in self.hosts.all()])
-     
-    def __unicode__(self):
-        return '%s' %(self.cluster)
+    status = (
+              (1,'运行'),
+              (2,'停止')
+              )
+    
+    clusterName = models.CharField(max_length=32,unique=True)
+    nodeType = models.IntegerField(choices=nodetype)
+    host = models.GenericIPAddressField()
+    containerName = models.CharField(max_length=32)
+    containerStatus = models.IntegerField(choices=status,default=1)
+    serviceStatus = models.IntegerField(choices=status,default=1)
  
 class RepositoryHost(models.Model):
     apiType = (
