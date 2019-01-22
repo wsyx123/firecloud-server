@@ -8,6 +8,7 @@ Created on 2019年1月13日 下午2:30:57
 import socket
 from docker import DockerClient
 from datetime import datetime
+from django.db.models import Q
 
 class MesosDeploy():
     def __init__(self,clsObj,deploy_model):
@@ -92,6 +93,22 @@ class MesosDeploy():
                 status_dict['msg'] = "{} download {} Fail:{}".format(host,img,msg)
                 status_dict['status'] = False
         return status_dict
+    
+    def record_deploy_log(self,deploy_obj,msg,status):
+        deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        deploy_obj.status = status
+        deploy_obj.msg = msg
+        deploy_obj.save()
+    
+    def record_container_status(self,detail_model,clusterName,containerID,host,containerName,status,nodeType):
+        detail_model.objects.update_or_create(clusterName=self.clsObj.clusterName,containerID=containerID,
+                                    nodeType=nodeType,host=host,containerName=containerName,containerStatus=status)
+        
+    def update_container_status(self,detail_model,host,containerName,status):
+        obj = detail_model.objects.get(Q(host=host),Q(containerName=containerName))
+        obj.containerStatus = status
+        obj.save()
+        
                 
     def create_container(self,deploy_obj,step_name,detail_model):
         if step_name == "deployZK":
@@ -108,12 +125,10 @@ class MesosDeploy():
             return False
             
     def deploy_zookeeper(self,deploy_obj,detail_model):
-        self.zookeeper_env = ['ZOO_INIT_LIMIT=10',
-                         'ZOO_TICK_TIME=3000',
-                         'ZOO_INIT_LIMIT=5',
-                         'ZOO_SYNC_LIMIT=2',
-                         'ZOO_MAX_CLIENT_CNXNS=60',
-                         'ZOO_ADMIN_ENABLESERVER=false']
+        self.zookeeper_env = ['ZOO_INIT_LIMIT=10','ZOO_TICK_TIME=3000','ZOO_INIT_LIMIT=5',
+                              'ZOO_SYNC_LIMIT=2',
+                              'ZOO_MAX_CLIENT_CNXNS=60',
+                              'ZOO_ADMIN_ENABLESERVER=false']
         img = str(self.clsObj.zkImage)
         hosts = self.master_host_list
         ZOO_SERVERS = ''
@@ -128,30 +143,32 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(img,detach=True,
-                                    name='mesos-zookeeper',
-                                    user='root',
-                                    tty=True,
-                                    stderr=True,
-                                    stdout=True,
-                                    environment=zookeeper_env,
-                                    network_mode='host',
-                                    restart_policy={"Name": "always"})
+                containerObj = sock.containers.create(img,detach=True,name='mesos-zookeeper',user='root',
+                                                     tty=True,
+                                                     #stderr=True,stdout=True,
+                                                     network_mode='host',
+                                                     environment=zookeeper_env,
+                                                     restart_policy={"Name": "always"})
+                #create the container record, status is created
+                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
+                                             hosts[i], 'mesos-zookeeper',3,2)
             except Exception as e:
                 msg = str(e)
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 4
-                deploy_obj.msg = hosts[i]+' Deployment zookeeper failure:'+msg
-                deploy_obj.save()
-                return False
+                msg = hosts[i]+' Deployment zookeeper failure:'+msg
+                self.record_deploy_log(deploy_obj, msg, 4)
             else:
-                detail_model.objects.create(clusterName=self.clsObj.clusterName,
-                                            nodeType=2,host=hosts[i],containerName='mesos-zookeeper')
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 3
-                deploy_obj.save()
-                return True
-            
+                try:
+                    containerObj.start()
+                except Exception as e:
+                    msg = str(e)
+                    msg = hosts[i]+' Deployment zookeeper failure:'+msg
+                    self.record_deploy_log(deploy_obj, msg, 4)
+                else:
+                    #create the container record, status is running
+                    self.update_container_status(detail_model, hosts[i], 'mesos-zookeeper', 1)
+                    self.record_deploy_log(deploy_obj, '', 3)
+                    return True
+            return False
     def deploy_master(self,deploy_obj,detail_model):
         img = self.clsObj.masterImage
         hosts = self.master_host_list
@@ -175,34 +192,37 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(img,detach=True,
-                                    name='mesos-master',
-                                    user='root',
+                containerObj = sock.containers.create(img,detach=True,name='mesos-master',user='root',
                                     tty=True,
-                                    stderr=True,
-                                    stdout=True,
+                                    #stderr=True,stdout=True,
+                                    network_mode='host',
                                     environment=[MESOS_ZK,MESOS_CLUSTER,MESOS_HOSTNAME,MESOS_PORT,
                                                  MESOS_LOG_DIR,MESOS_WORK_DIR,
                                                  MESOS_HOSTNAME_LOOKUP,MESOS_IP,MESOS_QUORUM],
                                     volumes={'/data/mesos-master/log': {'bind': '/var/log/mesos', 'mode': 'rw'},
                                              '/data/mesos-master/workdir': {'bind': '/var/tmp/mesos', 'mode': 'rw'},
                                              },
-                                    network_mode='host',
                                     restart_policy={"Name": "always"})
+                #create the container record, status is created
+                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
+                                             hosts[i], 'mesos-master',3,1)
             except Exception as e:
                 msg = str(e)
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 4
-                deploy_obj.msg = hosts[i]+' Deployment master failure:'+msg
-                deploy_obj.save()
-                return False
+                msg = hosts[i]+' Deployment master failure:'+msg
+                self.record_deploy_log(deploy_obj, msg, 4)
             else:
-                detail_model.objects.create(clusterName=self.clsObj.clusterName,
-                                            nodeType=1,host=hosts[i],containerName='mesos-master')
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 3
-                deploy_obj.save()
-                return True
+                try:
+                    containerObj.start()
+                except Exception as e:
+                    msg = str(e)
+                    msg = hosts[i]+' Deployment master failure:'+msg
+                    self.record_deploy_log(deploy_obj, msg, 4)
+                else:
+                    #create the container record, status is running
+                    self.update_container_status(detail_model, hosts[i], 'mesos-master', 1)
+                    self.record_deploy_log(deploy_obj, '', 3)
+                    return True
+            return False
             
     
     def deploy_marathon(self,deploy_obj,detail_model):
@@ -225,30 +245,34 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(img,detach=True,
-                                    name='mesos-marathon',
-                                    user='root',
+                containerObj = sock.containers.create(img,detach=True,
+                                    name='mesos-marathon',user='root',
                                     tty=True,
-                                    stderr=True,
-                                    stdout=True,
+                                    #stderr=True,stdout=True,
                                     environment=[MARATHON_ZK,MARATHON_MASTER,MARATHON_HOSTNAME,
                                                  MARATHON_HTTP_ADDRESS,MARATHON_HTTPS_ADDRESS],
                                     network_mode='host',
                                     restart_policy={"Name": "always"})
+                #create the container record, status is created
+                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
+                                             hosts[i], 'mesos-marathon',3,3)
             except Exception as e:
                 msg = str(e)
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 4
-                deploy_obj.msg = hosts[i]+' Deployment marathon failure:'+msg
-                deploy_obj.save()
-                return False
+                msg = hosts[i]+' Deployment marathon failure:'+msg
+                self.record_deploy_log(deploy_obj, msg, 4)
             else:
-                detail_model.objects.create(clusterName=self.clsObj.clusterName,
-                                            nodeType=3,host=hosts[i],containerName='mesos-marathon')
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 3
-                deploy_obj.save()
-                return True
+                try:
+                    containerObj.start()
+                except Exception as e:
+                    msg = str(e)
+                    msg = hosts[i]+' Deployment marathon failure:'+msg
+                    self.record_deploy_log(deploy_obj, msg, 4)
+                else:
+                    #create the container record, status is running
+                    self.update_container_status(detail_model, hosts[i], 'mesos-marathon', 1)
+                    self.record_deploy_log(deploy_obj, '', 3)
+                    return True
+            return False
      
     def deploy_haproxy(self,deploy_obj,detail_model):
         #https://github.com/QubitProducts/bamboo
@@ -278,31 +302,35 @@ class MesosDeploy():
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(img,detach=True,
-                                    name='haproxy-bamboo',
-                                    user='root',
+                containerObj = sock.containers.create(img,detach=True,
+                                    name='haproxy-bamboo',user='root',
                                     tty=True,
-                                    stderr=True,
-                                    stdout=True,
+                                    #stderr=True,stdout=True,
                                     ports=map_port,
                                     environment=[BAMBOO_ZK_HOST,BAMBOO_ZK_PATH,MARATHON_ENDPOINT,
                                                  BIND,CONFIG_PATH,BAMBOO_DOCKER_AUTO_HOST,BAMBOO_ENDPOINT],
                                     network_mode='bridge',
                                     restart_policy={"Name": "always"})
+                #create the container record, status is created
+                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
+                                             hosts[i], 'haproxy-bamboo',3,4)
             except Exception as e:
                 msg = str(e)
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 4
-                deploy_obj.msg = hosts[i]+' Deployment haproxy failure:'+msg
-                deploy_obj.save()
-                return False
+                msg = hosts[i]+' Deployment haproxy-bamboo failure:'+msg
+                self.record_deploy_log(deploy_obj, msg, 4)
             else:
-                detail_model.objects.create(clusterName=self.clsObj.clusterName,
-                                            nodeType=4,host=hosts[i],containerName='haproxy-bamboo')
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 3
-                deploy_obj.save()
-                return True
+                try:
+                    containerObj.start()
+                except Exception as e:
+                    msg = str(e)
+                    msg = hosts[i]+' Deployment haproxy-bamboo failure:'+msg
+                    self.record_deploy_log(deploy_obj, msg, 4)
+                else:
+                    #create the container record, status is running
+                    self.update_container_status(detail_model, hosts[i], 'haproxy-bamboo', 1)
+                    self.record_deploy_log(deploy_obj, '', 3)
+                    return True
+            return False
             
     def deploy_slave(self,deploy_obj,detail_model):
         img = self.clsObj.slaveImage
@@ -316,17 +344,12 @@ class MesosDeploy():
         for i in range(len(hosts)):
             MESOS_HOSTNAME = "MESOS_HOSTNAME={}".format(hosts[i])
             MESOS_IP = "MESOS_IP={}".format(hosts[i])
-            
-            
             base_url = "http://{}:6071".format(hosts[i])
             sock = DockerClient(base_url=base_url)
             try:
-                sock.containers.run(img,detach=True,
-                                    name='mesos-slave',
-                                    user='root',
+                containerObj = sock.containers.create(img,detach=True,name='mesos-slave',user='root',
                                     tty=True,
-                                    stderr=True,
-                                    stdout=True,
+                                    #stderr=True,stdout=True,
                                     privileged=True,
                                     environment=[MESOS_MASTER,MESOS_WORK_DIR,MESOS_ATTRIBUTES,
                                                  MESOS_CONTAINERIZERS,MESOS_LOG_DIR,
@@ -338,17 +361,23 @@ class MesosDeploy():
                                              },
                                     network_mode='host',
                                     restart_policy={"Name": "always"})
+                #create the container record, status is created
+                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
+                                             hosts[i], 'mesos-slave',3,5)
             except Exception as e:
                 msg = str(e)
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 4
-                deploy_obj.msg = hosts[i]+' Deployment slave failure:'+msg
-                deploy_obj.save()
-                return False
+                msg = hosts[i]+' Deployment slave failure:'+msg
+                self.record_deploy_log(deploy_obj, msg, 4)
             else:
-                detail_model.objects.create(clusterName=self.clsObj.clusterName,
-                                            nodeType=5,host=hosts[i],containerName='mesos-slave')
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 3
-                deploy_obj.save()
-                return True      
+                try:
+                    containerObj.start()
+                except Exception as e:
+                    msg = str(e)
+                    msg = hosts[i]+' Deployment slave failure:'+msg
+                    self.record_deploy_log(deploy_obj, msg, 4)
+                else:
+                    #create the container record, status is running
+                    self.update_container_status(detail_model, hosts[i], 'mesos-slave', 1)
+                    self.record_deploy_log(deploy_obj, '', 3)
+                    return True
+            return False     

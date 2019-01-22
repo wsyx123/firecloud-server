@@ -2,19 +2,50 @@
 {% load mesos %}
 
 {% block css %}
+<link rel="stylesheet" href="/static/xcConfirm/css/xcConfirm.css" />
 <style>
 .header {
     margin-top:0px;
-}
-
-.tabbable{
-	display:none;
 }
 
 .pull-right{
 	cursor:pointer;
 }
 
+.modal{
+	margin-top:0px;
+}
+.modal-dialog { 
+    position: absolute; 
+    top: 0; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+	width:80%;
+}
+
+.modal-header{
+	padding:10px;
+}
+.modal-content { 
+    /*overflow-y: scroll; */ 
+    position: absolute; 
+    top: 0; 
+    bottom: 0; 
+    width: 100%; 
+} .modal-body { 
+    overflow-y: scroll; 
+    position: absolute; 
+    top: 55px; 
+    bottom: 30px; 
+    width: 100%; 
+} 
+
+#logDisplay{
+	background-color:black;
+	color:white;
+	padding-left:15px;
+}
 </style>
 {% endblock %}
 {% block main %}
@@ -31,15 +62,101 @@
 				<li>{{ clsname }}</li>
 			</ul><!-- /.breadcrumb -->
 		</div>
-
+		
 		<div class="page-content">
+			<div class="alert alert-success hide" id="successBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>成功！</strong><span id="okMsg"></span>。
+			</div>
+			<div class="alert alert-danger hide" id="dangerBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>失败！</strong><span id="failMsg"></span>。
+			</div>
 			
+			<!-- 日志显示模态框（Modal） -->
+			<div class="modal fade" id="myModal"  data-backdrop="static">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" onclick="closeLog();">
+								&times;
+							</button>
+							<span style="font-size:20px;"><i class="fa fa-file-text" title="日志"></i> <span id="containerName"></span>日志</span>
+							<span style="margin-left:150px;">显示行数:
+								<select name="line" onchange="setLine();">
+									<option value="10" selected >10</option>
+									<option value="30">30</option>
+									<option value="50">50</option>
+									<option value="100">100</option>
+								</select>
+							</span>
+							<span style="margin-left:10px;">刷新频率:
+								<select name="time" onchange="setTime();">
+									<option value="5000">5秒</option>
+									<option value="10000">10秒</option>
+									<option value="15000">15秒</option>
+									<option value="no" selected>不刷新</option>
+								</select>
+							</span>
+						</div>
+						<div class="modal-body">
+							<div id="logDisplay">
+								No logs available								
+							</div>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal -->
+			</div>
 			<div class="row">
-				{% master_detail clusterObj masterNodes %}
-				{% zookeeper_detail clusterObj zookeeperNodes %}
-				{% marathon_detail clusterObj marathonNodes %}
-				{% haproxy_detail clusterObj haproxyNodes %}
-				{% slave_detail clusterObj slaveNodes %}
+				<div class="col-xs-12">
+					<h4 class="header smaller lighter blue">
+						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						{{ clsname }} 集群运行配置
+					</h4>
+					<div class="tabbable">
+						<ul class="nav nav-tabs">
+							<li class="active">
+								<a data-toggle="tab" href="#master">Mesos Master</a>
+							</li>
+							
+							<li>
+								<a data-toggle="tab" href="#zookeeper">Zookeeper</a>
+							</li>
+							<li>
+								<a data-toggle="tab" href="#marathon">Marathon</a>
+							</li>
+							<li>
+								<a data-toggle="tab" href="#haproxy">Haproxy</a>
+							</li>
+							<li>
+								<a data-toggle="tab" href="#slave">Mesos Slave</a>
+							</li>
+						</ul>
+						<div class="tab-content">
+							<div id="master" class="tab-pane in active">
+								{% master_detail clusterObj masterNodes %}
+							</div>
+							<div id="zookeeper" class="tab-pane">
+								{% zookeeper_detail clusterObj zookeeperNodes %}
+							</div>
+							<div id="marathon" class="tab-pane">
+								{% marathon_detail clusterObj marathonNodes %}
+							</div>
+							<div id="haproxy" class="tab-pane">
+								{% haproxy_detail clusterObj haproxyNodes %}
+							</div>
+							<div id="slave" class="tab-pane">
+								{% slave_detail clusterObj slaveNodes %}
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				
 			</div><!-- /.row -->
 		</div><!-- /.page-content -->
 	</div>
@@ -47,7 +164,7 @@
 {% endblock %}
 
 {% block js %}
-
+<script src="/static/xcConfirm/js/xcConfirm.js"></script>
 <script type="text/javascript">
 function collapseExpand(obj){
 	classStr = $(obj).text();
@@ -59,6 +176,97 @@ function collapseExpand(obj){
 		$(obj).parent().next().css('display','none');
 	}
 }
+
+function setTime(){
+	new_time = $("select[name='time']").val();
+	if(new_time == 'no'){
+		clearInterval(interval);
+	}else{
+		clearInterval(interval);
+		interval = setInterval(getLogsFunc,new_time);
+	}
+}
+
+function setLine(){
+	line = $("select[name='line']").val();
+	getLogsFunc();
+}
+
+function getLogs(obj){
+	interval = '';
+	line = $("select[name='line']").val();
+	host = $(obj).parent().parent().siblings().eq(0).text();
+	container = $(obj).parent().parent().siblings().eq(1).text();
+	$("#containerName").text(container);
+	getLogsFunc();
+}
+
+function getLogsFunc(){
+	$.ajax({
+			type: "POST",
+			url : "/mesos/list/node/log/",
+			data: {"host":host,"container":container,"line":line},
+			success:function(data){
+				$("#logDisplay").html(data["data"]);
+			}
+	})
+}
+
+function closeLog(){
+	$("#myModal").modal('hide');
+	clearInterval(interval);
+}
+
+function updateDockerStatus(obj,action){
+	var host = $(obj).parent().parent().siblings().eq(0).text();
+	var container = $(obj).parent().parent().siblings().eq(1).text();
+	var option = {
+		title: "容器操作",
+		btn: parseInt("0011",2),
+		onOk: function(){
+			startContainer(obj,host,container,action);
+		}
+	}
+	if(action=='start'){
+		window.wxc.xcConfirm('确定启动 '+container+' 容器 ?', window.wxc.xcConfirm.typeEnum.confirm,option);
+	}else if(action=='stop'){
+		window.wxc.xcConfirm('确定停止 '+container+' 容器 ?', window.wxc.xcConfirm.typeEnum.warning,option);
+	}
+}
+
+function startContainer(obj,host,container,action){
+	$.ajax({
+		type: 'POST',
+		url : '/mesos/update/container/',
+		data: {"host":host,"container":container,"action":action},
+		success: function(data){
+			if(data['code']==200){
+				if(action=='start'){
+					action_human = '启动';
+					$(obj).parent().parent().siblings().eq(2).children().removeClass('label-danger');
+					$(obj).parent().parent().siblings().eq(2).children().addClass('label-success');
+					$(obj).parent().parent().siblings().eq(2).children().text('启动 1秒')
+				}else{
+					action_human = '停止';
+					$(obj).parent().parent().siblings().eq(2).children().removeClass('label-success');
+					$(obj).parent().parent().siblings().eq(2).children().addClass('label-danger');
+					$(obj).parent().parent().siblings().eq(2).children().text('停止 1秒')
+				}
+				var txt = '容器:'+container+action_human+' 成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	})
+}
+
+function closeBlock(obj){
+	$(obj).parent().addClass('hide');
+}
+
 </script>
 {% endblock %}
 

@@ -1,30 +1,32 @@
-<div class="col-xs-12">
-	<h4 class="header smaller lighter">
-		<i class="fa fa-hand-o-right" aria-hidden="true"></i>
-		Mesos Master 运行配置
-		<span class="pull-right" onclick="collapseExpand(this);">显示</span>
-	</h4>
-	<div class="tabbable">
-		<ul class="nav nav-tabs" id="master">
-			<li class="active">
-				<a data-toggle="tab" href="#masterConfig">配置信息</a>
-			</li>
-			
-			<li>
-				<a data-toggle="tab" href="#masterNode">节点列表</a>
-			</li>
-		</ul>
+{% load mesos %}
 
-		<div class="tab-content">
-			<div id="masterConfig" class="tab-pane in active">
+<div id="master-list" class="panel-group accordion-style1 accordion-style2">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<a href="#master-config" data-parent="#master-list" data-toggle="collapse" class="accordion-toggle collapsed">
+				<i class="ace-icon fa fa-chevron-left pull-right" data-icon-hide="ace-icon fa fa-chevron-down" data-icon-show="ace-icon fa fa-chevron-left"></i>
+				<i class="fa fa-cog bigger-130" aria-hidden="true"></i>
+				&nbsp; 配置信息
+			</a>
+		</div>
+
+		<div class="panel-collapse collapse" id="master-config">
+			<div class="panel-body">
 				<div class="profile-user-info profile-user-info-striped">
+					<div class="profile-info-row">
+						<div class="profile-info-name">ID</div>
+						<div class="profile-info-value">
+							<span>{{clusterObj.clusterName}}</span>
+						</div>
+					</div>
+					
 					<div class="profile-info-row">
 						<div class="profile-info-name">VERSION</div>
 						<div class="profile-info-value">
 							<span>1.6.1-rc2</span>
 						</div>
 					</div>
-					
+
 					<div class="profile-info-row">
 						<div class="profile-info-name">IMAGE</div>
 						<div class="profile-info-value">
@@ -38,7 +40,7 @@
 							<span>{{clusterObj.masterDeploy}}</span>
 						</div>
 					</div>
-					
+
 					<div class="profile-info-row">
 						<div class="profile-info-name">PORT</div>
 						<div class="profile-info-value">
@@ -52,21 +54,21 @@
 							<span>{{clusterObj.marathonZK}}</span>
 						</div>
 					</div>
-					
+
 					<div class="profile-info-row">
 						<div class="profile-info-name">MESOS_CLUSTER</div>
 						<div class="profile-info-value">
 							<span>{{ clusterObj.clusterName}}</span>
 						</div>
 					</div>
-					
+
 					<div class="profile-info-row">
 						<div class="profile-info-name">MESOS_HOSTNAME_LOOKUP</div>
 						<div class="profile-info-value">
 							<span>false</span>
 						</div>
 					</div>
-					
+
 					<div class="profile-info-row">
 						<div class="profile-info-name">MESOS_LOG_DIR</div>
 						<div class="profile-info-value">
@@ -87,8 +89,20 @@
 					</div>
 				</div>
 			</div>
-			
-			<div id="masterNode" class="tab-pane">
+		</div>
+	</div>
+	
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<a href="#master-nodes" data-parent="#master-list" data-toggle="collapse" class="accordion-toggle collapsed">
+				<i class="ace-icon fa fa-chevron-left pull-right" data-icon-hide="ace-icon fa fa-chevron-down" data-icon-show="ace-icon fa fa-chevron-left"></i>
+				<i class="ace-icon fa fa-desktop bigger-120"></i>
+				&nbsp;节点列表
+			</a>
+		</div>
+
+		<div class="panel-collapse collapse" id="master-nodes">
+			<div class="panel-body">
 				<table class="table table-bordered">
 					<tr>
 						<th>所在主机</th>
@@ -101,44 +115,15 @@
 					<tr>
 						<td>{{ node.host }}</td>
 						<td>{{ node.containerName }}</td>
-						{% ifequal node.containerStatus 1 %}
-						<td><span class="label label-sm label-success">运行</span></td>
-						{% endifequal %}
-						{% ifequal node.containerStatus 2 %}
-						<td><span class="label label-sm label-danger">停止</span></td>
-						{% endifequal %}
-						{% ifequal node.containerStatus 3 %}
-						<td><span class="label label-sm">未部署</span></td>
-						{% endifequal %}
-						
-						{% ifequal node.serviceStatus 1 %}
-						<td><span class="label label-sm label-success">运行</span></td>
-						{% endifequal %}
-						{% ifequal node.serviceStatus 2 %}
-						<td><span class="label label-sm label-danger">停止</span></td>
-						{% endifequal %}
-						{% ifequal node.serviceStatus 3 %}
-						<td><span class="label label-sm">未部署</span></td>
-						{% endifequal %}
-						
+						{% node_status node %}
 						<td>
-							<div class="action-buttons">
-								<a href="#" class="blue">
-									<i class="fa fa-play-circle bigger-130" title="启动"></i>
-								</a>
-								<a href="#" class="red">
-									<i class="fa fa-stop-circle bigger-130" title="停止"></i>
-								</a>
-								<a href="#" class="red">
-									<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
-								</a>
-							</div>
+							{% detail_button %}
 						</td>
 					</tr>
 					{% endfor %}
-					
+										
 				</table>
 			</div>
 		</div>
 	</div>
-</div><!-- mesos master -->
+</div>

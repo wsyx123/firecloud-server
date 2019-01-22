@@ -1,0 +1,16 @@
+{% ifequal node.containerStatus 1 %}
+<td><span class="label label-sm label-success">运行 {{ node.containerRunTime }}</span></td>
+{% endifequal %}
+{% ifequal node.containerStatus 2 %}
+<td><span class="label label-sm label-danger">停止 {{ node.containerRunTime }}</span></td>
+{% endifequal %}
+{% ifequal node.containerStatus 3 %}
+<td><span class="label label-sm" style="background-color:#5bc0de;">创建 {{ node.containerRunTime }}</span></td>
+{% endifequal %}
+
+{% ifequal node.serviceStatus 1 %}
+<td><span class="label label-sm label-success">运行</span></td>
+{% endifequal %}
+{% ifequal node.serviceStatus 2 %}
+<td><span class="label label-sm label-danger">停止</span></td>
+{% endifequal %}

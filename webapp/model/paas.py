@@ -117,14 +117,17 @@ class MesosClusterDetail(models.Model):
                 )
     status = (
               (1,'运行'),
-              (2,'停止')
+              (2,'停止'),
+              (3,'创建')
               )
     
     clusterName = models.CharField(max_length=32,unique=True)
     nodeType = models.IntegerField(choices=nodetype)
     host = models.GenericIPAddressField()
+    containerID = models.CharField(max_length=64)
     containerName = models.CharField(max_length=32)
-    containerStatus = models.IntegerField(choices=status,default=1)
+    containerRunTime = models.CharField(max_length=32,default='1秒')
+    containerStatus = models.IntegerField(choices=status,default=3)
     serviceStatus = models.IntegerField(choices=status,default=1)
  
 class RepositoryHost(models.Model):

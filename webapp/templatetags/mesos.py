@@ -58,5 +58,13 @@ def haproxy_detail(clusterObj,haproxyNodes):
 @register.inclusion_tag('paas/cluster/mesos/detail/_slave_detail.html')
 def slave_detail(clusterObj,slaveNodes):
     return {'clusterObj':clusterObj,'slaveNodes':slaveNodes}
+
+@register.inclusion_tag('paas/cluster/mesos/detail/_button.html')
+def detail_button():
+    return {'status':True}
+
+@register.inclusion_tag('paas/cluster/mesos/detail/_node_status.html')
+def node_status(nodeObj):
+    return {'node':nodeObj}
     
     

@@ -98,6 +98,50 @@ class MesosClsDetail(TemplateView):
         context['haproxyNodes'] = MesosClusterDetail.objects.filter(Q(clusterName=clsname),Q(nodeType=4))
         context['slaveNodes'] = MesosClusterDetail.objects.filter(Q(clusterName=clsname),Q(nodeType=5))
         return context
+
+def cluster_docker_log(request):
+    if request.method == "POST":
+        line = int(request.POST.get('line'))
+        host = request.POST.get('host')
+        containerName = request.POST.get('container')
+        containerID = MesosClusterDetail.objects.get(Q(host=host,containerName=containerName)).containerID
+        sock = DockerClient(base_url='http://{}:6071'.format(host))
+        log = sock.api.logs(containerID,timestamps=False,tail=line)
+        log = log.replace('\r\n','<br />')
+        # info
+        log = log.replace('\x1b[34m','<span class="blue"> ')
+        log = log.replace('\x1b[0;39m',' </span>')
+        # error
+        log = log.replace('\x1b[1;31m','<span class="red"> ')
+        log = log.replace('\x1b[0;39m',' </span>')
+        return JsonResponse({"data":log})
+    
+def cluster_docker_update(request):
+    if request.method == "POST":
+        host = request.POST.get('host')
+        containerName = request.POST.get('container')
+        action = request.POST.get('action')
+        containerObj = MesosClusterDetail.objects.get(Q(host=host,containerName=containerName))
+        sock = DockerClient(base_url='http://{}:6071'.format(host))
+        status = 400
+        msg = ''
+        if action == 'start':
+            try:
+                sock.api.start(containerObj.containerID)
+            except Exception as e:
+                msg = str(e)
+            else:
+                containerObj.containerStatus = 1
+                containerObj.save()
+                status = 200
+        elif action == 'stop':
+            sock.api.stop(containerObj.containerID)
+            containerObj.containerStatus = 2
+            containerObj.save()
+            status = 200
+        else:
+            msg = 'the action {} is not support!'.format(action)
+        return JsonResponse({'code':status,'msg':msg})
     
 class MesosAddCluster(FormView):
     form_class = MesosClusterForm

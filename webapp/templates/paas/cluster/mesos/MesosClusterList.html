@@ -91,36 +91,7 @@
 					</table>
 				</div><!-- /.col -->
 			</div><!-- /.row -->
-		</div><!-- /.page-content -->		
-		
-		<!-- 删除模态框（Modal） -->
-		<div class="modal fade" id="mydelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-							&times;
-						</button>
-						<h4>
-							<span>删除 <strong class="blue" id="delete_name"></strong> 集群</span>
-						</h4>
-					</div>
-					<div class="modal-body">
-						<div class="center">
-							<label><strong>是否删除(</strong><span class="red">删除前请确保集群上已无应用,一旦删除动作启动,将不可逆</span>)?</label>
-						</div>
-						<div style="padding-left:80px;">
-							<strong id="refreshFailMsg" style="color: red;"></strong>
-						</div>
-					</div>
-					<div class="modal-footer center">
-						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteClusterAck();">删除</button>
-						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					</div>
-				</div><!-- /.modal-content -->
-			</div><!-- /.modal -->
-		</div>
-			
+		</div><!-- /.page-content -->					
 	</div>
 </div><!-- /.main-content -->
 {% endblock %}
