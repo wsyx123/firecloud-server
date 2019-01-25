@@ -15,7 +15,7 @@ from django.urls import reverse_lazy
 from django.db.models import ProtectedError
 import json
 import xlrd
-from webapp.tasks import process_asset_import,collect_host_info
+from webapp.tasks import process_asset_import_task,collect_host_info_task
 import os,sys
 from django.http.response import JsonResponse
 root_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -44,7 +44,7 @@ class HostAdd(FormView):
         """
         if self.request.POST.get('auto-collect').upper() == 'YES':
             self.object = form.save()
-            collect_host_info.delay(self.object.id,self.object.private_ip,self.object.port,
+            collect_host_info_task.delay(self.object.id,self.object.private_ip,self.object.port,
                                     self.object.remote_user,self.object.remote_passwd,2)
         return super(HostAdd, self).form_valid(form)
     
@@ -61,7 +61,7 @@ def host_refresh(request):
         key = request.POST.get('pk')
         obj = AssetHost.objects.get(id=key)
         try:
-            collect_host_info.delay(obj.id,obj.private_ip,obj.port,obj.remote_user,obj.remote_passwd,3)
+            collect_host_info_task.delay(obj.id,obj.private_ip,obj.port,obj.remote_user,obj.remote_passwd,3)
             status = 200
             err_msg = ''
         except Exception as e:
@@ -109,7 +109,7 @@ def host_import(request):
             import_info['total_line'] = total_rows
             import_info['status'] = True
             full_filename = handle_uploaded_file(res.id,request.FILES['file'])
-            process_asset_import.delay(res.id,full_filename)
+            process_asset_import_task.delay(res.id,full_filename)
 #             datalist = get_assets_data(full_filename)
 #             asset_format_check(res.id,datalist)
             return HttpResponse(json.dumps(import_info),content_type="application/json")

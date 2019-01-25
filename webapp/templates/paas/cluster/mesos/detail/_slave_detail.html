@@ -1,16 +1,16 @@
 {% load mesos %}
 
-<div id="slave-list" class="panel-group accordion-style1 accordion-style2">
+<div id="{{ slave.slaveLabel }}-list" class="panel-group accordion-style1 accordion-style2">
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<a href="#slave-config" data-parent="#slave-list" data-toggle="collapse" class="accordion-toggle collapsed">
+			<a href="#{{ slave.slaveLabel }}-config" data-parent="#{{ slave.slaveLabel }}-list" data-toggle="collapse" class="accordion-toggle collapsed">
 				<i class="ace-icon fa fa-chevron-left pull-right" data-icon-hide="ace-icon fa fa-chevron-down" data-icon-show="ace-icon fa fa-chevron-left"></i>
 				<i class="fa fa-cog bigger-130" aria-hidden="true"></i>
 				&nbsp; 配置信息
 			</a>
 		</div>
 
-		<div class="panel-collapse collapse" id="slave-config">
+		<div class="panel-collapse collapse" id="{{ slave.slaveLabel }}-config">
 			<div class="panel-body">
 				<div class="profile-user-info profile-user-info-striped">
 					<div class="profile-info-row">
@@ -23,35 +23,35 @@
 					<div class="profile-info-row">
 						<div class="profile-info-name">IMAGE</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.slaveImage}}</span>
+							<span>{{slaveObj.slaveImage}}</span>
 						</div>
 					</div>
 
 					<div class="profile-info-row">
 						<div class="profile-info-name">HOST</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.slaveDeploy}}</span>
+							<span>{{slaveObj.slaveDeploy}}</span>
 						</div>
 					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">PORT</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.slavePort}}</span>
+							<span>{{slaveObj.slavePort}}</span>
 						</div>
 					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">MESOS_ATTRIBUTES</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.slaveLabel}}</span>
+							<span>{{slaveObj.slaveLabel}}</span>
 						</div>
 					</div>
 
 					<div class="profile-info-row">
 						<div class="profile-info-name">MESOS_MASTER</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.slaveZK}}</span>
+							<span>{{slaveObj.slaveZK}}</span>
 						</div>
 					</div>
 					
@@ -95,14 +95,14 @@
 	
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<a href="#slave-nodes" data-parent="#slave-list" data-toggle="collapse" class="accordion-toggle collapsed">
+			<a href="#{{ slave.slaveLabel }}-nodes" data-parent="#{{ slave.slaveLabel }}-list" data-toggle="collapse" class="accordion-toggle collapsed">
 				<i class="ace-icon fa fa-chevron-left pull-right" data-icon-hide="ace-icon fa fa-chevron-down" data-icon-show="ace-icon fa fa-chevron-left"></i>
 				<i class="ace-icon fa fa-desktop bigger-120"></i>
 				&nbsp;节点列表
 			</a>
 		</div>
 
-		<div class="panel-collapse collapse" id="slave-nodes">
+		<div class="panel-collapse collapse" id="{{ slave.slaveLabel }}-nodes">
 			<div class="panel-body">
 				<table class="table table-bordered">
 					<tr>

@@ -3,20 +3,20 @@
 	<span class="green" id="enabled" onclick="deployCluster(this);">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="light-grey" id="disabled">
-		<i class="fa fa-play-circle bigger-130" title="启动"></i>
-	</span>
-	<span class="light-grey" id="disabled">
-		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
-	</span>
 	<span class="blue" id="enabled">
-		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
+		<a href="{% url 'MesosOverview' clsname=clusterName %}"><i class="fa fa-tachometer bigger-130" title="集群概览"></i></a>
+	</span>
+	<span class="light-grey" id="disabled">
+		<i class="fa fa-play-circle bigger-130" title="启动集群"></i>
+	</span>
+	<span class="light-grey" id="disabled">
+		<i class="fa fa-stop-circle bigger-130" title="停止集群"></i>
 	</span>
 	<span class="orange" id="enabled" onclick="cleanCluster(this);">
 		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
 	</span>
 	<span class="red" id="enabled" onclick="deleteCluster(this);">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除集群"></i>
 	</span>
 </div>
 {% endifequal %}
@@ -25,20 +25,20 @@
 	<span class="light-grey" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
-	<span class="light-grey" id="disabled">
-		<i class="fa fa-play-circle bigger-130" title="启动"></i>
-	</span>
-	<span class="light-grey" id="disabled">
-		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
-	</span>
 	<span class="blue" id="enabled">
-		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
+		<a href="{% url 'MesosOverview' clsname=clusterName %}"><i class="fa fa-tachometer bigger-130" title="集群概览"></i></a>
+	</span>
+	<span class="light-grey" id="disabled">
+		<i class="fa fa-play-circle bigger-130" title="启动集群"></i>
+	</span>
+	<span class="light-grey" id="disabled">
+		<i class="fa fa-stop-circle bigger-130" title="停止集群"></i>
 	</span>
 	<span class="" id="enabled" onclick="cleanCluster(this);">
 		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
 	</span>
 	<span class="light-grey" id="disabled">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除集群"></i>
 	</span>
 </div>
 {% endifequal %}
@@ -48,20 +48,20 @@
 	<span class="light-grey" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
+	<span class="blue" id="enabled">
+		<a href="{% url 'MesosOverview' clsname=clusterName %}"><i class="fa fa-tachometer bigger-130" title="集群概览"></i></a>
+	</span>
 	<span class="light-grey" id="disabled">
-		<i class="fa fa-play-circle bigger-130" title="启动"></i>
+		<i class="fa fa-play-circle bigger-130" title="启动集群"></i>
 	</span>
 	<span class="red" id="enabled" onclick="stopCluster(this);">
-		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+		<i class="fa fa-stop-circle bigger-130" title="停止集群"></i>
 	</span>
-	<span class="blue" id="enabled">
-		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
-	</span>
-	<span class="" id="enabled" onclick="cleanCluster(this);">
+	<span class="red" id="enabled" onclick="cleanCluster(this);">
 		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
 	</span>
 	<span class="red" id="enabled" onclick="deleteCluster(this);">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除集群"></i>
 	</span>
 </div>
 {% endifequal %}
@@ -71,20 +71,20 @@
 	<span class="light-grey" id="disabled">
 		<i class="fa fa-telegram bigger-130" title="部署"></i>
 	</span>
+	<span class="blue" id="enabled">
+		<a href="{% url 'MesosOverview' clsname=clusterName %}"><i class="fa fa-tachometer bigger-130" title="集群概览"></i></a>
+	</span>
 	<span class="blue" id="enabled" onclick="startCluster(this);">
-		<i class="fa fa-play-circle bigger-130" title="启动"></i>
+		<i class="fa fa-play-circle bigger-130" title="启动集群"></i>
 	</span>
 	<span class="light-grey" id="disabled">
-		<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+		<i class="fa fa-stop-circle bigger-130" title="停止集群"></i>
 	</span>
-	<span class="blue" id="enabled">
-		<a href="{% url 'MesosClsDetail' clsname=clusterName %}"><i class="fa fa-info-circle bigger-130" title="配置信息"></i></a>
-	</span>
-	<span class="" id="enabled" onclick="cleanCluster(this);">
+	<span class="red" id="enabled" onclick="cleanCluster(this);">
 		<i class="fa fa-eraser bigger-130" title="环境清除"></i>
 	</span>
 	<span class="red" id="enabled" onclick="deleteCluster(this);">
-		<i class="ace-icon fa fa-trash-o bigger-130" title="删除"></i>
+		<i class="ace-icon fa fa-trash-o bigger-130" title="删除集群"></i>
 	</span>
 </div>
 {% endifequal %}

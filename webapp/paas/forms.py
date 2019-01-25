@@ -6,14 +6,29 @@ Created on 2019年1月4日 下午3:16:03
 '''
 
 from django import forms
-from webapp.models import RepositoryHost,MesosCluster
+from webapp.models import RepositoryHost,MesosMaster,MesosMarathon,MesosHaproxy,MesosSlave
 
 class RepositoryHostForm(forms.ModelForm):
     class Meta:
         model = RepositoryHost
         fields = "__all__"
 
-class MesosClusterForm(forms.ModelForm):
+class MesosMasterForm(forms.ModelForm):
     class Meta:
-        model = MesosCluster
+        model = MesosMaster
+        fields = "__all__"
+        
+class MesosMarathonForm(forms.ModelForm):
+    class Meta:
+        model = MesosMarathon
+        fields = "__all__"
+        
+class MesosHaproxyForm(forms.ModelForm):
+    class Meta:
+        model = MesosHaproxy
+        fields = "__all__"
+        
+class MesosSlaveForm(forms.ModelForm):
+    class Meta:
+        model = MesosSlave
         fields = "__all__"

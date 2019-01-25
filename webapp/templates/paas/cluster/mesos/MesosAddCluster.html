@@ -197,7 +197,7 @@
 
 											<div class="step-pane" data-step="3">
 												<div class="form-group">
-													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Haproxy ID</label>
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">Haproxy ID</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
 															<input type="text" name="haproxyID" class="width-100" />
@@ -281,7 +281,7 @@
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">标签</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="slaveLabel" class="width-100" placeholder="mesos:slave" />
+															<input type="text" name="slaveLabel" class="width-100" placeholder="pool01" />
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -331,6 +331,9 @@
 														</span>
 													</div>
 													<span class="red">*</span>
+												</div>
+												<div class="center">
+													<strong class="red">备注:</strong><i class="blue">标签即资源池名称, 对应MESOS_ATTRIBUTES,其格式为mesos:slave,部署时会自动添加"mesos:"前缀</i>	
 												</div>
 											</div>
 										</div>

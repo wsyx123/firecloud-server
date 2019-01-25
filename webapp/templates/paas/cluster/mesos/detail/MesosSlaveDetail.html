@@ -1,0 +1,300 @@
+{% extends "base/base.html" %}
+{% load mesos %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/xcConfirm/css/xcConfirm.css" />
+<style>
+.header {
+    margin-top:0px;
+}
+
+.pull-right{
+	cursor:pointer;
+}
+
+.modal{
+	margin-top:0px;
+}
+.modal-dialog { 
+    position: absolute; 
+    top: 0; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+	width:80%;
+}
+
+.modal-header{
+	padding:10px;
+}
+.modal-content { 
+    /*overflow-y: scroll; */ 
+    position: absolute; 
+    top: 0; 
+    bottom: 0; 
+    width: 100%; 
+} .modal-body { 
+    overflow-y: scroll; 
+    position: absolute; 
+    top: 55px; 
+    bottom: 30px; 
+    width: 100%; 
+} 
+
+#logDisplay{
+	background-color:black;
+	color:white;
+	padding-left:15px;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+				<li>PAAS中心</li>
+				<li><a href="{% url 'MesosClusterList' %}">mesos</a></li>
+				<li>{{ clsname }}</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+		
+		<div class="page-content">
+			<div class="alert alert-success hide" id="successBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>成功！</strong><span id="okMsg"></span>。
+			</div>
+			<div class="alert alert-danger hide" id="dangerBlock">
+				<a href="#" class="close" onclick="closeBlock(this)">
+					&times;
+				</a>
+				<strong>失败！</strong><span id="failMsg"></span>。
+			</div>
+			
+			<!-- 日志显示模态框（Modal） -->
+			<div class="modal fade" id="myModal"  data-backdrop="static">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" onclick="closeLog();">
+								&times;
+							</button>
+							<span style="font-size:20px;"><i class="fa fa-file-text" title="日志"></i> <span id="containerName"></span>日志</span>
+							<span style="margin-left:150px;">显示行数:
+								<select name="line" onchange="setLine();">
+									<option value="10" selected >10</option>
+									<option value="30">30</option>
+									<option value="50">50</option>
+									<option value="100">100</option>
+								</select>
+							</span>
+							<span style="margin-left:10px;">刷新频率:
+								<select name="time" onchange="setTime();">
+									<option value="5000">5秒</option>
+									<option value="10000">10秒</option>
+									<option value="15000">15秒</option>
+									<option value="no" selected>不刷新</option>
+								</select>
+							</span>
+						</div>
+						<div class="modal-body">
+							<div id="logDisplay">
+								No logs available								
+							</div>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal -->
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<h4 class="header smaller lighter blue">
+						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						Slave 运行配置
+					</h4>
+					<div class="tabbable">
+						<ul class="nav nav-tabs">
+							{% for slave in slaveObj %}
+							{% ifequal forloop.counter 1 %}
+							<li class="active">
+								<a data-toggle="tab" href="#{{slave.slaveLabel}}">{{slave.slaveLabel }}</a>
+							</li>
+							{% else %}
+							<li>
+								<a data-toggle="tab" href="#{{slave.slaveLabel}}">{{slave.slaveLabel }}</a>
+							</li>
+							{% endifequal %}
+							{% endfor %}
+							<li>
+								<a data-toggle="tab" href="#event">集群事件</a>
+							</li>
+						</ul>
+						<div class="tab-content">
+							{% for slave in slaveObj %}
+							{% ifequal forloop.counter 1 %}
+							<div id="{{slave.slaveLabel}}" class="tab-pane in active">
+								{% slave_detail slave slaveNodes %}
+							</div>
+							{% else %}
+							<div id="{{slave.slaveLabel}}" class="tab-pane">
+								{% slave_detail slave slaveNodes %}
+							</div>
+							{% endifequal %}
+							{% endfor %}
+							<div id="event" class="tab-pane">
+								<table class="table">
+									<thead>
+										<tr>
+											<th class="col-sm-1">事件</th>
+											<th class="col-sm-1">集群</th>
+											<th class="col-sm-1">步骤</th>
+											<th class="col-sm-1">结果</th>
+											<th class="col-sm-1">状态</th>
+											<th class="col-sm-1">开始</th>
+											<th class="col-sm-1">结束</th>
+											<th>详细信息</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for event in clusterEnv %}
+										<tr>
+											<td>{{ event.name }}</td>
+											<td>{{ event.cluster_name }}</td>
+											<td>{{ event.step_name }}</td>
+											<td>{{ event.get_status_display }}</td>
+											{% ifequal event.status 3 %}
+											<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+											{% else %}
+											<td><span class="glyphicon glyphicon-remove-sign unhealth"></span></td>
+											{% endifequal %}
+											<td>{{event.start_time|date:"Y-m-d H:i:s"}}</td>
+											<td>{{event.finished_time|date:"Y-m-d H:i:s"}}</td>
+											<td>{{event.msg|default:'-------'}}</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/xcConfirm/js/xcConfirm.js"></script>
+<script type="text/javascript">
+function collapseExpand(obj){
+	classStr = $(obj).text();
+	if(classStr == '显示'){
+		$(obj).text('隐藏');
+		$(obj).parent().next().css('display','block');
+	}else{
+		$(obj).text('显示');
+		$(obj).parent().next().css('display','none');
+	}
+}
+
+function setTime(){
+	new_time = $("select[name='time']").val();
+	if(new_time == 'no'){
+		clearInterval(interval);
+	}else{
+		clearInterval(interval);
+		interval = setInterval(getLogsFunc,new_time);
+	}
+}
+
+function setLine(){
+	line = $("select[name='line']").val();
+	getLogsFunc();
+}
+
+function getLogs(obj){
+	interval = '';
+	line = $("select[name='line']").val();
+	host = $(obj).parent().parent().siblings().eq(0).text();
+	container = $(obj).parent().parent().siblings().eq(1).text();
+	$("#containerName").text(container);
+	getLogsFunc();
+}
+
+function getLogsFunc(){
+	$.ajax({
+			type: "POST",
+			url : "/mesos/list/node/log/",
+			data: {"host":host,"container":container,"line":line},
+			success:function(data){
+				$("#logDisplay").html(data["data"]);
+			}
+	})
+}
+
+function closeLog(){
+	$("#myModal").modal('hide');
+	clearInterval(interval);
+}
+
+function updateDockerStatus(obj,action){
+	var host = $(obj).parent().parent().siblings().eq(0).text();
+	var container = $(obj).parent().parent().siblings().eq(1).text();
+	var option = {
+		title: "容器操作",
+		btn: parseInt("0011",2),
+		onOk: function(){
+			startContainer(obj,host,container,action);
+		}
+	}
+	if(action=='start'){
+		window.wxc.xcConfirm('确定启动 '+container+' 容器 ?', window.wxc.xcConfirm.typeEnum.confirm,option);
+	}else if(action=='stop'){
+		window.wxc.xcConfirm('确定停止 '+container+' 容器 ?', window.wxc.xcConfirm.typeEnum.warning,option);
+	}
+}
+
+function startContainer(obj,host,container,action){
+	$.ajax({
+		type: 'POST',
+		url : '/mesos/update/container/',
+		data: {"host":host,"container":container,"action":action},
+		success: function(data){
+			if(data['code']==200){
+				if(action=='start'){
+					action_human = '启动';
+					$(obj).parent().parent().siblings().eq(2).children().removeClass('label-danger');
+					$(obj).parent().parent().siblings().eq(2).children().addClass('label-success');
+					$(obj).parent().parent().siblings().eq(2).children().text('启动 1秒')
+				}else{
+					action_human = '停止';
+					$(obj).parent().parent().siblings().eq(2).children().removeClass('label-success');
+					$(obj).parent().parent().siblings().eq(2).children().addClass('label-danger');
+					$(obj).parent().parent().siblings().eq(2).children().text('停止 1秒')
+				}
+				var txt = '容器:'+container+action_human+' 成功!';
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt);
+			}else{
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(data['msg']);
+			}
+		}
+	})
+}
+
+function closeBlock(obj){
+	$(obj).parent().addClass('hide');
+}
+
+</script>
+{% endblock %}
+

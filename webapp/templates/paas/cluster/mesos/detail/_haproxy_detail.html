@@ -1,21 +1,21 @@
 {% load mesos %}
-<div id="haproxy-list" class="panel-group accordion-style1 accordion-style2">
+<div id="{{ haproxyObj.haproxyID }}-list" class="panel-group accordion-style1 accordion-style2">
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<a href="#haproxy-config" data-parent="#haproxy-list" data-toggle="collapse" class="accordion-toggle collapsed">
+			<a href="#{{ haproxyObj.haproxyID }}-config" data-parent="#{{ haproxyObj.haproxyID }}-list" data-toggle="collapse" class="accordion-toggle collapsed">
 				<i class="ace-icon fa fa-chevron-left pull-right" data-icon-hide="ace-icon fa fa-chevron-down" data-icon-show="ace-icon fa fa-chevron-left"></i>
 				<i class="fa fa-cog bigger-130" aria-hidden="true"></i>
 				&nbsp; 配置信息
 			</a>
 		</div>
 
-		<div class="panel-collapse collapse" id="haproxy-config">
+		<div class="panel-collapse collapse" id="{{ haproxyObj.haproxyID }}-config">
 			<div class="panel-body">
 				<div class="profile-user-info profile-user-info-striped">
 					<div class="profile-info-row">
 						<div class="profile-info-name">ID</div>
 						<div class="profile-info-value">
-							<span>{{ clusterObj.haproxyID }}</span>
+							<span>{{ haproxyObj.haproxyID }}</span>
 						</div>
 					</div>
 					<div class="profile-info-row">
@@ -28,35 +28,35 @@
 					<div class="profile-info-row">
 						<div class="profile-info-name">IMAGE</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.haproxyImage}}</span>
+							<span>{{haproxyObj.haproxyImage}}</span>
 						</div>
 					</div>
 
 					<div class="profile-info-row">
 						<div class="profile-info-name">HOST</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.haproxyDeploy}}</span>
+							<span>{{haproxyObj.haproxyDeploy}}</span>
 						</div>
 					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">HAPROXY SERVICE PORT</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.servicePort}}</span>
+							<span>{{haproxyObj.servicePort}}</span>
 						</div>
 					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">HAPROXY STATUS PORT</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.statusPort}}</span>
+							<span>{{haproxyObj.statusPort}}</span>
 						</div>
 					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">BAMBOO PORT</div>
 						<div class="profile-info-value">
-							<span>{{clusterObj.bambooPort}}</span>
+							<span>{{haproxyObj.bambooPort}}</span>
 						</div>
 					</div>
 
@@ -68,9 +68,16 @@
 					</div>
 					
 					<div class="profile-info-row">
+						<div class="profile-info-name">BAMBOO_ZK_HOST</div>
+						<div class="profile-info-value">
+							<span>zk01.example.com:2181,zk02.example.com:2181</span>
+						</div>
+					</div>
+					
+					<div class="profile-info-row">
 						<div class="profile-info-name">BAMBOO_ZK_PATH</div>
 						<div class="profile-info-value">
-							<span>/{{clusterObj.haproxyID}}</span>
+							<span>/{{haproxyObj.haproxyID}}</span>
 						</div>
 					</div>
 					<div class="profile-info-row">
@@ -86,14 +93,14 @@
 	
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<a href="#haproxy-nodes" data-parent="#haproxy-list" data-toggle="collapse" class="accordion-toggle collapsed">
+			<a href="#{{ haproxyObj.haproxyID }}-nodes" data-parent="#{{ haproxyObj.haproxyID }}-list" data-toggle="collapse" class="accordion-toggle collapsed">
 				<i class="ace-icon fa fa-chevron-left pull-right" data-icon-hide="ace-icon fa fa-chevron-down" data-icon-show="ace-icon fa fa-chevron-left"></i>
 				<i class="ace-icon fa fa-desktop bigger-120"></i>
 				&nbsp;节点列表
 			</a>
 		</div>
 
-		<div class="panel-collapse collapse" id="haproxy-nodes">
+		<div class="panel-collapse collapse" id="{{ haproxyObj.haproxyID }}-nodes">
 			<div class="panel-body">
 				<table class="table table-bordered">
 					<tr>

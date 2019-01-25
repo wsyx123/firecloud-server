@@ -40,24 +40,24 @@ def opp_td(status_num,clusterName):
     return {'status':status_num,'clusterName':clusterName}
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_master_detail.html')
-def master_detail(clusterObj,masterNodes):
-    return {'clusterObj':clusterObj,'masterNodes':masterNodes}
+def master_detail(masterObj,masterNodes):
+    return {'masterObj':masterObj,'masterNodes':masterNodes}
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_zookeeper_detail.html')
 def zookeeper_detail(clusterObj,zookeeperNodes):
     return {'clusterObj':clusterObj,'zookeeperNodes':zookeeperNodes}
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_marathon_detail.html')
-def marathon_detail(clusterObj,marathonNodes):
-    return {'clusterObj':clusterObj,'marathonNodes':marathonNodes}
+def marathon_detail(marathonObj,marathonNodes):
+    return {'marathonObj':marathonObj,'marathonNodes':marathonNodes[marathonObj.marathonID]}
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_haproxy_detail.html')
-def haproxy_detail(clusterObj,haproxyNodes):
-    return {'clusterObj':clusterObj,'haproxyNodes':haproxyNodes}
+def haproxy_detail(haproxyObj,haproxyNodes):
+    return {'haproxyObj':haproxyObj,'haproxyNodes':haproxyNodes[haproxyObj.haproxyID]}
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_slave_detail.html')
-def slave_detail(clusterObj,slaveNodes):
-    return {'clusterObj':clusterObj,'slaveNodes':slaveNodes}
+def slave_detail(slaveObj,slaveNodes):
+    return {'slaveObj':slaveObj,'slaveNodes':slaveNodes[slaveObj.slaveLabel]}
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_button.html')
 def detail_button():

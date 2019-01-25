@@ -10,14 +10,13 @@ from docker import DockerClient
 from datetime import datetime
 from django.db.models import Q
 
-class MesosDeploy():
-    def __init__(self,clsObj,deploy_model):
+class MesosClusterDeploy():
+    def __init__(self,clsObj):
         self.clsObj = clsObj
         self.master_host_list = clsObj.masterDeploy.split(',')
         self.marathon_host_list = clsObj.marathonDeploy.split(',')
         self.haproxy_host_list = clsObj.haproxyDeploy.split(',')
         self.slave_host_list = clsObj.slaveDeploy.split(',')
-        self.deploy_model = deploy_model
         
     
     def get_cluster_all_host(self):
@@ -42,9 +41,10 @@ class MesosDeploy():
         return image_list
         
     
-    def check_con(self,deploy_obj):
+    def check_con(self,deploy_log_obj):
         socket.setdefaulttimeout(3)
         s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        deploy_log_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         err_host = []
         for host in self.get_cluster_all_host():
             result = s.connect_ex((host,6071))
@@ -53,31 +53,35 @@ class MesosDeploy():
             else:
                 err_host.append(host)
         if len(err_host) != 0:
-            deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            deploy_obj.status = 4
-            deploy_obj.msg = ','.join(err_host)+'端口:6071 连接失败!'
-            deploy_obj.save()
-            return False
+            status = 4
+            msg = ','.join(err_host)+'端口:6071 连接失败!'
+            res = False
         else:
-            deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            deploy_obj.status = 3
-            deploy_obj.save()
-            return True
+            status = 3
+            msg = ''
+            res = True
+        deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        deploy_log_obj.status = status
+        deploy_log_obj.msg = msg
+        deploy_log_obj.save()
+        return res
     
-    def img_download(self,deploy_obj):
+    def img_download(self,deploy_log_obj):
+        deploy_log_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         for item in self.get_cluster_all_image():
             img = item['image']
             hosts = item['hosts']
             download_result = self.download(img, hosts)
+            #只要下载一出错就直接返回失败，后面的不再进行
             if not download_result['status']:
-                deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_obj.status = 4
-                deploy_obj.msg = download_result['msg']
-                deploy_obj.save()
+                deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                deploy_log_obj.status = 4
+                deploy_log_obj.msg = download_result['msg']
+                deploy_log_obj.save()
                 return False
-        deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        deploy_obj.status = 3
-        deploy_obj.save()
+        deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        deploy_log_obj.status = 3
+        deploy_log_obj.save()
         return True
             
     
@@ -94,11 +98,11 @@ class MesosDeploy():
                 status_dict['status'] = False
         return status_dict
     
-    def record_deploy_log(self,deploy_obj,msg,status):
-        deploy_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        deploy_obj.status = status
-        deploy_obj.msg = msg
-        deploy_obj.save()
+    def record_deploy_log(self,deploy_log_obj,msg,status):
+        deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        deploy_log_obj.status = status
+        deploy_log_obj.msg = msg
+        deploy_log_obj.save()
     
     def record_container_status(self,detail_model,clusterName,containerID,host,containerName,status,nodeType):
         detail_model.objects.update_or_create(clusterName=self.clsObj.clusterName,containerID=containerID,
@@ -110,17 +114,17 @@ class MesosDeploy():
         obj.save()
         
                 
-    def create_container(self,deploy_obj,step_name,detail_model):
+    def create_container(self,deploy_log_obj,step_name,detail_model):
         if step_name == "deployZK":
-            return self.deploy_zookeeper(deploy_obj,detail_model)
+            return self.deploy_zookeeper(deploy_log_obj,detail_model)
         elif step_name == 'deployMaster':
-            return self.deploy_master(deploy_obj,detail_model)
+            return self.deploy_master(deploy_log_obj,detail_model)
         elif step_name == 'deployMT':
-            return self.deploy_marathon(deploy_obj,detail_model)
+            return self.deploy_marathon(deploy_log_obj,detail_model)
         elif step_name == 'deployHA':
-            return self.deploy_haproxy(deploy_obj,detail_model)
+            return self.deploy_haproxy(deploy_log_obj,detail_model)
         elif step_name == 'deploySlave':
-            return self.deploy_slave(deploy_obj,detail_model)
+            return self.deploy_slave(deploy_log_obj,detail_model)
         else:
             return False
             
@@ -292,8 +296,8 @@ class MesosDeploy():
             else:
                 bamboo_zk_host = bamboo_zk_host + zk_hosts[i]+':2181,'
         BAMBOO_ZK_HOST = "BAMBOO_ZK_HOST={}".format(bamboo_zk_host)
-        BAMBOO_ZK_PATH = "/"+self.clsObj.haproxyID
-        MARATHON_ENDPOINT = self.clsObj.haproxyMarathon
+        BAMBOO_ZK_PATH = "BAMBOO_ZK_PATH=/{}".format(self.clsObj.haproxyID)
+        MARATHON_ENDPOINT = "MARATHON_ENDPOINT={}".format(self.clsObj.haproxyMarathon)
         BIND = "BIND=:{}".format(bambooPort)
         CONFIG_PATH = "CONFIG_PATH=config/production.example.json"
         BAMBOO_DOCKER_AUTO_HOST = "BAMBOO_DOCKER_AUTO_HOST=true"
@@ -339,7 +343,7 @@ class MesosDeploy():
         MESOS_WORK_DIR = "MESOS_WORK_DIR=/var/tmp/mesos"
         MESOS_LOG_DIR = "MESOS_LOG_DIR=/var/log/mesos"
         MESOS_CONTAINERIZERS =  "MESOS_CONTAINERIZERS=docker,mesos"
-        MESOS_ATTRIBUTES = "MESOS_ATTRIBUTES={}".format(self.clsObj.slaveLabel)
+        MESOS_ATTRIBUTES = "MESOS_ATTRIBUTES=mesos:{}".format(self.clsObj.slaveLabel)
         MESOS_SYSTEMD_ENABLE_SUPPORT = "MESOS_SYSTEMD_ENABLE_SUPPORT=false"
         for i in range(len(hosts)):
             MESOS_HOSTNAME = "MESOS_HOSTNAME={}".format(hosts[i])
@@ -380,4 +384,5 @@ class MesosDeploy():
                     self.update_container_status(detail_model, hosts[i], 'mesos-slave', 1)
                     self.record_deploy_log(deploy_obj, '', 3)
                     return True
-            return False     
+            return False
+

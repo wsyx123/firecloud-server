@@ -47,7 +47,6 @@
 					<div class="clearfix">
 						<a href="{% url 'MesosIdleHostList' %}"><button class="btn btn-xs btn-info">空闲主机</button></a>
 						<a href="{% url 'MesosAddCluster' %}"><button class="btn btn-xs btn-info">创建集群</button></a>
-						<a href="{% url 'MesosAddNode' %}"><button class="btn btn-xs btn-info">添加节点</button></a>
 						<div class="pull-right tableTools-container"></div>
 					</div>
 
@@ -57,8 +56,8 @@
 								<th>ID</th>
 								<th>名称</th>
 								<th>管理节点</th>
-								<th>计算节点</th>
 								<th>Haproxy节点</th>
+								<th>计算节点</th>
 								<th class="hidden-xs">CPU</th>
 								<th class="hidden-xs">内存</th>
 								<th class="hidden-xs">存储</th>
@@ -72,10 +71,10 @@
 							{% for cluster in cluster_list %}
 							<tr>
 								<td>{{ cluster.id }}</td>
-								<td><a href="{% url 'MesosOverview' clsname=cluster.clusterName %}">{{ cluster.clusterName }}</a></td>
-								<td>{{ cluster.masterNodeNum }}</td>
-								<td>{{ cluster.slaveDeploy|countNode }}</td>
-								<td>{{ cluster.haproxyDeploy|countNode }}</td>
+								<td>{{ cluster.clusterName }}</td>
+								<td><a href="{% url 'MesosMasterDetail' clsname=cluster.clusterName %}">{{ cluster.masterNodeNum }}</a></td>
+								<td><a href="{% url 'MesosHaproxyDetail' clsname=cluster.clusterName %}">{{ cluster.haproxyDeploy|countNode }}</a></td>
+								<td><a href="{% url 'MesosSlaveDetail' clsname=cluster.clusterName %}">{{ cluster.slaveDeploy|countNode }}</a></td>
 								<td class="hidden-xs">/ Cores <span class="gray">({{cluster.cpu.percent}}%)</span></td>
 								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
 								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
@@ -181,7 +180,8 @@ function deployClusterAck(cluster_id,cluster_name){
 		data: {"cluster_id":cluster_id},
 		success: function(data){
 			if(data['status']==200){
-				var txt = '集群:'+cluster_name+'正在后台部署...<a href="/mesos/add/deploy/result/?cluster_id='+cluster_id+'" target="_blank">点我查看部署过程</a>';
+				var celery_id = data['celery_id']
+				var txt = '集群:'+cluster_name+'正在后台部署...<a href="/mesos/add/deploy/result/?cluster_id='+cluster_id+'&celery_id='+celery_id+'" target="_blank">点我查看部署过程</a>';
 				$("#successBlock").removeClass('hide');
 				$("#okMsg").html(txt);
 			}else{	

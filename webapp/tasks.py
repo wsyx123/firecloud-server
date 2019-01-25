@@ -12,17 +12,12 @@ from webapp.models import HostImport,AssetHost,HostEvent
 from utils.ansibleAdHoc import myadhoc
 from utils.ansibleplaybook import myplaybook
 from utils.callback import CollectAssetInfoCallback
-from utils.mesos_deploy import MesosDeploy
+from utils.mesos_deploy import MesosClusterDeploy
 import xlrd
 from django.core.validators import validate_ipv4_address
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from datetime import datetime
 import time
-
-@task(name='test_celery')
-def test_celery():
-    print 'test_celery'
 
 def override_ceel_value(value,typeobj):
     temp_value = str(value).strip()
@@ -141,14 +136,14 @@ def update_import_status(import_id,datalist,line_type,line_no):
     
        
 
-@task(name='process_asset_import')
-def process_asset_import(import_id,full_filename):
+@task(name='process_asset_import_task')
+def process_asset_import_task(import_id,full_filename):
     datalist = get_assets_data(full_filename)
     asset_format_check(import_id,datalist)
         
         
-@task(name='collect_host_info')
-def collect_host_info(asset_id,private_ip,port,user,password,action_num):
+@task(name='collect_host_info_task')
+def collect_host_info_task(asset_id,private_ip,port,user,password,action_num):
     tasks = [dict(action=dict(module='setup', args=''),register='shell_out'),]
     group = 'all'
     my=myadhoc(tasks,group,private_ip+',',port,user,password,CollectAssetInfoCallback)
@@ -193,40 +188,26 @@ def playbook_execute_task(task_id,playbook_full_name,playbook_full_host,callback
         obj.msg = execute_host_count # exception msg
         obj.save()
 
-#to initialize mesos cluster deploy log table
-def init_deploy_log_table(celery_id,cluster_name,deploy_model):
-    deploy_model.objects.filter(cluster_name=cluster_name).delete()
-    step_name_list = ["checkCon","imgDownload",
-                      "deployZK","deployMaster",
-                      "deployMT","deployHA","deploySlave"]
-    MesosDeployLogList = []
-    for step_name in step_name_list:
-        deployLog = deploy_model(celery_id=celery_id,cluster_name=cluster_name,step_name=step_name)
-        MesosDeployLogList.append(deployLog)
-    deploy_model.objects.bulk_create(MesosDeployLogList)
-
 @task(name='mesos_cluster_deploy_task',bind=True)
-def mesos_cluster_deploy_task(self,clsObj,deploy_model,detail_model):
+def mesos_cluster_deploy_task(self,clsObj,deploy_log_model,detail_model):
     celery_id = self.request.id
     clusterName = clsObj.clusterName
-    #to insert into MesosDeployLog
-    init_deploy_log_table(celery_id, clusterName, deploy_model)
     #Check the host connectivity
-    deploy_obj = deploy_model.objects.get(Q(cluster_name=clusterName),Q(step_name='checkCon'))
-    deploy_obj.status = 2
-    deploy_obj.save()
-    deploy_cls_instance = MesosDeploy(clsObj,deploy_model)
-    check_con_result = deploy_cls_instance.check_con(deploy_obj)
+    start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    deploy_log_obj = deploy_log_model.objects.create(celery_id=celery_id,cluster_name=clusterName,
+                                              step_name='checkCon',start_time=start_time,status=2)
+    deploy_cls_instance = MesosClusterDeploy(clsObj)
+    check_con_result = deploy_cls_instance.check_con(deploy_log_obj)
     if not check_con_result:
         clsObj.status = 3
         clsObj.save()
         return 'failed'
         
     #download docker image
-    deploy_obj = deploy_model.objects.get(Q(cluster_name=clusterName),Q(step_name='imgDownload'))
-    deploy_obj.status = 2
-    deploy_obj.save()
-    img_download_result = deploy_cls_instance.img_download(deploy_obj)
+    start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    deploy_log_obj = deploy_log_model.objects.create(celery_id=celery_id,cluster_name=clusterName,
+                                              step_name='imgDownload',start_time=start_time,status=2)
+    img_download_result = deploy_cls_instance.img_download(deploy_log_obj)
     if not img_download_result:
         clsObj.status = 3
         clsObj.save()
@@ -234,10 +215,10 @@ def mesos_cluster_deploy_task(self,clsObj,deploy_model,detail_model):
     #create container
     step_name_list = ["deployZK","deployMaster","deployMT","deployHA","deploySlave"]
     for step_name in step_name_list:
-        deploy_obj = deploy_model.objects.get(Q(cluster_name=clusterName),Q(step_name=step_name))
-        deploy_obj.status = 2
-        deploy_obj.save()
-        create_container_result = deploy_cls_instance.create_container(deploy_obj,step_name,detail_model)
+        start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        deploy_log_obj = deploy_log_model.objects.create(celery_id=celery_id,cluster_name=clusterName,
+                                              step_name=step_name,start_time=start_time,status=2)
+        create_container_result = deploy_cls_instance.create_container(deploy_log_obj,step_name,detail_model)
         if not create_container_result:
             clsObj.status = 3
             clsObj.save()
@@ -245,7 +226,10 @@ def mesos_cluster_deploy_task(self,clsObj,deploy_model,detail_model):
     clsObj.status = 4
     clsObj.save()
     return True
-    
+
+@task(name='check_mesos_cluster_task',bind=True)
+def check_mesos_cluster_task():
+    pass
     
 # @shared_task(name='test_celery')
 # def test_celery():

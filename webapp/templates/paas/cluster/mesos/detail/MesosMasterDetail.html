@@ -116,6 +116,9 @@
 					<h4 class="header smaller lighter blue">
 						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
 						{{ clsname }} 集群运行配置
+						<span class="pull-right">
+							<button class="btn btn-minier btn-info"><i class="fa fa-plus" aria-hidden="true"></i>添加Marathon集群</button>
+						</span>
 					</h4>
 					<div class="tabbable">
 						<ul class="nav nav-tabs">
@@ -126,31 +129,60 @@
 							<li>
 								<a data-toggle="tab" href="#zookeeper">Zookeeper</a>
 							</li>
+							{% for marathon in marathonObj %}
 							<li>
-								<a data-toggle="tab" href="#marathon">Marathon</a>
+								<a data-toggle="tab" href="#{{marathon.marathonID}}">{{marathon.marathonID}}</a>
 							</li>
+							{% endfor %}
 							<li>
-								<a data-toggle="tab" href="#haproxy">Haproxy</a>
-							</li>
-							<li>
-								<a data-toggle="tab" href="#slave">Mesos Slave</a>
+								<a data-toggle="tab" href="#event">集群事件</a>
 							</li>
 						</ul>
 						<div class="tab-content">
 							<div id="master" class="tab-pane in active">
-								{% master_detail clusterObj masterNodes %}
+								{% master_detail masterObj masterNodes %}
 							</div>
 							<div id="zookeeper" class="tab-pane">
-								{% zookeeper_detail clusterObj zookeeperNodes %}
+								{% zookeeper_detail masterObj zookeeperNodes %}
 							</div>
-							<div id="marathon" class="tab-pane">
-								{% marathon_detail clusterObj marathonNodes %}
+							{% for marathon in marathonObj %}
+							<div id="{{marathon.marathonID}}" class="tab-pane">
+								{% marathon_detail marathon marathonNodes %}
 							</div>
-							<div id="haproxy" class="tab-pane">
-								{% haproxy_detail clusterObj haproxyNodes %}
-							</div>
-							<div id="slave" class="tab-pane">
-								{% slave_detail clusterObj slaveNodes %}
+							{% endfor %}
+							<div id="event" class="tab-pane">
+								<table class="table">
+									<thead>
+										<tr>
+											<th class="col-sm-1">事件</th>
+											<th class="col-sm-1">集群</th>
+											<th class="col-sm-1">步骤</th>
+											<th class="col-sm-1">结果</th>
+											<th class="col-sm-1">状态</th>
+											<th class="col-sm-1">开始</th>
+											<th class="col-sm-1">结束</th>
+											<th>详细信息</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for event in clusterEnv %}
+										<tr>
+											<td>{{ event.name }}</td>
+											<td>{{ event.cluster_name }}</td>
+											<td>{{ event.step_name }}</td>
+											<td>{{ event.get_status_display }}</td>
+											{% ifequal event.status 3 %}
+											<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+											{% else %}
+											<td><span class="glyphicon glyphicon-remove-sign unhealth"></span></td>
+											{% endifequal %}
+											<td>{{event.start_time|date:"Y-m-d H:i:s"}}</td>
+											<td>{{event.finished_time|date:"Y-m-d H:i:s"}}</td>
+											<td>{{event.msg|default:'-------'}}</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
 							</div>
 						</div>
 					</div>
