@@ -1,0 +1,270 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/assets/css/select2.min.css" />
+<link rel="stylesheet" href="/static/xcConfirm/css/xcConfirm.css" />
+<style type="text/css">
+#singleNode{
+	display:none;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>PAAS中心</li>
+				<li><a href="{% url 'MesosClusterList' %}">mesos</a></li>
+				<li>添加节点</li>
+			</ul><!-- /.breadcrumb -->
+		</div>
+
+		<div class="page-content">
+			<div class="row">
+				<div class="col-xs-12">
+
+					<div class="widget-box">
+					
+						<div class="widget-body">
+							<div class="widget-main">
+								<!-- Mesos Slave -->
+								<form class="form-horizontal">
+									<div class="form-group">
+										<div class="col-sm-3"></div>
+										<div class="col-xs-12 col-sm-3 center">
+											<span>所属集群</span>
+											<select name="clusterName">
+												<option value="{{ masterObj.clusterName}}">{{  masterObj.clusterName }}</option>
+											</select>
+										</div>
+										<div class="col-xs-12 col-sm-2 center">
+											<span>添加类型</span>
+											<select name="addType" onchange="selectType();">
+												<option value="newPool">新资源池</option>
+												<option value="singleNode">添加节点</option>
+											</select>
+										</div>
+										<div class="col-sm-3"></div>
+									</div>
+									
+									<!--添加单节点 -->
+									<div id="singleNode">
+										<div class="form-group">
+											<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">选择资源池</label>
+											<div class="col-xs-12 col-sm-6">
+												<span class="block input-icon input-icon-right">
+													<select name="poolName" class="form-control">
+														{% for slaveObj in slaveObjs %}
+														<option value="{{ slaveObj.slaveLabel}}">{{  slaveObj.slaveLabel }}</option>
+														{% endfor %}
+													</select>
+												</span>
+											</div>
+											<span class="red">*</span>
+										</div>
+									
+									</div>
+									
+									<!--添加新资源池 -->
+									<div id="newPool">
+									
+										<div class="form-group">
+											<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">标签</label>
+											<div class="col-xs-12 col-sm-6">
+												<span class="block input-icon input-icon-right">
+													<input type="text" name="slaveLabel" class="width-100" placeholder="pool01" />
+												</span>
+											</div>
+											<span class="red">*</span>
+										</div>
+
+										<div class="form-group">
+											<label  class="col-xs-12 col-sm-3  control-label no-padding-right">端口</label>
+											<div class="col-xs-12 col-sm-6">
+												<span class="block input-icon input-icon-right">
+													<input type="text" name="slavePort" class="width-100" value="5051" />
+												</span>
+											</div>
+											<span class="red">*</span>
+										</div>
+										
+										<div class="form-group">
+											<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Master ZK</label>
+											<div class="col-xs-12 col-sm-6">
+												<span class="block input-icon input-icon-right">
+													<select class="form-control" name="slaveZK" id="slaveZK">
+														<option>{{master_zk}}</option>
+													</select>
+												</span>
+											</div>
+											<span class="red">*</span>
+										</div>
+										
+										<div class="form-group">
+											<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Slave镜像</label>
+											<div class="col-xs-12 col-sm-6">
+												<span class="block input-icon input-icon-right">
+													<select class="form-control" name="slaveImage">
+														{% for img in imgs %}
+														<option value="{{img.ip_port}}/{{img.image_name}}">{{img.ip_port}}/{{img.image_name}}</option>
+														{% endfor %}
+													</select>
+												</span>
+											</div>
+											<span class="red">*</span>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
+										<div class="col-xs-12 col-sm-6">
+											<span class="block input-icon input-icon-right">
+												<select multiple=""  name="slaveDeploy" class="select2 width-400" data-placeholder="选择部署主机...">
+													{% for host in hosts %}
+													<option value="{{host.host.private_ip}}">{{host.host.private_ip}}</option>
+													{% endfor %}
+												</select>
+											</span>
+										</div>
+										<span class="red">*</span>
+									</div>
+									<div class="center">
+										<strong class="red">备注:</strong><i class="blue">标签即资源池名称，用来划分资源池，对应MESOS_ATTRIBUTES属性,格式为mesos:slave，这里只需要填写':'后面部分</i>	
+									</div>
+								</form>
+								
+								<hr />
+								<div class="wizard-actions">
+									<button class="btn btn-success" onclick="saveNode('slave');">
+										添加
+										<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+									</button>
+								</div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script src="/static/assets/js/bootstrap-multiselect.min.js"></script>
+<script src="/static/assets/js/select2.min.js"></script>
+<script src="/static/assets/js/jquery-typeahead.js"></script>
+<script src="/static/xcConfirm/js/xcConfirm.js"></script>
+
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+selectType();
+function selectType(){
+	var addType = $("select[name='addType']").val();
+	if(addType == 'singleNode'){
+		$("#newPool").css("display","none");
+		$("#singleNode").css("display","block");
+	}else{
+		$("#newPool").css("display","block");
+		$("#singleNode").css("display","none");
+	}
+}
+
+function saveNode(nodeType){
+	var clusterName = $("select[name='clusterName']").text();
+	var addType = $("select[name='addType']").val();
+	if(addType=='newPool'){
+		var res = checkSlaveInfo();
+		if(!res){
+			return false;
+		}
+	}
+	$.ajax({
+		type: 'POST',
+		url : '/mesos/add/node/',
+		data: $("form").serialize()+'&nodeType='+nodeType,
+		success: function(data){
+			if(data['code']==200){
+				var option = {
+					onOk: function(){
+						window.location.href="/mesos/list/slave/"+clusterName+"/";
+					}
+				}
+				var txt=  "添加 "+nodeType+"成功!";
+				window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.success,option);
+			}else{
+				var txt = ''
+				for(var key in data['msg']){
+					txt = txt + '<strong class="red">'+key+'</strong><span> '+data['msg'][key].toString()+'</span><br />';
+				}
+				window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.error);
+			}
+		}
+	})
+	
+}
+
+//检查 slave info
+function checkSlaveInfo(){
+	var slaveLabel = $("input[name='slaveLabel']").val();
+	var slavePort = $("input[name='slavePort']").val();
+	var slaveImage = $("select[name='slaveImage']").val();
+	var slaveDeploy = $("select[name='slaveDeploy']").val();
+	if(slaveLabel.trim().length==0){
+		var txt = "请填写slave 标签!<br />格式:slave:pool1<br />标签用来划分资源池";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(slavePort.trim().length==0){
+		var txt = "请填写slave 端口!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(slaveImage.trim().length==0){
+		var txt = "请填写slave 镜像!<br />格式:192.168.10.3:5000/mesos-master:1.6.1-rc2";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	if(slaveDeploy==null){
+		var txt = "请选择部署slave 的主机!";
+		window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+		return false;
+	};
+	return true;
+}
+
+jQuery(function($) {
+	//select2
+	$('.select2').css('width','100%').select2({allowClear:false})
+	$('#select2-multiple-style .btn').on('click', function(e){
+		var target = $(this).find('input[type=radio]');
+		var which = parseInt(target.val());
+		if(which == 2) $('.select2').addClass('tag-input-style');
+		 else $('.select2').removeClass('tag-input-style');
+	});
+	
+	//////////////////
+	$('.multiselect').multiselect({
+	 enableFiltering: true,
+	 enableHTML: true,
+	 buttonClass: 'btn btn-white btn-primary',
+	 templates: {
+		button: '<button type="button" class="multiselect dropdown-toggle" data-toggle="dropdown"><span class="multiselect-selected-text"></span> &nbsp;<b class="fa fa-caret-down"></b></button>',
+		ul: '<ul class="multiselect-container dropdown-menu"></ul>',
+		filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="fa fa-search"></i></span><input class="form-control multiselect-search" type="text"></div></li>',
+		filterClearBtn: '<span class="input-group-btn"><button class="btn btn-default btn-white btn-grey multiselect-clear-filter" type="button"><i class="fa fa-times-circle red2"></i></button></span>',
+		li: '<li><a tabindex="0"><label></label></a></li>',
+		divider: '<li class="multiselect-item divider"></li>',
+		liGroup: '<li class="multiselect-item multiselect-group"><label></label></li>'
+	 }
+	});
+})
+</script>
+{% endblock %}

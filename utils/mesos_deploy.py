@@ -4,385 +4,199 @@
 Created on 2019年1月13日 下午2:30:57
 @author: yangxu
 '''
-
-import socket
 from docker import DockerClient
-from datetime import datetime
-from django.db.models import Q
+import re
 
-class MesosClusterDeploy():
-    def __init__(self,clsObj):
-        self.clsObj = clsObj
-        self.master_host_list = clsObj.masterDeploy.split(',')
-        self.marathon_host_list = clsObj.marathonDeploy.split(',')
-        self.haproxy_host_list = clsObj.haproxyDeploy.split(',')
-        self.slave_host_list = clsObj.slaveDeploy.split(',')
-        
+def check_docker_6071(hosts):
+    err_host = []
+    for host in hosts:
+        sock = DockerClient(base_url="{}:6071".format(host))
+        if not sock.ping():
+            err_host.append(host)
+    if len(err_host) != 0:
+        msg = ','.join(err_host)+'端口:6071 连接失败!'
+        status = False
+    else:
+        msg = ''
+        status = True
+    return {'status':status,'msg':msg,'err_host':err_host}
     
-    def get_cluster_all_host(self):
-        # return a tuple of all host
-        all_host_list = self.master_host_list + self.marathon_host_list\
-                        + self.haproxy_host_list + self.slave_host_list
-        return set(all_host_list)
-    
-    def get_cluster_all_image(self):
-        '''
-        return [
-                {'image':'master','hosts':[]},
-                ]
-        '''
-        image_list = []
-        image_list.append({'image':self.clsObj.masterImage,'hosts':self.master_host_list})
-        image_list.append({'image':self.clsObj.zkImage,'hosts':self.master_host_list})
-        image_list.append({'image':self.clsObj.marathonImage,'hosts':self.marathon_host_list})
-        image_list.append({'image':self.clsObj.haproxyImage,'hosts':self.haproxy_host_list})
-        image_list.append({'image':self.clsObj.slaveImage,'hosts':self.slave_host_list})
+def download_img(hosts,img):
+    status_dict = {'status':True}
+    for host in hosts:
+        base_url = "http://{}:6071".format(host)
+        sock = DockerClient(base_url=base_url)
+        try:
+            sock.images.pull(img)
+        except Exception as e:
+            msg = str(e)
+            status_dict['msg'] = "{} download {} Fail:{}".format(host,img,msg)
+            status_dict['status'] = False
+    return status_dict
 
-        return image_list
+def create_container(host,img,env,volume,containerName):
+    base_url = "http://{}:6071".format(host)
+    sock = DockerClient(base_url=base_url)
+    try:
+        containerObj = sock.containers.create(img,detach=True,name=containerName,user='root',
+                                             tty=True,
+                                             #stderr=True,stdout=True,
+                                             network_mode='host',
+                                             environment=env,
+                                             volumes=volume,
+                                             restart_policy={"Name": "always"})
+    except Exception as e:
+        msg = str(e)
+        return {'status':False,'msg':msg}
+    else:
+        return {'status':True,'containerObj':containerObj}
+
+def gen_zookeeper_env(hosts):
+    zookeeper_env_dict = {}
+    zookeeper_env = ['ZOO_INIT_LIMIT=10','ZOO_TICK_TIME=3000','ZOO_INIT_LIMIT=5',
+                     'ZOO_SYNC_LIMIT=2',
+                     'ZOO_MAX_CLIENT_CNXNS=60',
+                     'ZOO_ADMIN_ENABLESERVER=false']
+    ZOO_SERVERS = ''
+    for i in range(len(hosts)):
+        ZOO_SERVERS = ZOO_SERVERS + "server.{}={}:2888:3888:participant ".format(i+1,hosts[i])
+    zookeeper_env.append("ZOO_SERVERS={}".format(ZOO_SERVERS))
+    for i in range(len(hosts)):
+        temp_env = zookeeper_env
+        ZOO_MY_ID = "ZOO_MY_ID={}".format(i+1)
+        temp_env.append(ZOO_MY_ID)
+        zookeeper_env_dict[hosts[i]] = temp_env
+    return zookeeper_env_dict
+
+def gen_zookeeper_volume():
+    volumes = {'/data/zookeeper/data': {'bind': '/data', 'mode': 'rw'},}
+    return volumes
         
-    
-    def check_con(self,deploy_log_obj):
-        socket.setdefaulttimeout(3)
-        s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        deploy_log_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        err_host = []
-        for host in self.get_cluster_all_host():
-            result = s.connect_ex((host,6071))
-            if result == 0:
-                continue
-            else:
-                err_host.append(host)
-        if len(err_host) != 0:
-            status = 4
-            msg = ','.join(err_host)+'端口:6071 连接失败!'
-            res = False
+def gen_master_env(hosts,clusterName,masterPort):
+    master_env_dict = {}
+    mesos_zk = 'zk://'
+    for i in range(len(hosts)):
+        if i == len(hosts) - 1:
+            mesos_zk = mesos_zk + hosts[i]+':2181/'+clusterName
         else:
-            status = 3
-            msg = ''
-            res = True
-        deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        deploy_log_obj.status = status
-        deploy_log_obj.msg = msg
-        deploy_log_obj.save()
-        return res
-    
-    def img_download(self,deploy_log_obj):
-        deploy_log_obj.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        for item in self.get_cluster_all_image():
-            img = item['image']
-            hosts = item['hosts']
-            download_result = self.download(img, hosts)
-            #只要下载一出错就直接返回失败，后面的不再进行
-            if not download_result['status']:
-                deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                deploy_log_obj.status = 4
-                deploy_log_obj.msg = download_result['msg']
-                deploy_log_obj.save()
-                return False
-        deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        deploy_log_obj.status = 3
-        deploy_log_obj.save()
-        return True
-            
-    
-    def download(self,img,hosts):
-        status_dict = {'status':True}
-        for host in hosts:
-            base_url = "http://{}:6071".format(host)
-            sock = DockerClient(base_url=base_url)
-            try:
-                sock.images.pull(img)
-            except Exception as e:
-                msg = str(e)
-                status_dict['msg'] = "{} download {} Fail:{}".format(host,img,msg)
-                status_dict['status'] = False
-        return status_dict
-    
-    def record_deploy_log(self,deploy_log_obj,msg,status):
-        deploy_log_obj.finished_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        deploy_log_obj.status = status
-        deploy_log_obj.msg = msg
-        deploy_log_obj.save()
-    
-    def record_container_status(self,detail_model,clusterName,containerID,host,containerName,status,nodeType):
-        detail_model.objects.update_or_create(clusterName=self.clsObj.clusterName,containerID=containerID,
-                                    nodeType=nodeType,host=host,containerName=containerName,containerStatus=status)
-        
-    def update_container_status(self,detail_model,host,containerName,status):
-        obj = detail_model.objects.get(Q(host=host),Q(containerName=containerName))
-        obj.containerStatus = status
-        obj.save()
-        
-                
-    def create_container(self,deploy_log_obj,step_name,detail_model):
-        if step_name == "deployZK":
-            return self.deploy_zookeeper(deploy_log_obj,detail_model)
-        elif step_name == 'deployMaster':
-            return self.deploy_master(deploy_log_obj,detail_model)
-        elif step_name == 'deployMT':
-            return self.deploy_marathon(deploy_log_obj,detail_model)
-        elif step_name == 'deployHA':
-            return self.deploy_haproxy(deploy_log_obj,detail_model)
-        elif step_name == 'deploySlave':
-            return self.deploy_slave(deploy_log_obj,detail_model)
+            mesos_zk = mesos_zk + hosts[i]+':2181,'
+    MESOS_ZK = "MESOS_ZK={}".format(mesos_zk)
+    MESOS_CLUSTER = "MESOS_CLUSTER={}".format(clusterName)
+    MESOS_PORT = "MESOS_PORT={}".format(masterPort)
+    MESOS_LOG_DIR = "MESOS_LOG_DIR=/var/log/mesos"
+    MESOS_WORK_DIR = "MESOS_WORK_DIR=/var/tmp/mesos"
+    MESOS_HOSTNAME_LOOKUP = "MESOS_HOSTNAME_LOOKUP=false"
+    MESOS_QUORUM = "MESOS_QUORUM={}".format(len(hosts)/2+1)
+    master_env_list = [MESOS_ZK,
+                       MESOS_CLUSTER,
+                       MESOS_PORT,
+                       MESOS_LOG_DIR,
+                       MESOS_WORK_DIR,
+                       MESOS_HOSTNAME_LOOKUP,
+                       MESOS_QUORUM]
+    for i in range(len(hosts)):
+        temp_env = master_env_list
+        MESOS_HOSTNAME = "MESOS_HOSTNAME={}".format(hosts[i])
+        MESOS_IP = "MESOS_IP={}".format(hosts[i])
+        temp_env.extend([MESOS_HOSTNAME,MESOS_IP])
+        master_env_dict[hosts[i]] = temp_env
+    return master_env_dict
+
+def gen_master_volume():
+    volumes = {'/data/mesos-master/log': {'bind': '/var/log/mesos', 'mode': 'rw'},
+               '/data/mesos-master/workdir': {'bind': '/var/tmp/mesos', 'mode': 'rw'}}
+    return volumes        
+
+def gen_marathon_env(hosts,marathonID,masterZK):
+    marathon_env_dict = {}
+    #IP 地址匹配
+    zk_hosts=re.findall(r'\b(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b',masterZK)
+    marathon_zk = 'zk://'
+    for i in range(len(zk_hosts)):
+        if i == len(zk_hosts) - 1:
+            marathon_zk = marathon_zk + zk_hosts[i]+':2181/'+marathonID
         else:
-            return False
-            
-    def deploy_zookeeper(self,deploy_obj,detail_model):
-        self.zookeeper_env = ['ZOO_INIT_LIMIT=10','ZOO_TICK_TIME=3000','ZOO_INIT_LIMIT=5',
-                              'ZOO_SYNC_LIMIT=2',
-                              'ZOO_MAX_CLIENT_CNXNS=60',
-                              'ZOO_ADMIN_ENABLESERVER=false']
-        img = str(self.clsObj.zkImage)
-        hosts = self.master_host_list
-        ZOO_SERVERS = ''
-        for i in range(len(hosts)):
-            ZOO_SERVERS = ZOO_SERVERS + "server.{}={}:2888:3888:participant ".format(i+1,hosts[i])
-            
-        for i in range(len(hosts)):
-            zookeeper_env = self.zookeeper_env
-            ZOO_MY_ID = "ZOO_MY_ID={}".format(i+1)
-            zookeeper_env.append("ZOO_SERVERS={}".format(ZOO_SERVERS))
-            zookeeper_env.append(ZOO_MY_ID)
-            base_url = "http://{}:6071".format(hosts[i])
-            sock = DockerClient(base_url=base_url)
-            try:
-                containerObj = sock.containers.create(img,detach=True,name='mesos-zookeeper',user='root',
-                                                     tty=True,
-                                                     #stderr=True,stdout=True,
-                                                     network_mode='host',
-                                                     environment=zookeeper_env,
-                                                     restart_policy={"Name": "always"})
-                #create the container record, status is created
-                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
-                                             hosts[i], 'mesos-zookeeper',3,2)
-            except Exception as e:
-                msg = str(e)
-                msg = hosts[i]+' Deployment zookeeper failure:'+msg
-                self.record_deploy_log(deploy_obj, msg, 4)
-            else:
-                try:
-                    containerObj.start()
-                except Exception as e:
-                    msg = str(e)
-                    msg = hosts[i]+' Deployment zookeeper failure:'+msg
-                    self.record_deploy_log(deploy_obj, msg, 4)
-                else:
-                    #create the container record, status is running
-                    self.update_container_status(detail_model, hosts[i], 'mesos-zookeeper', 1)
-                    self.record_deploy_log(deploy_obj, '', 3)
-                    return True
-            return False
-    def deploy_master(self,deploy_obj,detail_model):
-        img = self.clsObj.masterImage
-        hosts = self.master_host_list
-        mesos_zk = 'zk://'
-        for i in range(len(hosts)):
-            if i == len(hosts) - 1:
-                mesos_zk = mesos_zk + hosts[i]+':2181/'+self.clsObj.clusterName
-            else:
-                mesos_zk = mesos_zk + hosts[i]+':2181,'
-        MESOS_ZK = "MESOS_ZK={}".format(mesos_zk)
-        MESOS_CLUSTER = "MESOS_CLUSTER={}".format(self.clsObj.clusterName)
-        MESOS_PORT = "MESOS_PORT={}".format(self.clsObj.masterPort)
-        MESOS_LOG_DIR = "MESOS_LOG_DIR=/var/log/mesos"
-        MESOS_WORK_DIR = "MESOS_WORK_DIR=/var/tmp/mesos"
-        MESOS_HOSTNAME_LOOKUP = "MESOS_HOSTNAME_LOOKUP=false"
-        for i in range(len(hosts)):
-            MESOS_HOSTNAME = "MESOS_HOSTNAME={}".format(hosts[i])
-            MESOS_IP = "MESOS_IP={}".format(hosts[i])
-            MESOS_QUORUM = "MESOS_QUORUM={}".format(len(hosts)/2+1)
-            
-            base_url = "http://{}:6071".format(hosts[i])
-            sock = DockerClient(base_url=base_url)
-            try:
-                containerObj = sock.containers.create(img,detach=True,name='mesos-master',user='root',
-                                    tty=True,
-                                    #stderr=True,stdout=True,
-                                    network_mode='host',
-                                    environment=[MESOS_ZK,MESOS_CLUSTER,MESOS_HOSTNAME,MESOS_PORT,
-                                                 MESOS_LOG_DIR,MESOS_WORK_DIR,
-                                                 MESOS_HOSTNAME_LOOKUP,MESOS_IP,MESOS_QUORUM],
-                                    volumes={'/data/mesos-master/log': {'bind': '/var/log/mesos', 'mode': 'rw'},
-                                             '/data/mesos-master/workdir': {'bind': '/var/tmp/mesos', 'mode': 'rw'},
-                                             },
-                                    restart_policy={"Name": "always"})
-                #create the container record, status is created
-                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
-                                             hosts[i], 'mesos-master',3,1)
-            except Exception as e:
-                msg = str(e)
-                msg = hosts[i]+' Deployment master failure:'+msg
-                self.record_deploy_log(deploy_obj, msg, 4)
-            else:
-                try:
-                    containerObj.start()
-                except Exception as e:
-                    msg = str(e)
-                    msg = hosts[i]+' Deployment master failure:'+msg
-                    self.record_deploy_log(deploy_obj, msg, 4)
-                else:
-                    #create the container record, status is running
-                    self.update_container_status(detail_model, hosts[i], 'mesos-master', 1)
-                    self.record_deploy_log(deploy_obj, '', 3)
-                    return True
-            return False
-            
-    
-    def deploy_marathon(self,deploy_obj,detail_model):
-        img = self.clsObj.marathonImage
-        hosts = self.marathon_host_list
-        marathon_zk = 'zk://'
-        for i in range(len(hosts)):
-            if i == len(hosts) - 1:
-                marathon_zk = marathon_zk + hosts[i]+':2181/'+self.clsObj.marathonID
-            else:
-                marathon_zk = marathon_zk + hosts[i]+':2181,'
-        MARATHON_ZK = "MARATHON_ZK={}".format(marathon_zk)
-        MARATHON_MASTER = "MARATHON_MASTER={}".format(self.clsObj.marathonZK)
-        #MARATHON_EVENT_SUBSCRIBER = "MARATHON_EVENT_SUBSCRIBER=http_callback"  v1.7.50 is deprecated
-        for i in range(len(hosts)):
-            MARATHON_HOSTNAME = "MARATHON_HOSTNAME={}".format(hosts[i])
-            MARATHON_HTTP_ADDRESS = "MARATHON_HTTP_ADDRESS={}".format(hosts[i])
-            MARATHON_HTTPS_ADDRESS = "MARATHON_HTTPS_ADDRESS={}".format(hosts[i])
-            
-            base_url = "http://{}:6071".format(hosts[i])
-            sock = DockerClient(base_url=base_url)
-            try:
-                containerObj = sock.containers.create(img,detach=True,
-                                    name='mesos-marathon',user='root',
-                                    tty=True,
-                                    #stderr=True,stdout=True,
-                                    environment=[MARATHON_ZK,MARATHON_MASTER,MARATHON_HOSTNAME,
-                                                 MARATHON_HTTP_ADDRESS,MARATHON_HTTPS_ADDRESS],
-                                    network_mode='host',
-                                    restart_policy={"Name": "always"})
-                #create the container record, status is created
-                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
-                                             hosts[i], 'mesos-marathon',3,3)
-            except Exception as e:
-                msg = str(e)
-                msg = hosts[i]+' Deployment marathon failure:'+msg
-                self.record_deploy_log(deploy_obj, msg, 4)
-            else:
-                try:
-                    containerObj.start()
-                except Exception as e:
-                    msg = str(e)
-                    msg = hosts[i]+' Deployment marathon failure:'+msg
-                    self.record_deploy_log(deploy_obj, msg, 4)
-                else:
-                    #create the container record, status is running
-                    self.update_container_status(detail_model, hosts[i], 'mesos-marathon', 1)
-                    self.record_deploy_log(deploy_obj, '', 3)
-                    return True
-            return False
-     
-    def deploy_haproxy(self,deploy_obj,detail_model):
-        #https://github.com/QubitProducts/bamboo
-        img = self.clsObj.haproxyImage
-        hosts = self.haproxy_host_list
-        zk_hosts = self.master_host_list
-        servicePort = self.clsObj.servicePort
-        statusPort = self.clsObj.statusPort
-        bambooPort = self.clsObj.bambooPort
-        map_port = {'{}/tcp'.format(bambooPort):bambooPort,
-                    '{}/tcp'.format(servicePort):servicePort,
-                    '{}/tcp'.format(statusPort):statusPort}
-        bamboo_zk_host = ''
-        for i in range(len(zk_hosts)):
-            if i == len(zk_hosts) - 1:
-                bamboo_zk_host = bamboo_zk_host + zk_hosts[i]+':2181'
-            else:
-                bamboo_zk_host = bamboo_zk_host + zk_hosts[i]+':2181,'
-        BAMBOO_ZK_HOST = "BAMBOO_ZK_HOST={}".format(bamboo_zk_host)
-        BAMBOO_ZK_PATH = "BAMBOO_ZK_PATH=/{}".format(self.clsObj.haproxyID)
-        MARATHON_ENDPOINT = "MARATHON_ENDPOINT={}".format(self.clsObj.haproxyMarathon)
-        BIND = "BIND=:{}".format(bambooPort)
-        CONFIG_PATH = "CONFIG_PATH=config/production.example.json"
-        BAMBOO_DOCKER_AUTO_HOST = "BAMBOO_DOCKER_AUTO_HOST=true"
-        for i in range(len(hosts)):
-            BAMBOO_ENDPOINT = "BAMBOO_ENDPOINT=http://{}:{}".format(hosts[i],bambooPort)
-            base_url = "http://{}:6071".format(hosts[i])
-            sock = DockerClient(base_url=base_url)
-            try:
-                containerObj = sock.containers.create(img,detach=True,
-                                    name='haproxy-bamboo',user='root',
-                                    tty=True,
-                                    #stderr=True,stdout=True,
-                                    ports=map_port,
-                                    environment=[BAMBOO_ZK_HOST,BAMBOO_ZK_PATH,MARATHON_ENDPOINT,
-                                                 BIND,CONFIG_PATH,BAMBOO_DOCKER_AUTO_HOST,BAMBOO_ENDPOINT],
-                                    network_mode='bridge',
-                                    restart_policy={"Name": "always"})
-                #create the container record, status is created
-                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
-                                             hosts[i], 'haproxy-bamboo',3,4)
-            except Exception as e:
-                msg = str(e)
-                msg = hosts[i]+' Deployment haproxy-bamboo failure:'+msg
-                self.record_deploy_log(deploy_obj, msg, 4)
-            else:
-                try:
-                    containerObj.start()
-                except Exception as e:
-                    msg = str(e)
-                    msg = hosts[i]+' Deployment haproxy-bamboo failure:'+msg
-                    self.record_deploy_log(deploy_obj, msg, 4)
-                else:
-                    #create the container record, status is running
-                    self.update_container_status(detail_model, hosts[i], 'haproxy-bamboo', 1)
-                    self.record_deploy_log(deploy_obj, '', 3)
-                    return True
-            return False
-            
-    def deploy_slave(self,deploy_obj,detail_model):
-        img = self.clsObj.slaveImage
-        hosts = self.slave_host_list
-        MESOS_MASTER = "MESOS_MASTER={}".format(self.clsObj.slaveZK)
-        MESOS_WORK_DIR = "MESOS_WORK_DIR=/var/tmp/mesos"
-        MESOS_LOG_DIR = "MESOS_LOG_DIR=/var/log/mesos"
-        MESOS_CONTAINERIZERS =  "MESOS_CONTAINERIZERS=docker,mesos"
-        MESOS_ATTRIBUTES = "MESOS_ATTRIBUTES=mesos:{}".format(self.clsObj.slaveLabel)
-        MESOS_SYSTEMD_ENABLE_SUPPORT = "MESOS_SYSTEMD_ENABLE_SUPPORT=false"
-        for i in range(len(hosts)):
-            MESOS_HOSTNAME = "MESOS_HOSTNAME={}".format(hosts[i])
-            MESOS_IP = "MESOS_IP={}".format(hosts[i])
-            base_url = "http://{}:6071".format(hosts[i])
-            sock = DockerClient(base_url=base_url)
-            try:
-                containerObj = sock.containers.create(img,detach=True,name='mesos-slave',user='root',
-                                    tty=True,
-                                    #stderr=True,stdout=True,
-                                    privileged=True,
-                                    environment=[MESOS_MASTER,MESOS_WORK_DIR,MESOS_ATTRIBUTES,
-                                                 MESOS_CONTAINERIZERS,MESOS_LOG_DIR,
-                                                 MESOS_SYSTEMD_ENABLE_SUPPORT,MESOS_HOSTNAME,MESOS_IP],
-                                    volumes={'/sys/fs/cgroup': {'bind': '/sys/fs/cgroup', 'mode': 'rw'},
-                                             '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'},
-                                             '/data/mesos-slave/workdir': {'bind': '/var/tmp/mesos', 'mode': 'rw'},
-                                             '/data/mesos-slave/log': {'bind': '/var/log/mesos', 'mode': 'rw'},
-                                             },
-                                    network_mode='host',
-                                    restart_policy={"Name": "always"})
-                #create the container record, status is created
-                self.record_container_status(detail_model, self.clsObj.clusterName, containerObj.id,
-                                             hosts[i], 'mesos-slave',3,5)
-            except Exception as e:
-                msg = str(e)
-                msg = hosts[i]+' Deployment slave failure:'+msg
-                self.record_deploy_log(deploy_obj, msg, 4)
-            else:
-                try:
-                    containerObj.start()
-                except Exception as e:
-                    msg = str(e)
-                    msg = hosts[i]+' Deployment slave failure:'+msg
-                    self.record_deploy_log(deploy_obj, msg, 4)
-                else:
-                    #create the container record, status is running
-                    self.update_container_status(detail_model, hosts[i], 'mesos-slave', 1)
-                    self.record_deploy_log(deploy_obj, '', 3)
-                    return True
-            return False
+            marathon_zk = marathon_zk + zk_hosts[i]+':2181,'
+    MARATHON_ZK = "MARATHON_ZK={}".format(marathon_zk)
+    #mesos master 的zookeeper node
+    MARATHON_MASTER = "MARATHON_MASTER={}".format(masterZK)
+    #MARATHON_EVENT_SUBSCRIBER = "MARATHON_EVENT_SUBSCRIBER=http_callback"  v1.7.50 is deprecated
+    marathon_env_list = [MARATHON_ZK,MARATHON_MASTER]
+    for i in range(len(hosts)):
+        temp_env = marathon_env_list
+        MARATHON_HOSTNAME = "MARATHON_HOSTNAME={}".format(hosts[i])
+        MARATHON_HTTP_ADDRESS = "MARATHON_HTTP_ADDRESS={}".format(hosts[i])
+        MARATHON_HTTPS_ADDRESS = "MARATHON_HTTPS_ADDRESS={}".format(hosts[i])
+        temp_env.extend([MARATHON_HOSTNAME,MARATHON_HTTP_ADDRESS,MARATHON_HTTPS_ADDRESS])
+        marathon_env_dict[hosts[i]] = temp_env
+    return marathon_env_dict
+
+def gen_marathon_volume():
+    volumes = {'/data/marathon/log': {'bind': '/var/log/marathon', 'mode': 'rw'},}
+    return volumes  
+         
+ 
+def gen_haproxy_env(hosts,haproxyID,bambooPort,zk_hosts,marathonEndpoint):
+    #https://github.com/QubitProducts/bamboo
+    bamboo_env_dict = {}
+    bamboo_zk_host = ''
+    for i in range(len(zk_hosts)):
+        if i == len(zk_hosts) - 1:
+            bamboo_zk_host = bamboo_zk_host + zk_hosts[i]+':2181'
+        else:
+            bamboo_zk_host = bamboo_zk_host + zk_hosts[i]+':2181,'
+    BAMBOO_ZK_HOST = "BAMBOO_ZK_HOST={}".format(bamboo_zk_host)
+    BAMBOO_ZK_PATH = "BAMBOO_ZK_PATH=/{}".format(haproxyID)
+    MARATHON_ENDPOINT = "MARATHON_ENDPOINT={}".format(marathonEndpoint)
+    MARATHON_USE_EVENT_STREAM = "MARATHON_USE_EVENT_STREAM=True"
+    BIND = "BIND=:{}".format(bambooPort)
+    CONFIG_PATH = "CONFIG_PATH=config/production.example.json"
+    BAMBOO_DOCKER_AUTO_HOST = "BAMBOO_DOCKER_AUTO_HOST=true"
+    bamboo_env_list = [BAMBOO_ZK_HOST,
+                       BIND,
+                       CONFIG_PATH,
+                       BAMBOO_DOCKER_AUTO_HOST,
+                       BAMBOO_ZK_PATH,
+                       MARATHON_ENDPOINT,
+                       MARATHON_USE_EVENT_STREAM]
+    for i in range(len(hosts)):
+        temp_env = bamboo_env_list
+        BAMBOO_ENDPOINT = "BAMBOO_ENDPOINT=http://{}:{}".format(hosts[i],bambooPort)
+        temp_env.append(BAMBOO_ENDPOINT)
+        bamboo_env_dict[hosts[i]] = temp_env
+    return bamboo_env_dict
+
+def gen_haproxy_volume():
+    volumes = {'/data/haproxy/log': {'bind': '/var/log/supervisor', 'mode': 'rw'},}
+    return volumes 
+        
+def gen_slave_env(hosts,master_zk,slaveLabel):
+    slave_env_dict = {}
+    MESOS_MASTER = "MESOS_MASTER={}".format(master_zk)
+    MESOS_WORK_DIR = "MESOS_WORK_DIR=/var/tmp/mesos"
+    MESOS_LOG_DIR = "MESOS_LOG_DIR=/var/log/mesos"
+    MESOS_CONTAINERIZERS =  "MESOS_CONTAINERIZERS=docker,mesos"
+    MESOS_ATTRIBUTES = "MESOS_ATTRIBUTES=mesos:{}".format(slaveLabel)
+    MESOS_SYSTEMD_ENABLE_SUPPORT = "MESOS_SYSTEMD_ENABLE_SUPPORT=false"
+    slave_env_list = [MESOS_MASTER,
+                      MESOS_WORK_DIR,
+                      MESOS_LOG_DIR,
+                      MESOS_CONTAINERIZERS,
+                      MESOS_ATTRIBUTES,
+                      MESOS_SYSTEMD_ENABLE_SUPPORT]
+    for i in range(len(hosts)):
+        temp_env = slave_env_list
+        MESOS_HOSTNAME = "MESOS_HOSTNAME={}".format(hosts[i])
+        MESOS_IP = "MESOS_IP={}".format(hosts[i])
+        temp_env.extend([MESOS_HOSTNAME,MESOS_IP])
+        slave_env_dict[hosts[i]] = temp_env
+    return slave_env_dict
+
+def gen_slave_volume():
+    volumes = {'/data/mesos-slave/log': {'bind': '/var/log/mesos', 'mode': 'rw'},
+               '/data/mesos-slave/workdir': {'bind': '/var/tmp/mesos', 'mode': 'rw'},
+               '/sys/fs/cgroup': {'bind': '/sys/fs/cgroup', 'mode': 'rw'},
+               '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
+    return volumes
+
 

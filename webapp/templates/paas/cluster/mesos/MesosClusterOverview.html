@@ -126,13 +126,14 @@
 						<div class='vertical-middle'>
 						  <label class='acc-label'>容器数</label> 0
 						</div>
-						<a href="{% url 'MesosAddNode' %}?name={{clsObj.clusterName}}" style="margin-left:25px;"><i class="fa fa-plus">添加节点</i></a>
-						<!--
-						{% ifequal clsObj.master_status 1 %}
-						<a href="{% url 'MesosAddNode' name=clsObj.clusterName %}" style="margin-left:25px;"><i class="fa fa-plus">添加节点</i></a>
-						{% else %}
-						<span style="margin-left:25px;" id="disabled"><i class="fa fa-plus">添加节点</i></span>
-						{% endifequal %} -->
+						<span style="margin-left:10px;">刷新:
+							<select name="time">
+								<option value="5000">5秒</option>
+								<option value="10000">10秒</option>
+								<option value="15000">15秒</option>
+								<option value="no" selected>NO</option>
+							</select>
+						</span>
 					</div>
 
 					<div class="row">

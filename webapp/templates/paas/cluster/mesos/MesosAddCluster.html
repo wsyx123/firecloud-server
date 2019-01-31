@@ -61,6 +61,7 @@
 										<form class="form-horizontal" method="POST" id="mesosForm">
 											<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
 											<input name="status" type='text' value="1" hidden>
+											<input name="is_master" type='text' value="1" hidden>
 											<div class="step-pane active" data-step="1">
 												<div class="form-group">
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">集群名称</label>
@@ -99,7 +100,11 @@
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Master镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="masterImage" class="width-100" />
+															<select class="form-control" name="masterImage">
+																{% for img in imgs %}
+																<option value="{{img.ip_port}}/{{img.image_name}}">{{img.ip_port}}/{{img.image_name}}</option>
+																{% endfor %}
+															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -109,7 +114,11 @@
 													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Zookeeper镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="zkImage" class="width-100" />
+															<select class="form-control" name="zkImage">
+																{% for img in imgs %}
+																<option value="{{img.ip_port}}/{{img.image_name}}">{{img.ip_port}}/{{img.image_name}}</option>
+																{% endfor %}
+															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -171,14 +180,18 @@
 													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Marathon镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="marathonImage" class="width-100" />
+															<select class="form-control" name="marathonImage">
+																{% for img in imgs %}
+																<option value="{{img.ip_port}}/{{img.image_name}}">{{img.ip_port}}/{{img.image_name}}</option>
+																{% endfor %}
+															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
 												</div>
 
 												<div class="form-group">
-													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
 															<select multiple="" name="marathonDeploy" class="select2 width-400" data-placeholder="选择部署主机...">
@@ -252,7 +265,11 @@
 													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Haproxy镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="haproxyImage" class="width-100" />
+															<select class="form-control" name="haproxyImage">
+																{% for img in imgs %}
+																<option value="{{img.ip_port}}/{{img.image_name}}">{{img.ip_port}}/{{img.image_name}}</option>
+																{% endfor %}
+															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -313,7 +330,11 @@
 													<label  class="col-xs-12 col-sm-3  control-label no-padding-right">Slave镜像</label>
 													<div class="col-xs-12 col-sm-6">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="slaveImage" class="width-100" />
+															<select class="form-control" name="slaveImage">
+																{% for img in imgs %}
+																<option value="{{img.ip_port}}/{{img.image_name}}">{{img.ip_port}}/{{img.image_name}}</option>
+																{% endfor %}
+															</select>
 														</span>
 													</div>
 													<span class="red">*</span>
@@ -386,8 +407,8 @@ function checkMasterInfo(){
 	var clusterName = $("input[name='clusterName']").val();
 	var masterNodeNum = $("select[name='masterNodeNum']").val();
 	var masterPort = $("input[name='masterPort']").val();
-	var masterImage = $("input[name='masterImage']").val();
-	var zkImage = $("input[name='zkImage']").val();
+	var masterImage = $("select[name='masterImage']").val();
+	var zkImage = $("select[name='zkImage']").val();
 	var masterDeploy = $("select[name='masterDeploy']").val();
 	if(clusterName.trim().length==0){
 		var txt=  "请填写集群名称,只能是字母与数字组成!";
@@ -442,7 +463,7 @@ function genZkUrl(masterDeploy,clusterName){
 function checkMarathonInfo(){
 	var marathonID = $("input[name='marathonID']").val();
 	var marathonPort = $("input[name='marathonPort']").val();
-	var marathonImage = $("input[name='marathonImage']").val();
+	var marathonImage = $("select[name='marathonImage']").val();
 	var marathonDeploy = $("select[name='marathonDeploy']").val();
 	if(marathonID.trim().length==0){
 		var txt=  "请填写marathon ID!";
@@ -488,7 +509,7 @@ function checkHaproxyInfo(){
 	var servicePort = $("input[name='servicePort']").val();
 	var statusPort = $("input[name='statusPort']").val();
 	var bambooPort = $("input[name='bambooPort']").val();
-	var haproxyImage = $("input[name='haproxyImage']").val();
+	var haproxyImage = $("select[name='haproxyImage']").val();
 	var haproxyDeploy = $("select[name='haproxyDeploy']").val();
 	if(haproxyID.trim().length==0){
 		var txt=  "请填写haproxy ID!";
@@ -526,7 +547,7 @@ function checkHaproxyInfo(){
 function checkSlaveInfo(){
 	var slaveLabel = $("input[name='slaveLabel']").val();
 	var slavePort = $("input[name='slavePort']").val();
-	var slaveImage = $("input[name='slaveImage']").val();
+	var slaveImage = $("select[name='slaveImage']").val();
 	var slaveDeploy = $("select[name='slaveDeploy']").val();
 	if(slaveLabel.trim().length==0){
 		var txt = "请填写slave 标签!<br />格式:slave:pool1<br />标签用来划分资源池";

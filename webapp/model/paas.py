@@ -9,12 +9,13 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-class PaasHost(models.Model):
+class IdleHost(models.Model):
     assignStatus = (
                   (1,'未分配'),
                   (2,'已分配')
                   )
-    host = models.ForeignKey('AssetHost')
+    # OneToOne has the same effect as to Setting unique=True on a ForeignKey
+    host = models.OneToOneField('AssetHost')  
     assign_status = models.IntegerField(choices=assignStatus,default=1)
     owner = models.ForeignKey('SysUser')
     create_time = models.DateTimeField(auto_now_add=True)
@@ -29,8 +30,7 @@ class MesosMaster(models.Model):
                      (3,'部署失败'),
                      (4,'集群正常'),
                      (5,'集群错误'),
-                     (6,'集群异常'),
-                     (7,'还未启动')
+                     (6,'集群异常')
                      )
     status = (
             (1,'health'),
@@ -44,28 +44,85 @@ class MesosMaster(models.Model):
     masterPort = models.IntegerField()
     masterImage = models.CharField(max_length=128)
     zkImage = models.CharField(max_length=128)
-    masterDeploy = models.CharField(max_length=255)
     #other info
-    vendor = models.CharField(max_length=16,default='Apache Mesos')
-    version = models.CharField(max_length=16,default='v1.6.1-rc2')
+    vendor = models.CharField(max_length=16,null=True,blank=True,default='Apache Mesos')
+    version = models.CharField(max_length=16,null=True,blank=True,default='v1.6.1-rc2')
     leader = models.GenericIPAddressField(null=True,blank=True)
-    total_container = models.IntegerField(default=0)
-    cpu_use = models.IntegerField(default=0)
-    memory_use = models.IntegerField(default=0)
-    disk_use = models.IntegerField(default=0)
+    total_container = models.IntegerField(null=True,blank=True,default=0)
+    cpu_used = models.IntegerField(null=True,blank=True,default=0)
+    cpu_total = models.IntegerField(null=True,blank=True,default=0)
+    memory_used = models.FloatField(null=True,blank=True,default=0)
+    memory_total = models.FloatField(null=True,blank=True,default=0)
+    disk_used = models.FloatField(null=True,blank=True,default=0)
+    disk_total = models.FloatField(null=True,blank=True,default=0)
     #status
-    master_status = models.IntegerField(choices=status,default=4)
-    zookeeper_status = models.IntegerField(choices=status,default=4)
-    marathon_status = models.IntegerField(choices=status,default=4)
-    haproxy_status = models.IntegerField(choices=status,default=4)
-    bamboo_status = models.IntegerField(choices=status,default=4)
-    slave_status = models.IntegerField(choices=status,default=4)
+    master_status = models.IntegerField(choices=status,null=True,blank=True,default=4)
+    zookeeper_status = models.IntegerField(choices=status,null=True,blank=True,default=4)
+    marathon_status = models.IntegerField(choices=status,null=True,blank=True,default=4)
+    haproxy_status = models.IntegerField(choices=status,null=True,blank=True,default=4)
+    bamboo_status = models.IntegerField(choices=status,null=True,blank=True,default=4)
+    slave_status = models.IntegerField(choices=status,null=True,blank=True,default=4)
     owner = models.ForeignKey('SysUser')
-    status = models.IntegerField(choices=clusterStatus,default=1)
+    status = models.IntegerField(choices=clusterStatus,null=True,blank=True,default=1)
     create_time = models.DateTimeField(auto_now_add=True)
     
     def __unicode__(self):
         return '%s' %(self.clusterName)
+    
+class MesosMarathon(models.Model):
+    clusterStatus = (
+             (1,'还未部署'),
+             (2,'正在部署'),
+             (3,'部署失败'),
+             (4,'集群正常'),
+             (5,'集群错误'),
+             (6,'集群异常')
+             )
+    clusterName = models.CharField(max_length=32)
+    marathonID = models.CharField(max_length=32,unique=True)
+    marathonPort = models.IntegerField(default=8080)
+    #marathonZK 指向mesos master的  zk node
+    marathonZK = models.CharField(max_length=128)
+    marathonImage = models.CharField(max_length=128)
+    status = models.IntegerField(choices=clusterStatus,null=True,blank=True,default=1)
+    is_master = models.BooleanField(default=True)
+
+class MesosHaproxy(models.Model):
+    clusterStatus = (
+             (1,'还未部署'),
+             (2,'正在部署'),
+             (3,'部署失败'),
+             (4,'集群正常'),
+             (5,'集群错误'),
+             (6,'集群异常')
+             )
+    clusterName = models.CharField(max_length=32)
+    haproxyID = models.CharField(max_length=32,unique=True)
+    servicePort = models.IntegerField()
+    statusPort = models.IntegerField()
+    bambooPort = models.IntegerField()
+    haproxyMarathon = models.CharField(max_length=128)
+    haproxyImage = models.CharField(max_length=128)
+    status = models.IntegerField(choices=clusterStatus,null=True,blank=True,default=1)
+    is_master = models.BooleanField(default=True)
+
+class MesosSlave(models.Model):
+    clusterStatus = (
+             (1,'还未部署'),
+             (2,'正在部署'),
+             (3,'部署失败'),
+             (4,'集群正常'),
+             (5,'集群错误'),
+             (6,'集群异常')
+             )
+    clusterName = models.CharField(max_length=32)
+    slaveLabel = models.CharField(max_length=32,unique=True)
+    slavePort = models.IntegerField(default=5051)
+    #slaveZK 指向mesos master的  zk node
+    slaveZK = models.CharField(max_length=128)
+    slaveImage = models.CharField(max_length=128)
+    status = models.IntegerField(choices=clusterStatus,null=True,blank=True,default=1)
+    is_master = models.BooleanField(default=True)
     
 class MesosDeployLog(models.Model):
     deployStatus = (
@@ -86,49 +143,28 @@ class MesosDeployLog(models.Model):
     
     def __unicode__(self):
         return '%s' %(self.cluster_name)
+
     
 class MesosNodeStatus(models.Model):
     status = (
               (1,'运行'),
               (2,'停止'),
-              (3,'创建')
+              (3,'创建'),
+              (4,'未创建')
               )
-    clusterName = models.CharField(max_length=32,unique=True)
-    nodeName = models.CharField(max_length=32)
+    clusterName = models.CharField(max_length=32)
+    #nodeName 对于marathon,haproxy,slave 就等于 marathonID, haproxyID, slaveLabel
+    #对于master 和zookeeper是固定的 因为一个mesos集群只能有一个master
+    nodeName = models.CharField(max_length=32)#eg: master,zookeeper,marathon01
     host = models.GenericIPAddressField()
-    containerID = models.CharField(max_length=64)
+    containerID = models.CharField(max_length=64,null=True,blank=True)
     containerName = models.CharField(max_length=32)
     containerRunTime = models.CharField(max_length=32,default='1秒')
-    containerStatus = models.IntegerField(choices=status,default=3)
-    serviceStatus = models.IntegerField(choices=status,default=1)
-    
-class MesosMarathon(models.Model):
-    clusterName = models.ForeignKey('MesosMaster')
-    marathonID = models.CharField(max_length=32)
-    marathonPort = models.IntegerField(default=8080)
-    marathonZK = models.CharField(max_length=128)
-    marathonImage = models.CharField(max_length=128)
-    marathonDeploy = models.CharField(max_length=255)
-
-class MesosHaproxy(models.Model):
-    clusterName = models.ForeignKey('MesosMaster')
-    haproxyID = models.CharField(max_length=32)
-    servicePort = models.IntegerField()
-    statusPort = models.IntegerField()
-    bambooPort = models.IntegerField()
-    haproxyMarathon = models.CharField(max_length=128)
-    haproxyImage = models.CharField(max_length=128)
-    haproxyDeploy = models.CharField(max_length=255)
-
-class MesosSlave(models.Model):
-    clusterName = models.ForeignKey('MesosMaster')
-    slaveLabel = models.CharField(max_length=32)
-    slavePort = models.IntegerField()
-    slaveZK = models.CharField(max_length=128)
-    slaveImage = models.CharField(max_length=128)
-    slaveDeploy = models.CharField(max_length=255)
-    
-#MesosCluster 表可以把haproxy,marathon,slave部分拆出来，overview的内容加进去，删除overview表
+    containerStatus = models.IntegerField(choices=status,default=4)
+    serviceStatus = models.IntegerField(choices=status,default=4)
+    class Meta:
+        #Django model中设置多个字段联合唯一约束
+        unique_together = ('nodeName', 'host')
  
 class RepositoryHost(models.Model):
     apiType = (

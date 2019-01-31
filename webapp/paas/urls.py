@@ -1,10 +1,14 @@
 from django.conf.urls import url
 from webapp.paas.paas import Kubernetes,K8sOverview,K8sDetail
-from webapp.paas.paas import MesosClusterList,MesosOverview,MesosAddCluster,MesosAddNode,\
-ListNetwork,ListStorage,MesosIdleHostList,mesos_idle_host_add,MesosIdleHostDelete,\
-mesos_cluster_deploy,MesosClusterDeployResult,mesos_cluster_start,\
-mesos_cluster_stop,mesos_cluster_delete,mesos_cluster_clean,cluster_node_log,\
-cluster_node_update,MesosMasterDetail,MesosHaproxyDetail,MesosSlaveDetail
+#idle host
+from webapp.paas.paas import MesosIdleHostAdd,MesosIdleHostList,MesosIdleHostDelete
+#mesos class
+from webapp.paas.paas import MesosClusterList,MesosOverview,MesosAddCluster,MesosAddNode,ListNetwork,\
+ListStorage,MesosDeployCluster,MesosDeleteNode,MesosDeleteCluster,MesosCleanCluster,\
+MesosMasterDetail,MesosHaproxyDetail,MesosSlaveDetail,MesosMarathonDetail,MesosClusterDeployResult
+#mesos func
+from webapp.paas.paas import cluster_node_update,cluster_node_log
+
 from webapp.paas.repository import RepositoryHostList,RepositoryImageList,\
 RepositoryHostAdd,RepositoryHostDelete,repositor_refresh
 
@@ -18,19 +22,19 @@ urlpatterns = [
     url(r'^mesos/list/node/log/$',cluster_node_log),
     url(r'^mesos/list/overview/(?P<clsname>.+)/$',MesosOverview.as_view(),name='MesosOverview'),
     url(r'^mesos/list/master/(?P<clsname>.+)/$',MesosMasterDetail.as_view(),name='MesosMasterDetail'),
+    url(r'^mesos/list/marathon/(?P<clsname>.+)/$',MesosMarathonDetail.as_view(),name='MesosMarathonDetail'),
     url(r'^mesos/list/slave/(?P<clsname>.+)/$',MesosSlaveDetail.as_view(),name='MesosSlaveDetail'),
     url(r'^mesos/list/haproxy/(?P<clsname>.+)/$',MesosHaproxyDetail.as_view(),name='MesosHaproxyDetail'),
     url(r'^mesos/add/cluster/$',MesosAddCluster.as_view(),name='MesosAddCluster'),
-    url(r'^mesos/add/deploy/$',mesos_cluster_deploy),
-    url(r'^mesos/add/start/$',mesos_cluster_start),
-    url(r'^mesos/add/stop/$',mesos_cluster_stop),
-    url(r'^mesos/add/clean/$',mesos_cluster_clean),
+    url(r'^mesos/add/deploy/$',MesosDeployCluster.as_view()),
+    url(r'^mesos/add/clean/$',MesosCleanCluster.as_view()),
     url(r'^mesos/update/container/$',cluster_node_update),
-    url(r'^mesos/delete/$',mesos_cluster_delete),
+    url(r'^mesos/delete/$',MesosDeleteCluster.as_view()),
     url(r'^mesos/add/deploy/result/$',MesosClusterDeployResult.as_view()),
     url(r'^mesos/add/node/$',MesosAddNode.as_view(),name='MesosAddNode'),
-    url(r'^mesos/add/idle/$',mesos_idle_host_add),
+    url(r'^mesos/add/idle/$',MesosIdleHostAdd.as_view()),
     url(r'^mesos/delete/idle/(?P<pk>.+)$',MesosIdleHostDelete.as_view()),
+    url(r'^mesos/delete/node/$',MesosDeleteNode.as_view()),
     
     
     url(r'^network/list/$',ListNetwork.as_view(),name='network'),

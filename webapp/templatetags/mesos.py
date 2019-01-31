@@ -9,10 +9,10 @@ from django import template
 
 register = template.Library()
 
-@register.filter(name='countNode')
-def count_node(deployhoststr):
-    host_list = deployhoststr.split(',')
-    return len(host_list)
+#统计集群数量  count marathon cluster number
+@register.simple_tag(name='countNode')
+def count_node(Count,clusterName,nodeType):
+    return Count[clusterName][nodeType]
 
 @register.filter(name='returnClass')
 def return_class(status_num):
@@ -31,8 +31,8 @@ def return_class(status_num):
 def return_overview_div(status_num,name):
     return {'status':status_num,'name':name}
 
-@register.inclusion_tag('paas/cluster/mesos/_opp_td.html')
-def opp_td(status_num,clusterName):
+@register.inclusion_tag('paas/cluster/mesos/_cluster_action_buttons.html')
+def cluster_action_buttons(status_num,clusterName):
     if status_num in [1,3]:
         status_num = 1
     if status_num in [4,5,6]:
@@ -57,14 +57,12 @@ def haproxy_detail(haproxyObj,haproxyNodes):
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_slave_detail.html')
 def slave_detail(slaveObj,slaveNodes):
-    return {'slaveObj':slaveObj,'slaveNodes':slaveNodes[slaveObj.slaveLabel]}
-
-@register.inclusion_tag('paas/cluster/mesos/detail/_button.html')
-def detail_button():
-    return {'status':True}
+    return {'slave':slaveObj,'slaveNodes':slaveNodes[slaveObj.slaveLabel]}
 
 @register.inclusion_tag('paas/cluster/mesos/detail/_node_status.html')
 def node_status(nodeObj):
     return {'node':nodeObj}
+
+
     
     

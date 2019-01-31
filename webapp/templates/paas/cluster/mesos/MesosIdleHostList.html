@@ -266,7 +266,7 @@ function oneChecked(obj){
 	}
 }
 
-//获取已选择的服务器IP和帐号,格式IP:Acount,IP:Acount
+//获取已选择的服务器
 function getHostAccount(){
 	var checked = $(".tr-select-modal:visible input[type='checkbox']:checked");
 	var checked_host_array = new Array();
@@ -286,7 +286,7 @@ function addIdleHost(){
 		$.ajax({
 			type: 'POST',
 			url : '/mesos/add/idle/',
-			data: {'checked_host_array':JSON.stringify(checked_host_array)},
+			data: {'checked_host_array':checked_host_array},
 			success: function(data){
 				if(data['status']){
 					window.location.reload();

@@ -55,9 +55,10 @@
 							<tr>
 								<th>ID</th>
 								<th>名称</th>
-								<th>管理节点</th>
-								<th>Haproxy节点</th>
-								<th>计算节点</th>
+								<th>Master</th>
+								<th>Marathon</th>
+								<th>Haproxy</th>
+								<th>Slave</th>
 								<th class="hidden-xs">CPU</th>
 								<th class="hidden-xs">内存</th>
 								<th class="hidden-xs">存储</th>
@@ -72,16 +73,23 @@
 							<tr>
 								<td>{{ cluster.id }}</td>
 								<td>{{ cluster.clusterName }}</td>
-								<td><a href="{% url 'MesosMasterDetail' clsname=cluster.clusterName %}">{{ cluster.masterNodeNum }}</a></td>
-								<td><a href="{% url 'MesosHaproxyDetail' clsname=cluster.clusterName %}">{{ cluster.haproxyDeploy|countNode }}</a></td>
-								<td><a href="{% url 'MesosSlaveDetail' clsname=cluster.clusterName %}">{{ cluster.slaveDeploy|countNode }}</a></td>
-								<td class="hidden-xs">/ Cores <span class="gray">({{cluster.cpu.percent}}%)</span></td>
-								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
-								<td class="hidden-xs">/ GiB <span class="gray">({{cluster.memory.percent}}%)</span></td>
+								<td><a href="{% url 'MesosMasterDetail' clsname=cluster.clusterName %}">{{ cluster.masterNodeNum }}</a> / 1</td>
+								<td><a href="{% url 'MesosMarathonDetail' clsname=cluster.clusterName %}">
+									{% countNode nodeCount cluster.clusterName 'marathon' %}</a> / {% countNode clusterCount cluster.clusterName 'marathon' %}
+								</td>
+								<td><a href="{% url 'MesosHaproxyDetail' clsname=cluster.clusterName %}">
+									{% countNode nodeCount cluster.clusterName 'haproxy' %}</a> / {% countNode clusterCount cluster.clusterName 'haproxy' %}
+								</td>
+								<td><a href="{% url 'MesosSlaveDetail' clsname=cluster.clusterName %}">
+									{% countNode nodeCount cluster.clusterName 'slave' %}</a> / {% countNode clusterCount cluster.clusterName 'slave' %}
+								</td>
+								<td class="hidden-xs">{{cluster.cpu_used}}/{{cluster.cpu_total}} Cores</td>
+								<td class="hidden-xs">{{cluster.memory_used}}/{{cluster.memory_total}} GiB</td>
+								<td class="hidden-xs">{{cluster.disk_used}}/{{cluster.disk_total}} GiB</td>
 								<td><label class="label label-sm {{cluster.status|returnClass}} ">{{ cluster.get_status_display}}</label></td>
 								<td class="hidden-xs">{{ cluster.create_time|date:"Y-m-d H:i:s"}}</td>
 								<td>
-									{% opp_td cluster.status cluster.clusterName %}
+									{% cluster_action_buttons cluster.status cluster.clusterName %}
 								</td>											
 							</tr>
 							{% endfor %}
@@ -177,7 +185,7 @@ function deployClusterAck(cluster_id,cluster_name){
 	$.ajax({
 		method: "POST",
 		url: "/mesos/add/deploy/",
-		data: {"cluster_id":cluster_id},
+		data: {"cluster_name":cluster_name},
 		success: function(data){
 			if(data['status']==200){
 				var celery_id = data['celery_id']
@@ -279,7 +287,7 @@ jQuery(function($) {
 		bAutoWidth: false,
 		"aoColumns": [
 		  { "bSortable": false },
-		  null, null,null, null, null,null,null,null,null,
+		  null, null,null, null, null,null,null,null,null,null,
 		  { "bSortable": false }
 		],
 		"aaSorting": [],

@@ -1,9 +1,8 @@
 {% load mesos %}
-
 <div id="{{marathonObj.marathonID}}-list" class="panel-group accordion-style1 accordion-style2">
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<a href="#{{marathonObj.marathonID}}-config" data-parent="{{marathonObj.marathonID}}-list" data-toggle="collapse" class="accordion-toggle collapsed">
+			<a href="#{{marathonObj.marathonID}}-config" data-parent="#{{marathonObj.marathonID}}-list" data-toggle="collapse" class="accordion-toggle collapsed">
 				<i class="ace-icon fa fa-chevron-left pull-right" data-icon-hide="ace-icon fa fa-chevron-down" data-icon-show="ace-icon fa fa-chevron-left"></i>
 				<i class="fa fa-cog bigger-130" aria-hidden="true"></i>
 				&nbsp; 配置信息
@@ -32,13 +31,6 @@
 							<span>{{ marathonObj.marathonImage}}</span>
 						</div>
 					</div>
-
-					<div class="profile-info-row">
-						<div class="profile-info-name">HOST</div>
-						<div class="profile-info-value">
-							<span>{{marathonObj.marathonDeploy}}</span>
-						</div>
-					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">PORT</div>
@@ -65,6 +57,20 @@
 						<div class="profile-info-name">Documentation</div>
 						<div class="profile-info-value">
 							<span><a href="https://mesosphere.github.io/marathon/docs/" target="view_window">Readme</a></span>
+						</div>
+					</div>
+					
+					<div class="profile-info-row">
+						<div class="profile-info-name">集群状态</div>
+						<div class="profile-info-value">
+							<span class="label {{marathonObj.status|returnClass}} arrowed">{{ marathonObj.get_status_display}}</span>
+						</div>
+					</div>
+					
+					<div class="profile-info-row">
+						<div class="profile-info-name">集群操作</div>
+						<div class="profile-info-value">
+							<span class="label label-danger" id="enabled" onclick="clusterNodeDel(this);"><i class="fa fa-trash-o"></i> 删除</span>
 						</div>
 					</div>
 				</div>
@@ -97,7 +103,17 @@
 						<td>{{ node.containerName }}</td>
 						{% node_status node %}
 						<td>
-							{% detail_button %}
+							<div class="action-buttons">
+								<a href="#" class="blue" onclick="updateDockerStatus(this,'start');">
+									<i class="fa fa-play-circle bigger-130" title="启动"></i>
+								</a>
+								<a href="#" class="red" onclick="updateDockerStatus(this,'stop');">
+									<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+								</a>
+								<a href="#" class="" data-toggle="modal" data-target="#myModal" onclick="getLogs(this);">
+									<i class="fa fa-file-text" title="日志"></i>
+								</a>
+							</div>
 						</td>
 					</tr>
 					{% endfor %}

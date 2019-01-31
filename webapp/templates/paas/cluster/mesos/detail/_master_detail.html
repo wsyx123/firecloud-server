@@ -35,13 +35,6 @@
 					</div>
 
 					<div class="profile-info-row">
-						<div class="profile-info-name">HOST</div>
-						<div class="profile-info-value">
-							<span>{{masterObj.masterDeploy}}</span>
-						</div>
-					</div>
-
-					<div class="profile-info-row">
 						<div class="profile-info-name">PORT</div>
 						<div class="profile-info-value">
 							<span>{{masterObj.masterPort}}</span>
@@ -117,7 +110,20 @@
 						<td>{{ node.containerName }}</td>
 						{% node_status node %}
 						<td>
-							{% detail_button %}
+							<div class="action-buttons">
+								<a href="#" class="blue" onclick="updateDockerStatus(this,'start');">
+									<i class="fa fa-play-circle bigger-130" title="启动"></i>
+								</a>
+								<a href="#" class="red" onclick="updateDockerStatus(this,'stop');">
+									<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+								</a>
+								<a href="#" class="" data-toggle="modal" data-target="#myModal" onclick="getLogs(this);">
+									<i class="fa fa-file-text" title="日志"></i>
+								</a>
+								<a href="http://{{node.host}}:{{masterObj.masterPort}}/master/redirect" target="_blank">
+									<i class="fa fa-link" title="Master Web"></i>
+								</a>
+							</div>
 						</td>
 					</tr>
 					{% endfor %}

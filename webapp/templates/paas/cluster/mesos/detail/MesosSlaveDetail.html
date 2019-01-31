@@ -116,6 +116,11 @@
 					<h4 class="header smaller lighter blue">
 						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
 						Slave 运行配置
+						{% ifequal masterObj.status 4 %}
+						<span class="pull-right">
+							<a href="{% url 'MesosAddNode' %}?name={{masterObj.clusterName}}&type=slave" style="margin-left:25px;"><i class="fa fa-plus">添加Slave节点或池</i></a>
+						</span>
+						{% endifequal %}
 					</h4>
 					<div class="tabbable">
 						<ul class="nav nav-tabs">
@@ -130,9 +135,6 @@
 							</li>
 							{% endifequal %}
 							{% endfor %}
-							<li>
-								<a data-toggle="tab" href="#event">集群事件</a>
-							</li>
 						</ul>
 						<div class="tab-content">
 							{% for slave in slaveObj %}
@@ -146,40 +148,6 @@
 							</div>
 							{% endifequal %}
 							{% endfor %}
-							<div id="event" class="tab-pane">
-								<table class="table">
-									<thead>
-										<tr>
-											<th class="col-sm-1">事件</th>
-											<th class="col-sm-1">集群</th>
-											<th class="col-sm-1">步骤</th>
-											<th class="col-sm-1">结果</th>
-											<th class="col-sm-1">状态</th>
-											<th class="col-sm-1">开始</th>
-											<th class="col-sm-1">结束</th>
-											<th>详细信息</th>
-										</tr>
-									</thead>
-									<tbody>
-										{% for event in clusterEnv %}
-										<tr>
-											<td>{{ event.name }}</td>
-											<td>{{ event.cluster_name }}</td>
-											<td>{{ event.step_name }}</td>
-											<td>{{ event.get_status_display }}</td>
-											{% ifequal event.status 3 %}
-											<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
-											{% else %}
-											<td><span class="glyphicon glyphicon-remove-sign unhealth"></span></td>
-											{% endifequal %}
-											<td>{{event.start_time|date:"Y-m-d H:i:s"}}</td>
-											<td>{{event.finished_time|date:"Y-m-d H:i:s"}}</td>
-											<td>{{event.msg|default:'-------'}}</td>
-										</tr>
-										{% endfor %}
-									</tbody>
-								</table>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -194,17 +162,6 @@
 {% block js %}
 <script src="/static/xcConfirm/js/xcConfirm.js"></script>
 <script type="text/javascript">
-function collapseExpand(obj){
-	classStr = $(obj).text();
-	if(classStr == '显示'){
-		$(obj).text('隐藏');
-		$(obj).parent().next().css('display','block');
-	}else{
-		$(obj).text('显示');
-		$(obj).parent().next().css('display','none');
-	}
-}
-
 function setTime(){
 	new_time = $("select[name='time']").val();
 	if(new_time == 'no'){
@@ -290,6 +247,72 @@ function startContainer(obj,host,container,action){
 		}
 	})
 }
+
+function clusterNodeDel(obj){
+	var poolID = $(obj).parent().parent().parent().parent().parent().attr('id');
+	var poolName = poolID.split("-")[0];
+	var clusterName = $(".breadcrumb").children().last().text();
+	var option = {
+		onOk: function(){
+			clusterNodeDelAck(clusterName,poolName);
+		}
+	}
+	window.wxc.xcConfirm('确定删除 '+poolName+' 资源池?', window.wxc.xcConfirm.typeEnum.warning,option);
+}
+
+function clusterNodeDelAck(clusterName,poolName){
+	$.ajax({
+		type: 'POST',
+		url : '/mesos/delete/node/',
+		data: {'clusterName':clusterName,'poolName':poolName,'type':'slave'},
+		success: function(data){
+			var txt = poolName+' 资源池';
+			if(data['code']==200){
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt+' 删除成功!');
+				$("#"+poolName).remove();
+			}else{
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(txt+' 删除失败,'+data['msg']);
+			}
+		}
+	
+	})
+}
+
+function SingleNodeDel(obj){
+	var poolID = $(obj).parent().parent().parent().parent().parent().parent().parent().attr('id');
+	var host = $(obj).parent().parent().parent().children().eq(0).text();
+	var container = $(obj).parent().parent().parent().children().eq(1).text();
+	var poolName = poolID.split("-")[0];
+	var option = {
+		onOk: function(){
+			SingleNodeDelAck(poolName,host,container,obj);
+		}
+	}
+	window.wxc.xcConfirm('确定删除 '+poolName+' 池中的'+host+' 节点?', window.wxc.xcConfirm.typeEnum.warning,option);
+}
+
+function SingleNodeDelAck(poolName,host,container,obj){
+	$.ajax({
+		type: 'POST',
+		url : '/mesos/delete/node/',
+		data: {'poolName':poolName,'host':host,'container':container,'type':'slaveSingleNode'},
+		success: function(data){
+			var txt = poolName+' 池中节点: '+host;
+			if(data['code']==200){
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt+' 删除成功!');
+				$(obj).parent().parent().parent().remove();
+			}else{
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(txt+' 删除失败,'+data['msg']);
+			}
+		}
+	
+	})
+}
+
 
 function closeBlock(obj){
 	$(obj).parent().addClass('hide');

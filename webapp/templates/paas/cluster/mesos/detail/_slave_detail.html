@@ -23,35 +23,28 @@
 					<div class="profile-info-row">
 						<div class="profile-info-name">IMAGE</div>
 						<div class="profile-info-value">
-							<span>{{slaveObj.slaveImage}}</span>
-						</div>
-					</div>
-
-					<div class="profile-info-row">
-						<div class="profile-info-name">HOST</div>
-						<div class="profile-info-value">
-							<span>{{slaveObj.slaveDeploy}}</span>
+							<span>{{slave.slaveImage}}</span>
 						</div>
 					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">PORT</div>
 						<div class="profile-info-value">
-							<span>{{slaveObj.slavePort}}</span>
+							<span>{{slave.slavePort}}</span>
 						</div>
 					</div>
 					
 					<div class="profile-info-row">
 						<div class="profile-info-name">MESOS_ATTRIBUTES</div>
 						<div class="profile-info-value">
-							<span>{{slaveObj.slaveLabel}}</span>
+							<span>{{slave.slaveLabel}}</span>
 						</div>
 					</div>
 
 					<div class="profile-info-row">
 						<div class="profile-info-name">MESOS_MASTER</div>
 						<div class="profile-info-value">
-							<span>{{slaveObj.slaveZK}}</span>
+							<span>{{slave.slaveZK}}</span>
 						</div>
 					</div>
 					
@@ -88,6 +81,20 @@
 							<span><a href="https://github.com/mesosphere/docker-containers/tree/master/mesos" target="view_window">Readme</a></span>
 						</div>
 					</div>
+					
+					<div class="profile-info-row">
+						<div class="profile-info-name">集群状态</div>
+						<div class="profile-info-value">
+							<span class="label {{slave.status|returnClass}} arrowed">{{ slave.get_status_display}}</span>
+						</div>
+					</div>
+					
+					<div class="profile-info-row">
+						<div class="profile-info-name">集群操作</div>
+						<div class="profile-info-value">
+							<span class="label label-danger" id="enabled" onclick="clusterNodeDel(this);"><i class="fa fa-trash-o"></i> 删除</span>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -118,7 +125,20 @@
 						<td>{{ node.containerName }}</td>
 						{% node_status node %}
 						<td>
-							{% detail_button %}
+							<div class="action-buttons">
+								<a href="#" class="blue" onclick="updateDockerStatus(this,'start');">
+									<i class="fa fa-play-circle bigger-130" title="启动"></i>
+								</a>
+								<a href="#" class="red" onclick="updateDockerStatus(this,'stop');">
+									<i class="fa fa-stop-circle bigger-130" title="停止"></i>
+								</a>
+								<a href="#" class="red" onclick="SingleNodeDel(this);">
+									<i class="fa fa-trash-o bigger-130" title="删除"></i>
+								</a>
+								<a href="#" class="" data-toggle="modal" data-target="#myModal" onclick="getLogs(this);">
+									<i class="fa fa-file-text" title="日志"></i>
+								</a>
+							</div>
 						</td>
 					</tr>
 					{% endfor %}

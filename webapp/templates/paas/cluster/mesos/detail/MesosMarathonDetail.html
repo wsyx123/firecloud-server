@@ -12,10 +12,10 @@
 	cursor:pointer;
 }
 
-.modal{
+#log .modal{
 	margin-top:0px;
 }
-.modal-dialog { 
+#log .modal-dialog { 
     position: absolute; 
     top: 0; 
     bottom: 0; 
@@ -24,16 +24,17 @@
 	width:80%;
 }
 
-.modal-header{
+#log .modal-header{
 	padding:10px;
 }
-.modal-content { 
+#log .modal-content { 
     /*overflow-y: scroll; */ 
     position: absolute; 
     top: 0; 
     bottom: 0; 
     width: 100%; 
-} .modal-body { 
+} 
+#log .modal-body { 
     overflow-y: scroll; 
     position: absolute; 
     top: 55px; 
@@ -78,103 +79,79 @@
 			</div>
 			
 			<!-- 日志显示模态框（Modal） -->
-			<div class="modal fade" id="myModal"  data-backdrop="static">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<button type="button" class="close" onclick="closeLog();">
-								&times;
-							</button>
-							<span style="font-size:20px;"><i class="fa fa-file-text" title="日志"></i> <span id="containerName"></span>日志</span>
-							<span style="margin-left:150px;">显示行数:
-								<select name="line" onchange="setLine();">
-									<option value="10" selected >10</option>
-									<option value="30">30</option>
-									<option value="50">50</option>
-									<option value="100">100</option>
-								</select>
-							</span>
-							<span style="margin-left:10px;">刷新频率:
-								<select name="time" onchange="setTime();">
-									<option value="5000">5秒</option>
-									<option value="10000">10秒</option>
-									<option value="15000">15秒</option>
-									<option value="no" selected>不刷新</option>
-								</select>
-							</span>
-						</div>
-						<div class="modal-body">
-							<div id="logDisplay">
-								No logs available								
+			<div id="log">
+				<div class="modal fade" id="myModal"  data-backdrop="static">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" onclick="closeLog();">
+									&times;
+								</button>
+								<span style="font-size:20px;"><i class="fa fa-file-text" title="日志"></i> <span id="containerName"></span>日志</span>
+								<span style="margin-left:150px;">显示行数:
+									<select name="line" onchange="setLine();">
+										<option value="10" selected >10</option>
+										<option value="30">30</option>
+										<option value="50">50</option>
+										<option value="100">100</option>
+									</select>
+								</span>
+								<span style="margin-left:10px;">刷新频率:
+									<select name="time" onchange="setTime();">
+										<option value="5000">5秒</option>
+										<option value="10000">10秒</option>
+										<option value="15000">15秒</option>
+										<option value="no" selected>不刷新</option>
+									</select>
+								</span>
 							</div>
-						</div>
-					</div><!-- /.modal-content -->
-				</div><!-- /.modal -->
-			</div>
+							<div class="modal-body">
+								<div id="logDisplay">
+									No logs available								
+								</div>
+							</div>
+						</div><!-- /.modal-content -->
+					</div><!-- /.modal -->
+				</div>
+			</div>	
+			
 			<div class="row">
 				<div class="col-xs-12">
 					<h4 class="header smaller lighter blue">
 						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
-						{{ clsname }} 集群运行配置
+						Marathon 集群运行配置
+						{% ifequal masterObj.status 4 %}
+						<span class="pull-right">
+							<a href="{% url 'MesosAddNode' %}?name={{masterObj.clusterName}}&type=marathon" style="margin-left:25px;"><i class="fa fa-plus">添加Marathon集群</i></a>
+						</span>
+						{% endifequal %}
 					</h4>
 					<div class="tabbable">
-						<ul class="nav nav-tabs">
+						<ul class="nav nav-tabs">							
+							{% for marathon in marathonObj %}
+							{% ifequal forloop.counter 1 %}
 							<li class="active">
-								<a data-toggle="tab" href="#master">Mesos Master</a>
+								<a data-toggle="tab" href="#{{marathon.marathonID}}">{{marathon.marathonID}}</a>
 							</li>
-							
+							{% else %}
 							<li>
-								<a data-toggle="tab" href="#zookeeper">Zookeeper</a>
+								<a data-toggle="tab" href="#{{marathon.marathonID}}">{{marathon.marathonID}}</a>
 							</li>
-							<li>
-								<a data-toggle="tab" href="#event">集群事件</a>
-							</li>
+							{% endifequal %}
+							{% endfor %}
 						</ul>
 						<div class="tab-content">
-							<div id="master" class="tab-pane in active">
-								{% master_detail masterObj masterNodes %}
+							{% for marathon in marathonObj %}
+							{% ifequal forloop.counter 1 %}
+							<div id="{{marathon.marathonID}}" class="tab-pane in active">
+								{% marathon_detail marathon marathonNodes %}
 							</div>
-							<div id="zookeeper" class="tab-pane">
-								{% zookeeper_detail masterObj zookeeperNodes %}
+							{% else %}
+							<div id="{{marathon.marathonID}}" class="tab-pane">
+								{% marathon_detail marathon marathonNodes %}
 							</div>
-							<div id="event" class="tab-pane">
-								<table class="table">
-									<thead>
-										<tr>
-											<th class="col-sm-2">事件</th>
-											<th class="col-sm-1">集群</th>
-											<th class="col-sm-1">步骤</th>
-											<th class="col-sm-1">结果</th>
-											<th class="col-sm-1">状态</th>
-											<th class="col-sm-1">开始</th>
-											<th class="col-sm-1">结束</th>
-											<th>详细信息</th>
-										</tr>
-									</thead>
-									<tbody>
-										{% for event in clusterEnv %}
-										<tr>
-											<td>{{ event.name }}</td>
-											<td>{{ event.cluster_name }}</td>
-											<td>{{ event.step_name }}</td>
-											<td>{{ event.get_status_display }}</td>
-											{% ifequal event.status 3 %}
-											<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
-											{% endifequal %}
-											{% ifequal event.status 2 %}
-											<td><img src="/static/images/waiting.gif" /></td>
-											{% endifequal %}
-											{% ifequal event.status 4 %}
-											<td><span class="glyphicon glyphicon-remove-sign unhealth"></span></td>
-											{% endifequal %}
-											<td>{{event.start_time|date:"Y-m-d H:i:s"}}</td>
-											<td>{{event.finished_time|date:"Y-m-d H:i:s"}}</td>
-											<td>{{event.msg|default:'-------'}}</td>
-										</tr>
-										{% endfor %}
-									</tbody>
-								</table>
-							</div>
+							{% endifequal %}
+							{% endfor %}
 						</div>
 					</div>
 				</div>
@@ -189,16 +166,6 @@
 {% block js %}
 <script src="/static/xcConfirm/js/xcConfirm.js"></script>
 <script type="text/javascript">
-function collapseExpand(obj){
-	classStr = $(obj).text();
-	if(classStr == '显示'){
-		$(obj).text('隐藏');
-		$(obj).parent().next().css('display','block');
-	}else{
-		$(obj).text('显示');
-		$(obj).parent().next().css('display','none');
-	}
-}
 
 function setTime(){
 	new_time = $("select[name='time']").val();
@@ -286,10 +253,41 @@ function startContainer(obj,host,container,action){
 	})
 }
 
+function clusterNodeDel(obj){
+	var poolID = $(obj).parent().parent().parent().parent().parent().attr('id');
+	var poolName = poolID.split("-")[0];
+	var clusterName = $(".breadcrumb").children().last().text();
+	var option = {
+		onOk: function(){
+			clusterNodeDelAck(clusterName,poolName);
+		}
+	}
+	window.wxc.xcConfirm('确定删除 '+poolName+' 集群?', window.wxc.xcConfirm.typeEnum.warning,option);
+}
+
+function clusterNodeDelAck(clusterName,poolName){
+	$.ajax({
+		type: 'POST',
+		url : '/mesos/delete/node/',
+		data: {'clusterName':clusterName,'poolName':poolName,'type':'marathon'},
+		success: function(data){
+			var txt = poolName+' 资源池';
+			if(data['code']==200){
+				$("#successBlock").removeClass('hide');
+				$("#okMsg").text(txt+' 删除成功!');
+				$("#"+poolName).remove();
+			}else{
+				$("#dangerBlock").removeClass('hide');
+				$("#failMsg").text(txt+' 删除失败,'+data['msg']);
+			}
+		}
+	
+	})
+}
+
 function closeBlock(obj){
 	$(obj).parent().addClass('hide');
 }
-
 </script>
 {% endblock %}
 
