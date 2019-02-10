@@ -138,25 +138,25 @@
 
 					<div class="row">
 						<div class="col-xs-12 col-sm-4 center">
-							<div class="easy-pie-chart percentage" data-percent="{{clsObj.cpu_use}}" data-color="#3497da">
+							<div class="easy-pie-chart percentage" data-percent="{% resource_percent clsObj.cpu_used clsObj.cpu_total %}" data-color="#3497da">
 								<span class="percent">
 									<span>CPU </span>
-									<span style="font-size:50px;">{{clsObj.cpu_use}}</span>%
+									<span style="font-size:50px;">{% resource_percent clsObj.cpu_used clsObj.cpu_total %}</span>%
 								</span>
 							</div>
 						</div><!-- /.col -->
 						
 						<div class="col-xs-12 col-sm-4 center">
-							<div class="easy-pie-chart percentage" data-percent="{{clsObj.memory_use}}" data-color="#3497da">
+							<div class="easy-pie-chart percentage" data-percent="{% resource_percent clsObj.memory_used clsObj.memory_total %}" data-color="#3497da">
 								<span>Memory </span>
-								<span style="font-size:50px;">{{clsObj.memory_use}}</span>%
+								<span style="font-size:50px;">{% resource_percent clsObj.memory_used clsObj.memory_total %}</span>%
 							</div>
 						</div><!-- /.col -->
 						
 						<div class="col-xs-12 col-sm-4 center">
-							<div class="easy-pie-chart percentage" data-percent="{{clsObj.disk_use}}" data-color="#3497da">
+							<div class="easy-pie-chart percentage" data-percent="{% resource_percent clsObj.disk_used clsObj.disk_total %}" data-color="#3497da">
 								<span>Disk </span>
-								<span style="font-size:50px;">{{clsObj.disk_use}}</span>%
+								<span style="font-size:50px;">{% resource_percent clsObj.disk_used clsObj.disk_total %}</span>%
 							</div>
 						</div><!-- /.col -->
 						

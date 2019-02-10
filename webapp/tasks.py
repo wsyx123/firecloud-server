@@ -8,6 +8,7 @@ Created on 2018年4月23日
 from __future__ import absolute_import
 from celery import task
 import traceback
+import requests
 from webapp.models import HostImport,AssetHost,HostEvent,MesosMaster,MesosNodeStatus,\
 MesosMarathon,MesosHaproxy,MesosSlave,MesosDeployLog
 from utils.ansibleAdHoc import myadhoc
@@ -469,7 +470,6 @@ def deploy_mesos_node_task(self,queryset,log_model,NodeStatus_model,hosts):
 
 @task(name='check_mesos_cluster_task')
 def check_mesos_cluster_task():
-    import requests
     def statistics_mesos_master_resource(masterObj):
         clusterName = masterObj.clusterName
         masterNodes = MesosNodeStatus.objects.filter(Q(clusterName=clusterName),
@@ -481,14 +481,28 @@ def check_mesos_cluster_task():
             r = requests.get(url)
             if r.ok:
                 res_dict = r.json()
-                masterObj.cpu_used = res_dict['slave/cpus_used']
-                masterObj.cpu_total = res_dict['slave/cpus_total']
-                masterObj.memory_used = res_dict['slave/mem_used']
-                masterObj.memory_total = res_dict['slave/mem_total']
-                masterObj.disk_used = res_dict['slave/disk_used']
-                masterObj.disk_total = res_dict['slave/disk_total']
+                masterObj.cpu_used = res_dict['master/cpus_used']
+                masterObj.cpu_total = res_dict['master/cpus_total']
+                masterObj.memory_used = res_dict['master/mem_used']/1000
+                masterObj.memory_total = res_dict['master/mem_total']/1000
+                masterObj.disk_used = res_dict['master/disk_used']/1000
+                masterObj.disk_total = res_dict['master/disk_total']/1000
                 masterObj.save()
-        return True 
+        return True
+    
+    def get_master_leader(masterObj):
+        clusterName = masterObj.clusterName
+        masterNodes = MesosNodeStatus.objects.filter(Q(clusterName=clusterName),
+                                                     Q(nodeName=clusterName),
+                                                     Q(containerStatus=1))
+        if len(masterNodes) != 0:
+            host = masterNodes[0].host
+            url = 'http://{}:{}{}'.format(host,masterObj.masterPort,'/master/state')
+            r = requests.get(url)
+            if r.ok:
+                res_dict = r.json()
+                masterObj.leader = res_dict['leader_info']['hostname']
+                masterObj.save()
         
     def get_distinct_hosts(nodes):
         hosts = []
@@ -504,7 +518,7 @@ def check_mesos_cluster_task():
         else:
             return False
     
-    def get_node_status(clusterName,nodeName,port,url_context):
+    def get_cluster_status(clusterName,nodeName,port,url_context):
         #获取xx集群下，容器停止的记录条数
         DieNodes = MesosNodeStatus.objects.filter(Q(clusterName=clusterName),
                                                   Q(nodeName=nodeName),
@@ -523,17 +537,23 @@ def check_mesos_cluster_task():
         elif len(ActNodes) == 0:
             status = 3
         
-        #status = 1, status = 2 都要进行服务可用性判断   
+        #status = 1, status = 2 都要进行服务可用性判断
         if status !=3:
             host = ActNodes[0].host
             url = 'http://{}:{}{}'.format(host,port,url_context)
-            r = requests.get(url)
-            if r.ok:
-                status = 1
+            try:
+                r = requests.get(url)
+            except:
+                return 3
             else:
-                status = 3
+                if r.ok:
+                    status = 1
+                else:
+                    status = 3
         return status
+        
     
+    #这里得到的是多个集群状态判断出的最终集群可用状态,如一个master下有2个marathon集群，一个集群可用，一个集群不可用那么整个marathon集群就是2(waring)
     def status_judge(status_list):
         if len(status_list) > 1:
             #1,2 都没有说明 是3 (danger==unavailable)
@@ -554,46 +574,81 @@ def check_mesos_cluster_task():
             status = status_list[0]
         return status
     
+    def set_master_status(masterObj):
+        master_status = masterObj.master_status
+        marathon_status = masterObj.marathon_status
+        haproxy_status = masterObj.haproxy_status
+        bamboo_status = masterObj.bamboo_status
+        slave_status = masterObj.slave_status
+        status_list = [master_status,marathon_status,haproxy_status,bamboo_status,slave_status]
+        if 3 in status_list:
+            masterObj.status = 6
+            masterObj.save()
+        elif 2 in status_list:
+            masterObj.status = 5
+            masterObj.save()
+        else:
+            masterObj.status = 4
+            masterObj.save()        
+    
     def set_status(masterObj,check_type,url_context):
         clusterName=masterObj.clusterName
         if check_type == 'marathon':
-            clusters = MesosMarathon.objects.filter(Q(clusterName=clusterName),Q(status=4))
+            clusters = MesosMarathon.objects.filter(Q(clusterName=clusterName),Q(status=4)|Q(status=5)|Q(status=6))
         elif check_type == 'haproxy':
-            clusters = MesosHaproxy.objects.filter(Q(clusterName=clusterName),Q(status=4))
+            clusters = MesosHaproxy.objects.filter(Q(clusterName=clusterName),Q(status=4)|Q(status=5)|Q(status=6))
         elif check_type == 'slave':
-            clusters = MesosSlave.objects.filter(Q(clusterName=clusterName),Q(status=4))
+            clusters = MesosSlave.objects.filter(Q(clusterName=clusterName),Q(status=4)|Q(status=5)|Q(status=6))
         else:
-            clusters = MesosMaster.objects.filter(Q(clusterName=clusterName),Q(status=4))
-        #status_list保存各xx集群的状态，最后依据此来综合判断xx 是否可用
+            clusters = MesosMaster.objects.filter(Q(clusterName=clusterName),Q(status=4)|Q(status=5)|Q(status=6))
+        #status_list保存各xx集群(如MesosMarathon)的状态，最后依据此来综合判断xx 是否可用
         status_list = []
-        #获取此集群下的所有xx集群
-        for cluster in clusters:
+        #获取此集群下的所有已部署的xx集群
+        if len(clusters) > 0:
+            for cluster in clusters:
+                if check_type == 'marathon':
+                    nodeName = cluster.marathonID
+                    port = cluster.marathonPort
+                elif check_type == 'haproxy':
+                    nodeName = cluster.haproxyID
+                    port = cluster.bambooPort
+                elif check_type == 'slave':
+                    nodeName = cluster.slaveLabel
+                    port = cluster.slavePort
+                else:
+                    nodeName = cluster.clusterName
+                    port = cluster.masterPort
+                status = get_cluster_status(clusterName, nodeName, port,url_context)
+                #根据整个集群所有node状态，服务状态来设置集群状态
+                if status == 1:
+                    cluster.status = 4
+                elif status == 2:
+                    cluster.status = 5
+                elif status == 3:
+                    cluster.status = 6
+                cluster.save()
+                status_list.append(status)
+            status = status_judge(status_list)
             if check_type == 'marathon':
-                nodeName = cluster.marathonID
-                port = cluster.marathonPort
+                masterObj.marathon_status = status
             elif check_type == 'haproxy':
-                nodeName = cluster.haproxyID
-                port = cluster.bambooPort
+                masterObj.haproxy_status = status
             elif check_type == 'slave':
-                nodeName = cluster.slaveLabel
-                port = cluster.slavePort
+                masterObj.slave_status = status
             else:
-                nodeName = cluster.clusterName
-                port = cluster.masterPort
-            status = get_node_status(clusterName, nodeName, port,url_context)
-            cluster.status = status
-            cluster.save()
-            status_list.append(status)
-        status = status_judge(status_list)
-        if check_type == 'marathon':
-            masterObj.marathon_status = status
-        elif check_type == 'haproxy':
-            masterObj.haproxy_status = status
-        elif check_type == 'slave':
-            masterObj.slave_status = status
+                masterObj.master_status = status
+            masterObj.save()
         else:
-            masterObj.master_status = status
-        masterObj.save()
+            #没有部署成功的集群
+            if check_type == 'marathon':
+                masterObj.marathon_status = 4
+            elif check_type == 'haproxy':
+                masterObj.haproxy_status = 4
+            elif check_type == 'slave':
+                masterObj.slave_status = 4
+            else:
+                masterObj.master_status = 4
+            masterObj.save()
    
     
     #1 获取已部署成功的集群
@@ -603,25 +658,23 @@ def check_mesos_cluster_task():
         clusterName = masterObj.clusterName
         nodes = MesosNodeStatus.objects.filter(Q(clusterName=clusterName),
                                                Q(containerStatus=1)|Q(containerStatus=2))
-        #3 如果有主机6071端口不通(说明docker服务挂了),更新此主机上的所有容器状态为停止
+        #2.1 如果有主机6071端口不通(说明docker服务挂了),更新此主机上的所有容器状态为停止
         hosts = get_distinct_hosts(nodes)
         conn_res = check_docker_6071(hosts)
-        print conn_res
-        #更新所有不通主机上的容器状态为停止
         for host in conn_res['err_host']:
             MesosNodeStatus.objects.filter(Q(clusterName=clusterName),Q(host=host)).update(containerStatus=2)
-        #更新所有正常主机上的容器状态为运行
+        #2.2 更新所有正常主机上的容器状态为运行
         for host in hosts-set(conn_res['err_host']):
             MesosNodeStatus.objects.filter(Q(clusterName=clusterName),Q(host=host)).update(containerStatus=1)
-        #4 检查运行的容器是否真正运行
+        #2.3 检查运行的容器是否真正运行
         containers = MesosNodeStatus.objects.filter(Q(clusterName=clusterName),Q(containerStatus=1))
         for container in containers:
             host = container.host
             containerName = container.containerName
             if not container_is_running(host, containerName):
-                MesosNodeStatus.objects.filter(Q(host=host),Q(clusterName=containerName)).update(containerStatus=2)
-        #5 检查zookeeper集群状态(从3.5.0开始zookeeper服务中嵌入了jetty server作为adminserver管理服务器，默认端口：8080)
-        #6 检查mesos集群状态(master,marathon,slave),通过master 5050 api
+                MesosNodeStatus.objects.filter(Q(host=host),Q(containerName=containerName)).update(containerStatus=2)
+        #3 检查zookeeper集群状态(从3.5.0开始zookeeper服务中嵌入了jetty server作为adminserver管理服务器，默认端口：8080)
+        #4 检查mesos集群状态(master,marathon,slave),通过master 5050 api
         #http://mesos.apache.org/documentation/latest/endpoints/
         #http://192.168.10.3:5050/master/state
         # http://192.168.10.3:5050/metrics/snapshot
@@ -630,6 +683,8 @@ def check_mesos_cluster_task():
         set_status(masterObj, 'haproxy', '/api/state')
         set_status(masterObj, 'slave', '/metrics/snapshot')
         statistics_mesos_master_resource(masterObj)
+        get_master_leader(masterObj)
+        set_master_status(masterObj)
     return True
         
         

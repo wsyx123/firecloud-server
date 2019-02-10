@@ -10,9 +10,13 @@ import re
 def check_docker_6071(hosts):
     err_host = []
     for host in hosts:
-        sock = DockerClient(base_url="{}:6071".format(host))
-        if not sock.ping():
+        base_url="{}:6071".format(host)
+        try:
+            DockerClient(base_url=base_url)
+        except:
             err_host.append(host)
+        else:
+            pass
     if len(err_host) != 0:
         msg = ','.join(err_host)+'端口:6071 连接失败!'
         status = False

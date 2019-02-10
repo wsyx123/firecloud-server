@@ -29,8 +29,8 @@ class MesosMaster(models.Model):
                      (2,'正在部署'),
                      (3,'部署失败'),
                      (4,'集群正常'),
-                     (5,'集群错误'),
-                     (6,'集群异常')
+                     (5,'集群异常'),
+                     (6,'集群错误')
                      )
     status = (
             (1,'health'),
@@ -75,8 +75,8 @@ class MesosMarathon(models.Model):
              (2,'正在部署'),
              (3,'部署失败'),
              (4,'集群正常'),
-             (5,'集群错误'),
-             (6,'集群异常')
+             (5,'集群异常'),
+             (6,'集群错误')
              )
     clusterName = models.CharField(max_length=32)
     marathonID = models.CharField(max_length=32,unique=True)
@@ -93,8 +93,8 @@ class MesosHaproxy(models.Model):
              (2,'正在部署'),
              (3,'部署失败'),
              (4,'集群正常'),
-             (5,'集群错误'),
-             (6,'集群异常')
+             (5,'集群异常'),
+             (6,'集群错误')
              )
     clusterName = models.CharField(max_length=32)
     haproxyID = models.CharField(max_length=32,unique=True)
@@ -112,8 +112,8 @@ class MesosSlave(models.Model):
              (2,'正在部署'),
              (3,'部署失败'),
              (4,'集群正常'),
-             (5,'集群错误'),
-             (6,'集群异常')
+             (5,'集群异常'),
+             (6,'集群错误')
              )
     clusterName = models.CharField(max_length=32)
     slaveLabel = models.CharField(max_length=32,unique=True)

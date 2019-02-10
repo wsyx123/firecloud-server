@@ -21,8 +21,8 @@ def return_class(status_num):
                   2:'label-info',
                   3:'label-danger',
                   4:'label-success',
-                  5:'label-danger',
-                  6:'label-warning',
+                  5:'label-warning',
+                  6:'label-danger',
                   7:'label-default'
                   }
     return status_map[int(status_num)]
@@ -62,6 +62,12 @@ def slave_detail(slaveObj,slaveNodes):
 @register.inclusion_tag('paas/cluster/mesos/detail/_node_status.html')
 def node_status(nodeObj):
     return {'node':nodeObj}
+
+#计算集群cpu,内存,磁盘利用率
+@register.simple_tag(name='resource_percent')
+def resource_percent(used,total):
+    percent = int(round(float(used)/(total+1)*100,0))
+    return percent
 
 
     

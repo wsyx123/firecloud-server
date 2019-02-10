@@ -136,7 +136,6 @@ class MesosDeployCluster(TemplateView):
 class MesosOverview(TemplateView):
     template_name = 'paas/cluster/mesos/MesosClusterOverview.html'
     def get_context_data(self, **kwargs):
-        check_mesos_cluster_task.delay()
         context = super(MesosOverview,self).get_context_data(**kwargs)
         context['clsObj'] = MesosMaster.objects.get(clusterName=kwargs['clsname'])
         return context
