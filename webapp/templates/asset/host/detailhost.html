@@ -1,14 +1,28 @@
 {% extends "base/base.html" %}
+{% load asset %}
 {% block css %}
 <style>
-.health::before{
-	color: #00AA00;
-}
-.unhealth::before{
-	color: #FF0000;
-}
 .header {
     margin-top:0px;
+}
+
+.hostoverview{
+	border: 1px solid  	#D3D3D3;
+	padding-top: 5px;
+}
+
+.table > tbody > tr > td{
+	padding:2px;
+	border-top: none;
+}
+
+.table > tbody > tr > th{
+	padding:2px;
+	border-top: none;
+}
+
+.pagination{
+	margin: 0px;
 }
 
 </style>
@@ -39,183 +53,32 @@
 			
 			<div class="row">
 				<div class="col-xs-12">
-					<h4 class="header smaller lighter blue">
-						<i class="fa fa-hand-o-right" aria-hidden="true"></i>
-						{{detailhost.private_ip}}详细信息
-					</h4>
+					
 					<div class="tabbable">
 						<ul class="nav nav-tabs" id="myTab4">
 							<li class="active">
-								<a data-toggle="tab" href="#manager">管理信息</a>
+								<a data-toggle="tab" href="#monitor">监控视图</a>
 							</li>
-							
-							<li>
-								<a data-toggle="tab" href="#specification">规格信息</a>
+							<li >
+								<a data-toggle="tab" href="#manager">主机信息</a>
 							</li>
 
 							<li>
 								<a data-toggle="tab" href="#agent">代理信息</a>
 							</li>
 							<li>
-								<a data-toggle="tab" href="#event">事件查看</a>
+								<a data-toggle="tab" href="#event">历史事件</a>
 							</li>
 						</ul>
 
 						<div class="tab-content">
-							<div id="manager" class="tab-pane in active">
-								<div class="profile-user-info profile-user-info-striped">
-									<div class="profile-info-row">
-										<div class="profile-info-name">序列号</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.serial}}</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">主机名</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.hostname}}</span>
-										</div>
-									</div>
-
-									<div class="profile-info-row">
-										<div class="profile-info-name">管理IP</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.private_ip}}</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">公网IP</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.public_ip}}</span>
-										</div>
-									</div>
-
-									<div class="profile-info-row">
-										<div class="profile-info-name">SSH端口</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.port}}</span>
-										</div>
-									</div>
-
-									<div class="profile-info-row">
-										<div class="profile-info-name">管理用户</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.remote_user}}</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">用户密码</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.remote_passwd}}</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">主机状态</div>
-										<div class="profile-info-value">
-											<span class="editable">
-												{% if detailhost.host_status == 1 %}
-													 <span class="label label-success arrowed">在线</span>
-												{% else %}
-													 <span class="label label-danger arrowed-in">离线</span>
-												{% endif %}														
-											</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">运营状态</div>
-										<div class="profile-info-value">
-											<span class="editable">
-												{% if detailhost.operate_status == 1 %}
-													 <span class="label label-success arrowed">运营中</span>
-												{% else %}
-													 <span class="label label-default arrowed">未知</span>
-												{% endif %}														
-											</span>
-										</div>
-									</div>
-										
-									<div class="profile-info-row">
-										<div class="profile-info-name">位置信息</div>
-										<div class="profile-info-value">
-											<i class="fa fa-map-marker light-orange bigger-110"></i>
-											<span>{{detailhost.position}}</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">主机组</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.group}}</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">使用部门</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.department}}</span>
-										</div>
-									</div>
-								</div>
+							<div id="manager" class="tab-pane">
+								{% hostInfoView detailhost %}
 							</div>
-							
-							<div id="specification" class="tab-pane">
-								<div class="profile-user-info profile-user-info-striped">
-									<div class="profile-info-row">
-										<div class="profile-info-name">CPU核数</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.cpu_no}}</span>
-										</div>
-									</div>
-
-									<div class="profile-info-row">
-										<div class="profile-info-name">CPU型号</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.cpu_model}}</span>
-										</div>
-									</div>
-
-									<div class="profile-info-row">
-										<div class="profile-info-name">物理内存</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.memory}} MB</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">磁盘容量</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.disk}} GB</span>
-										</div>
-									</div>
-
-									<div class="profile-info-row">
-										<div class="profile-info-name">操作系统</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.os}}</span>
-										</div>
-									</div>
-
-									<div class="profile-info-row">
-										<div class="profile-info-name">内核版本</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.kernel}}</span>
-										</div>
-									</div>
-									
-									<div class="profile-info-row">
-										<div class="profile-info-name">机器型号</div>
-										<div class="profile-info-value">
-											<span>{{detailhost.machine_model}}</span>
-										</div>
-									</div>								
-								</div>
+							<div id="monitor" class="tab-pane in active">
+								{% hostMonitorView %}
 							</div>
-							
+														
 							<div id="agent" class="tab-pane">
 								{% if detailhost.agent_is_install %}
 								<div class="profile-user-info profile-user-info-striped">
@@ -285,5 +148,181 @@
 		</div><!-- /.page-content -->
 	</div>
 </div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<script src="/static/js/echarts.min.js"></script>
+<script type="text/javascript">  	
+	function setdiskIO (id,title,height,series) {
+	$('#'+id).css({'width': '100%' , 'height': height});
+    this.chart = echarts.init(document.getElementById(id))
+    this.chart.setOption({
+    title: {
+        text: title,
+		x: 'center',
+		textStyle: {
+              fontWeight: 'normal',
+              fontSize: 16,
+        }
+    },
+    tooltip : {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            label: {
+                backgroundColor: '#6a7985'
+            }
+        }
+    },
+   
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : ['09:00','09:30','10:00','10:30','11:00','11:30','12:00']
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+        }
+    ],
+    series : series
+    });
+	return this.chart;
+    };
+$(document).ready(function(){
+	var hei = (document.documentElement.clientHeight*28/100);
+	console.log(hei);
+	var cpu_series =[
+        
+        {
+            name:'usage_iowait',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {}},
+			itemStyle:{
+				normal:{
+					color:'#FFFF00'
+				}
+			},
+            data:[1, 2, 1, 3, 1, 2, 4]
+        },
+        {
+            name:'usage_user',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {
+				color:'yellow',
+				},},
+			itemStyle:{
+				normal:{
+					color:'#00BFFF'
+				}
+			},
+            data:[3, 4, 5, 3, 5, 6, 1],
+        },
+        {
+            name:'usage_system',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {}},
+			itemStyle:{
+				normal:{
+					color:'#DAA520'
+				}
+			},
+            data:[5, 4, 2, 1, 3, 2, 1]
+        },
+		{
+            name:'usage_idle',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {
+				color: '#90EE90'
+			}},
+			itemStyle:{
+				normal:{
+					color:'#90EE90'
+				}
+			},
+            data:[91, 90, 92, 93, 91, 90, 94]
+        }
+    ];
+	var memory_series =[
+        
+        {
+            name:'usage_iowait',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {}},
+			itemStyle:{
+				normal:{
+					color:'#FFFF00'
+				}
+			},
+            data:[1, 2, 1, 3, 1, 2, 4]
+        },
+        {
+            name:'usage_user',
+            type:'line',
+            stack: '总量',
+            areaStyle: {normal: {
+				color:'yellow',
+				},},
+			itemStyle:{
+				normal:{
+					color:'#00BFFF'
+				}
+			},
+            data:[3, 4, 5, 3, 5, 6, 1],
+        },
+        
+		
+    ];
+	
+	
+	var diskI_hei_t = $("#diskId").css('height');
+	var diskU_hei_t = $("#diskUd").css('height');
+	
+	var diskI_hei = hei-(diskI_hei_t.substring(0,diskI_hei_t.length-2)) +113;
+	var diskU_hei = hei-(diskU_hei_t.substring(0,diskU_hei_t.length-2)) +113;
+	
+	console.log(hei);
+	console.log(diskI_hei);
+
+	cpuObj = setdiskIO('cpu','CPU使用率',hei,cpu_series);
+	memoryObj = setdiskIO('memory','内存使用率',hei,memory_series);
+	diskIObj = setdiskIO('diskI','磁盘 IO',diskI_hei,memory_series);
+	diskUObj = setdiskIO('diskU','磁盘使用率',diskU_hei,memory_series);
+	networkObj = setdiskIO('network','Network',hei);
+	netstatObj = setdiskIO('netstat','Netstat',hei);
+	processesObj = setdiskIO('processes','进程数',hei);
+	threadsObj = setdiskIO('threads','线程数',hei);
+	loadObj = setdiskIO('load','5分钟负载',hei);
+	
+	
+	
+});
+$(window).resize(function() {
+	/* var width = $(".widget-main").width();
+	draw_resource('piechart-placeholder',width,'180px','60'); */
+	cpuObj.resize();
+	memoryObj.resize();
+	diskIObj.resize();
+	diskUObj.resize();
+	networkObj.resize();
+	netstatObj.resize();
+	processesObj.resize();
+	threadsObj.resize();
+	loadObj.resize();
+});
+  
+</script>
 {% endblock %}
 

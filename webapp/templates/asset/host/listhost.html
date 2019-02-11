@@ -2,6 +2,9 @@
 {% load menu %}
 {% block css %}
 <style type="text/css">
+.dropdown-menu{
+	min-width:10px;
+}
 </style>
 {% endblock %}
 {% block main %}
@@ -19,8 +22,6 @@
 				</li>
 				<li class="active">主机列表</li>
 			</ul>
-
-			
 		</div> <!-- /.breadcrumb -->
 
 		<div class="page-content">
@@ -48,9 +49,9 @@
 											<th>私网IP</th>
 											<th>端口</th>
 											<th>主机组</th>
+											<th>SSH 状态</th>
+											<th>Agent 状态</th>
 											<th>创建者</th>
-											<th>状态</th>
-											<th>Agent</th>
 											<th class="hidden-xs">
 												<i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i>
 												更新时间
@@ -67,47 +68,58 @@
 											<td><a href="{% url 'HostDetail' pk=host.id %}">{{ host.private_ip }}</a></td>
 											<td>{{ host.port }}</td>
 											<td>{{ host.group }}</td>
-											<td>{{ host.owner }}</td>
 											{% ifequal host.host_status 1 %}
 											<td>
-												<span class="label label-sm label-success">在线</span>
+												<i class="fa fa-circle health" aria-hidden="true"></i>
+												<span>正常</span>
 											</td>
 											{% else %}
 											<td>
+												<i class="fa fa-circle unhealth" aria-hidden="true"></i>
 												<span class="label label-sm label-danger">离线</span>
 											</td>
 											{% endifequal %}
 											
 											{% ifequal host.agent_is_install 1 %}
 											<td>
-												<span>已安装</span> |
-												<span class="badge" style="cursor:pointer;" onclick="uninstall_agent(this);">卸载</span>
+												<i class="fa fa-circle health" aria-hidden="true"></i>
+												<span>正常</span>
 											</td>
 											{% else %}
 											<td>
-												<span>未安装</span> |
-												<span class="badge badge-info" style="cursor:pointer;" onclick="install_agent(this);">安装</span>
+												<i class="fa fa-circle unhealth" aria-hidden="true"></i>
+												<span>未安装</span>
 											</td>
 											{% endifequal %}
-											
+											<td>{{ host.owner }}</td>
 											<td class="hidden-xs">{{ host.update_time|date:"Y-m-d H:i:s" }}</td>
 											<td>
-												<div class="action-buttons">
-													<a class="green" href="#" onclick="HostRefresh(this);">
-														<i class="ace-icon fa fa-refresh bigger-130" title="刷新" data-toggle="modal" data-target="#myrefresh"></i>
-													</a>
+												<div class="btn-group">
+													<button data-toggle="dropdown" class="btn btn-xs btn-info btn-white dropdown-toggle">
+														更多
+														<i class="ace-icon fa fa-angle-down icon-on-right"></i>
+													</button>
 
-													<a class="blue" href="{% url 'HostUpdate' pk=host.id %}">
-														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
-													</a>
+													<ul class="dropdown-menu">
+														<li>
+															<a href="#" onclick="HostRefresh(this);">
+																<span data-toggle="modal" data-target="#myrefresh">刷新</span>
+															</a>
+														</li>
+														<li>
+															<a href="{% url 'HostUpdate' pk=host.id %}">编辑</a>
+														</li>
+														<li>
+															<a href="{% url 'HostLogin' %}" target="_blan">连接</a>
+														</li>
 
-													<a class="red" href="#" onclick="HostDelete(this);">
-														<i class="ace-icon fa fa-trash-o bigger-130" title="删除" data-toggle="modal" data-target="#mydelete"></i>
-													</a>
-													<a class="bigger-130" href="{% url 'HostLogin' %}" target="_blan">
-														<i class="fa fa-terminal fa-lg" aria-hidden="true" title="连接"></i>
-													</a>
-												</div>
+														<li>
+															<a class="red" href="#" onclick="HostDelete(this);">
+																<span data-toggle="modal" data-target="#mydelete">删除</span>
+															</a>
+														</li>
+													</ul>
+												</div><!-- /.btn-group -->
 											</td>
 										</tr>
 										{% endfor %}
@@ -212,8 +224,8 @@
 	};
 	
 	function HostRefresh(obj){
-		host_id = $($(obj).parent().parent()).siblings().eq(0).text();
-		var host_name = $($(obj).parent().parent()).siblings().eq(2).text();
+		host_id = $(obj).parent().parent().parent().parent().siblings().eq(0).text();
+		var host_name = $(obj).parent().parent().parent().parent().siblings().eq(2).text();
 		$("#refresh_name").text(host_name);
 	};
 	function HostRefreshAck(){

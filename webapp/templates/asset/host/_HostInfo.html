@@ -1,0 +1,373 @@
+<table>
+	<tr>
+		<td><div><strong>管理信息</strong></div></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">序列号</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.serial}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">机器型号</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.machine_model}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">代理状态</div>
+				<div class="profile-info-value">
+					<span class="editable">
+						{% if detailhost.host_status == 1 %}
+							 <span class="label label-success arrowed">在线</span>
+						{% else %}
+							 <span class="label label-danger arrowed-in">离线</span>
+						{% endif %}														
+					</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">运营状态</div>
+				<div class="profile-info-value">
+					<span class="editable">
+						{% if detailhost.operate_status == 1 %}
+							 <span class="label label-success arrowed">运营中</span>
+						{% else %}
+							 <span class="label label-default arrowed">未知</span>
+						{% endif %}														
+					</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">使用部门</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.department}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">主机组</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.group}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">创建者</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.owner}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">位置信息</div>
+				<div class="profile-info-value">
+					<i class="fa fa-map-marker light-orange bigger-110"></i>
+					<span>{{detailhost.position}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td><div><strong>系统信息</strong></div></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">主机名</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.hostname}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">管理IP</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.private_ip}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">公网IP</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.public_ip}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">SSH端口</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.port}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">管理用户</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.remote_user}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">用户密码</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.remote_passwd}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">操作系统</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.os}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">内核版本</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.kernel}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">CPU型号</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.cpu_model}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">CPU核数</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.cpu_no}}</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">物理内存</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.memory}} MB</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">磁盘容量</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.disk}} GB</span>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td><div><strong>磁盘信息</strong></div></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td colspan="2">
+			<table class="table table-bordered">
+				<tr>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">名称</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">大小</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">使用</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">可用</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">使用率</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">挂载点</div>
+						</div>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">/dev/sda2</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">16G</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">15G</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">244M</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">99%</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">/</div>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td><div><strong>网卡信息</strong></div></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td colspan="2">
+			<table class="table table-bordered">
+				<tr>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">名称</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">IP</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">子网掩码</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">MAC</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">速度</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">状态</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">eth0</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">192.168.10.3</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">255.255.255.0</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">00:0c:29:64:40:2b</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">1000</div>
+						</div>
+					</td>
+					<td>
+						<div class="profile-info-row">
+							<div class="profile-info-name">
+								<i class="fa fa-circle health" aria-hidden="true"></i>
+								<span>激活</span>
+							</div>
+						</div>
+					</td>
+				</tr>				
+			</table>
+		</td>
+	</tr>
+	
+	
+</table>

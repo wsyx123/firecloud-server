@@ -13,7 +13,7 @@ from django.views.generic import TemplateView,DeleteView,FormView,ListView
 from webapp.models import AssetHost,IdleHost,MesosDeployLog,MesosMaster,MesosNodeStatus,\
 MesosMarathon,MesosHaproxy,RepositoryImage
 from .forms import MesosMasterForm,MesosMarathonForm,MesosHaproxyForm,MesosSlaveForm
-from webapp.tasks import mesos_cluster_deploy_task,check_mesos_cluster_task
+from webapp.tasks import mesos_cluster_deploy_task
 from docker import DockerClient
 from webapp.model.paas import MesosSlave
 

@@ -80,6 +80,20 @@
 							<span><a href="https://github.com/mesosphere/docker-containers/tree/master/mesos" target="view_window">Readme</a></span>
 						</div>
 					</div>
+					<div class="profile-info-row">
+						<div class="profile-info-name">集群状态</div>
+						<div class="profile-info-value">
+							{% ifequal masterObj.master_status 1 %}
+								<span class="label label-success arrowed">集群正常</span>
+							{% endifequal %}
+							{% ifequal masterObj.master_status 2 %}
+								<span class="label label-warning arrowed">集群异常</span>
+							{% endifequal %}
+							{% ifequal masterObj.master_status 3 %}
+								<span class="label label-danger arrowed">集群错误</span>
+							{% endifequal %}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

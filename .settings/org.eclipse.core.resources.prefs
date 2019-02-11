@@ -36,6 +36,7 @@ encoding//webapp/task/forms.py=utf-8
 encoding//webapp/task/task.py=utf-8
 encoding//webapp/task/urls.py=utf-8
 encoding//webapp/tasks.py=utf-8
+encoding//webapp/templatetags/asset.py=utf-8
 encoding//webapp/templatetags/menu.py=utf-8
 encoding//webapp/templatetags/mesos.py=utf-8
 encoding/celery_tasks.py=utf-8
