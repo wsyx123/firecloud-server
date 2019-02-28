@@ -10,7 +10,7 @@ from celery import task
 import traceback
 import requests
 from webapp.models import HostImport,AssetHost,HostEvent,MesosMaster,MesosNodeStatus,\
-MesosMarathon,MesosHaproxy,MesosSlave,MesosDeployLog
+MesosMarathon,MesosHaproxy,MesosSlave,MesosDeployLog,HostDisk,HostEth
 from utils.ansibleAdHoc import myadhoc
 from utils.ansibleplaybook import myplaybook
 from utils.callback import CollectAssetInfoCallback
@@ -146,7 +146,23 @@ def update_import_status(import_id,datalist,line_type,line_no):
 def process_asset_import_task(import_id,full_filename):
     datalist = get_assets_data(full_filename)
     asset_format_check(import_id,datalist)
-        
+
+def save_ansible_mounts(mount_list,host_queryset):
+    HostDisk.objects.filter(host=host_queryset).delete()
+    querylist = []
+    for mount in mount_list:
+        mount['host'] = host_queryset
+        querylist.append(HostDisk(**mount))
+    HostDisk.objects.bulk_create(querylist)
+
+def save_ansible_ethernet(eth_list,host_queryset):
+    HostEth.objects.filter(host=host_queryset).delete()
+    querylist = []
+    for one_eth in eth_list:
+        one_eth['host'] = host_queryset
+        querylist.append(HostEth(**one_eth))
+    HostEth.objects.bulk_create(querylist)
+    
         
 @task(name='collect_host_info_task')
 def collect_host_info_task(asset_id,private_ip,port,user,password,action_num):
@@ -168,6 +184,8 @@ def collect_host_info_task(asset_id,private_ip,port,user,password,action_num):
         queryset.kernel = collect_result['result']['kernel']
         queryset.machine_model = collect_result['result']['machine_model']
         queryset.save()
+        save_ansible_ethernet(collect_result['result']['eth_list'], queryset)
+        save_ansible_mounts(collect_result['result']['mounts'], queryset)
         HostEvent.objects.create(host_id=queryset.id,action=action_num,is_succeeded=True)
     elif collect_result['status'] == 'failed':
         HostEvent.objects.create(host_id=queryset.id,action=action_num,is_succeeded=False,

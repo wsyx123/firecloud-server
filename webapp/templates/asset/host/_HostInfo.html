@@ -1,4 +1,4 @@
-<table>
+<table class="table">
 	<tr>
 		<td><div><strong>管理信息</strong></div></td>
 		<td></td>
@@ -220,7 +220,7 @@
 	<tr>
 		<td></td>
 		<td colspan="2">
-			<table class="table table-bordered">
+			<table class="table table-bordered mounts">
 				<tr>
 					<td>
 						<div class="profile-info-row">
@@ -253,39 +253,40 @@
 						</div>
 					</td>
 				</tr>
-				
+				{% for disk in DiskQuerySet %}
 				<tr>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">/dev/sda2</div>
+							<div class="profile-info-name">{{disk.name}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">16G</div>
+							<div class="profile-info-name">{{disk.size}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">15G</div>
+							<div class="profile-info-name">{{disk.used}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">244M</div>
+							<div class="profile-info-name">{{disk.available}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">99%</div>
+							<div class="profile-info-name">{{disk.percent}}%</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">/</div>
+							<div class="profile-info-name">{{disk.mount}}</div>
 						</div>
 					</td>
 				</tr>
+				{% endfor %}
 			</table>
 		</td>
 	</tr>
@@ -297,7 +298,7 @@
 	<tr>
 		<td></td>
 		<td colspan="2">
-			<table class="table table-bordered">
+			<table class="table table-bordered ethernet">
 				<tr>
 					<td>
 						<div class="profile-info-row">
@@ -330,41 +331,48 @@
 						</div>
 					</td>
 				</tr>
+				{% for ethernet in EthQuerySet %}
 				<tr>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">eth0</div>
+							<div class="profile-info-name">{{ ethernet.name}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">192.168.10.3</div>
+							<div class="profile-info-name">{{ethernet.ip}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">255.255.255.0</div>
+							<div class="profile-info-name">{{ethernet.netmask}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">00:0c:29:64:40:2b</div>
+							<div class="profile-info-name">{{ethernet.mac}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
-							<div class="profile-info-name">1000</div>
+							<div class="profile-info-name">{{ethernet.speed}}</div>
 						</div>
 					</td>
 					<td>
 						<div class="profile-info-row">
 							<div class="profile-info-name">
+								{% ifequal ethernet.status 1 %}
 								<i class="fa fa-circle health" aria-hidden="true"></i>
 								<span>激活</span>
+								{% else %}
+								<i class="fa fa-circle unhealth" aria-hidden="true"></i>
+								<span>未激活</span>
+								{% endifequal %}
 							</div>
 						</div>
 					</td>
-				</tr>				
+				</tr>
+				{% endfor %}
 			</table>
 		</td>
 	</tr>

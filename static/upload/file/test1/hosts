@@ -1,3 +1,0 @@
-192.168.10.3 ansible_ssh_user=root ansible_ssh_pass=password ansible_ssh_port=22
-192.168.10.4 ansible_ssh_user=root ansible_ssh_pass=password ansible_ssh_port=22
-192.168.10.5 ansible_ssh_user=root ansible_ssh_pass=password ansible_ssh_port=22

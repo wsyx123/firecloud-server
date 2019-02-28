@@ -10,6 +10,52 @@ class CollectAssetInfoCallback(CallbackBase):
         self._result = {'status':None,'result':None}
         super(CollectAssetInfoCallback,self).__init__(display=None)
     
+    def get_size(self,size):
+        if len(str(size)) > 9:
+            return str(int(float(size)/1024/1000/1000))+'G'
+        else:
+            return str(int(float(size)/1024/1000))+'M'
+    
+    def get_ansible_mounts(self,ansible_facts):
+        ansible_mounts = ansible_facts['ansible_mounts']
+        mount_list = []
+        for mount in ansible_mounts:
+            mount_dict = {}
+            size_total = mount['size_total']
+            size_available = mount['size_available']
+            size_used = size_total - size_available
+            percent = round(float(size_used)/size_total,2)*100
+            
+            mount_dict['name'] = mount['device']
+            mount_dict['size'] = self.get_size(size_total)
+            mount_dict['used'] = self.get_size(size_used)
+            mount_dict['available'] = self.get_size(size_available)
+            mount_dict['percent'] = percent
+            mount_dict['mount'] = mount['mount']
+            mount_list.append(mount_dict)
+        return mount_list
+    
+    def get_ansible_ethernet(self,ansible_facts):
+        ansible_interfaces = ansible_facts['ansible_interfaces']
+        eth_list = []
+        for eth in ansible_interfaces:
+            eth_dict = {}
+            eth_dict['name'] = eth
+            eth_dict['ip'] = ansible_facts['ansible_'+eth]['ipv4']['address']
+            eth_dict['netmask'] = ansible_facts['ansible_'+eth]['ipv4']['netmask']
+            if ansible_facts['ansible_'+eth].has_key('macaddress'):
+                eth_dict['mac'] = ansible_facts['ansible_'+eth]['macaddress']
+            else:
+                eth_dict['mac'] = None
+            if ansible_facts['ansible_'+eth].has_key('speed'):
+                eth_dict['speed'] = ansible_facts['ansible_'+eth]['speed']
+            else:
+                eth_dict['speed'] = None
+            eth_dict['status'] = ansible_facts['ansible_'+eth]['active']
+            eth_list.append(eth_dict)
+        return eth_list
+        
+    
     def get_public_ip(self,private_ip,interfaces,host_info):
         for eth in interfaces:
             if eth != 'lo' and host_info['ansible_'+eth] != private_ip:
@@ -71,6 +117,8 @@ class CollectAssetInfoCallback(CallbackBase):
         
         interfaces = host_info['ansible_interfaces']
         results['public_ip'] = self.get_public_ip(private_ip, interfaces, host_info)
+        results['eth_list'] = self.get_ansible_ethernet(host_info)
+        results['mounts'] = self.get_ansible_mounts(host_info)
         self._result['result'] = results
         
     def v2_runner_on_failed(self, result, ignore_errors=False):

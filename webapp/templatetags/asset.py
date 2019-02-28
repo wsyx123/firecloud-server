@@ -13,5 +13,5 @@ def hostMonitorView():
     return
 
 @register.inclusion_tag('asset/host/_HostInfo.html')
-def hostInfoView(detailhost):
-    return {'detailhost':detailhost}
+def hostInfoView(detailhost,DiskQuerySet,EthQuerySet):
+    return {'detailhost':detailhost,'DiskQuerySet':DiskQuerySet,'EthQuerySet':EthQuerySet}

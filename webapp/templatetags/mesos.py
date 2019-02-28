@@ -66,7 +66,7 @@ def node_status(nodeObj):
 #计算集群cpu,内存,磁盘利用率
 @register.simple_tag(name='resource_percent')
 def resource_percent(used,total):
-    percent = int(round(float(used)/(total+1)*100,0))
+    percent = int(round(float(used)/total*100,0))
     return percent
 
 

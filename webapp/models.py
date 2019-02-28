@@ -7,7 +7,8 @@ from model.sys_mgt import SysRole,SysUser,Level1Menu,\
 Level2Menu,Menu_Role_rel,HomePage,AppOpt_Role_rel
 
 # import asset model
-from model.asset import AssetHost,HostEvent,HostImport,HostAccount,HostGroup,Enterprise
+from model.asset import AssetHost,HostEvent,HostImport,HostAccount,HostGroup,Enterprise,\
+HostDisk,HostEth
 
 # import tasks model
 from model.task import ScriptModel,TaskLog,TaskHost,AnsibleModel,AnsibleLog,AnsibleHost,\

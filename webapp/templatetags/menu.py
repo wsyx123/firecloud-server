@@ -45,14 +45,8 @@ def level1menu(roleid):
     if roleid == 1:
         menu_obj_list = get_all_menu()
     else:
-        lev1_lev2_dict = {}# {1:[1,2,3],2[1,2]}
-        '''
-                            最终返回给level1menu.html的是 ： [
-                                  [Level1MenuObj,[Level2MenuObj1,Level2MenuObj2,...]],
-                                ]
-        '''
-        menu_obj_list = []
-        #通过role id 获取一级，二级菜单
+        #先找出一级菜单与二级菜单 ID 的对应关系  {1:[1,2,3],2[1,2]}
+        lev1_lev2_dict = {}
         m_r_objs = Menu_Role_rel.objects.filter(role_id = roleid)
         for queryobj in m_r_objs:
             Level1MenuId = queryobj.level_1_menu_id
@@ -62,20 +56,26 @@ def level1menu(roleid):
             else:
                 lev1_lev2_dict[Level1MenuId] = []
                 lev1_lev2_dict[Level1MenuId].append(Level2MenuId)
+        
+        menu_obj_list = []
+        '''
+                            最终返回给level1menu.html的是 ： [
+                                  [Level1MenuObj,[Level2MenuObj1,Level2MenuObj2,...]],
+                                ]
+        '''
+        
+        #返回一级菜单与二级菜单对应的object
         for Level1MenuId in lev1_lev2_dict.keys():
-            
             temp1_list = []
             temp2_list = []
             Level1MenuObj = Level1Menu.objects.get(id=Level1MenuId)
             temp1_list.append(Level1MenuObj)
-            if Level1MenuId == 1:
-                temp2_list = []
-            else:
-                for Level2MenuId in lev1_lev2_dict[Level1MenuId]:
-                    Level2MenuObj = Level2Menu.objects.get(id=Level2MenuId)
-                    temp2_list.append(Level2MenuObj)
+            for Level2MenuId in lev1_lev2_dict[Level1MenuId]:
+                Level2MenuObj = Level2Menu.objects.get(id=Level2MenuId)
+                temp2_list.append(Level2MenuObj)
             temp1_list.append(temp2_list)
             menu_obj_list.append(temp1_list)
+    
     return {'menu_obj_list':menu_obj_list}
 
 @register.inclusion_tag('base/level2menu.html')

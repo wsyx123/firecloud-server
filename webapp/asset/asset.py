@@ -6,7 +6,7 @@ Created on 2018年7月28日
 @author: yangxu
 '''
 from dwebsocket import accept_websocket
-from webapp.models import AssetHost,HostGroup,HostImport,HostEvent,HostAccount,SysUser
+from webapp.models import AssetHost,HostGroup,HostImport,HostEvent,HostAccount,SysUser,HostDisk,HostEth
 from webapp.asset.forms import AssetHostForm,HostGroupForm
 from ssh_client.client import connect
 from django.shortcuts import render_to_response,HttpResponse
@@ -83,8 +83,9 @@ class HostDetail(DetailView):
     
     def get_context_data(self, **kwargs):
         context = super(HostDetail, self).get_context_data(**kwargs)
-        EventQuerySet = HostEvent.objects.filter(host_id=context['object'].id)
-        context['EventQuerySet'] = EventQuerySet
+        context['EventQuerySet'] = HostEvent.objects.filter(host_id=context['object'].id)
+        context['DiskQuerySet'] = HostDisk.objects.filter(host_id=context['object'].id)
+        context['EthQuerySet'] = HostEth.objects.filter(host_id=context['object'].id)
         return context
 
 def handle_uploaded_file(import_id,f):

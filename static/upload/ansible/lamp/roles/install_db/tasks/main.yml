@@ -1,3 +1,0 @@
-- name: install mysql
-  hosts: all
-  shell: ls

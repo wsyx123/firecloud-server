@@ -48,6 +48,24 @@ class AssetHost(models.Model):
     def __unicode__(self):
         return '%s' %(self.private_ip)
     
+class HostDisk(models.Model):
+    host = models.ForeignKey(AssetHost)
+    name = models.CharField(max_length=32,verbose_name='分区名称')
+    size = models.CharField(max_length=16)
+    used = models.CharField(max_length=16)
+    available = models.CharField(max_length=16)
+    percent = models.IntegerField()
+    mount = models.CharField(max_length=32)
+
+class HostEth(models.Model):
+    host = models.ForeignKey(AssetHost)
+    name = models.CharField(max_length=32,verbose_name='网卡名称')
+    ip = models.GenericIPAddressField()
+    netmask = models.GenericIPAddressField()
+    mac = models.CharField(max_length=17,null=True,blank=True)
+    speed = models.IntegerField(null=True,blank=True)
+    status = models.BooleanField(default=False)
+      
 class HostEvent(models.Model):
     actions = (
                    (1,u'代理安装'),
