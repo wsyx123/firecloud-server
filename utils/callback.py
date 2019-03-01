@@ -100,6 +100,7 @@ class CollectAssetInfoCallback(CallbackBase):
         results['machine_model'] = product_name
         #服务器供应商
         system_vendor = host_info['ansible_system_vendor']
+        results['vendor'] = system_vendor
         #内核
         kernel = host_info['ansible_kernel']
         results['kernel'] = kernel

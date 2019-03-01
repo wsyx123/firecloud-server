@@ -6,13 +6,14 @@ Created on 2018年10月24日
 @author: yangxu
 '''
 from django.conf.urls import url
-from asset import HostList,HostAdd,HostUpdate,HostDelete,host_import,HostDetail,\
+from asset import AssetView,HostList,HostAdd,HostUpdate,HostDelete,host_import,HostDetail,\
                   get_import_result,host_refresh
 from asset import AccountList
 from asset import GroupList,GroupAdd,GroupUpdate,GroupDelete
 from asset import Enterprise,AddDepartment,Employee,AddEmployee,Project,AddProject,asset_connect
 
 urlpatterns = [
+    url(r'^asset/list/$', AssetView.as_view(),name='AssetView'),
     url(r'^host/list/$', HostList.as_view(),name='HostList'),
     url(r'^host/add/$', HostAdd.as_view(),name='HostAdd'),
     url(r'^host/ssh/$',asset_connect,name='HostLogin'),

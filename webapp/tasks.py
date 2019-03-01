@@ -183,6 +183,7 @@ def collect_host_info_task(asset_id,private_ip,port,user,password,action_num):
         queryset.os = collect_result['result']['os']
         queryset.kernel = collect_result['result']['kernel']
         queryset.machine_model = collect_result['result']['machine_model']
+        queryset.verdor = collect_result['result']['verdor']
         queryset.save()
         save_ansible_ethernet(collect_result['result']['eth_list'], queryset)
         save_ansible_mounts(collect_result['result']['mounts'], queryset)

@@ -19,6 +19,11 @@ from webapp.tasks import process_asset_import_task,collect_host_info_task
 import os,sys
 from django.http.response import JsonResponse
 root_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+class AssetView(ListView):
+    model = AssetHost #数据模型
+    context_object_name = 'host_list' #QuerySet 变量名
+    template_name = 'asset/view/asset_index.html'
     
 class HostList(ListView):
     model = AssetHost #数据模型

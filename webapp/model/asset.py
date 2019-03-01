@@ -17,6 +17,10 @@ class AssetHost(models.Model):
                       (2,u'维护中'),
                       (3,u'已下线')
                       )
+    asset_type = (
+                  (1,'物理机'),
+                  (2,'虚拟机')
+                  )
     private_ip = models.GenericIPAddressField(unique=True,verbose_name='私网IP')#1L
     port = models.IntegerField(verbose_name='端口')
     host_status = models.IntegerField(choices=host_status,verbose_name='状态')
@@ -24,6 +28,7 @@ class AssetHost(models.Model):
     remote_passwd = models.CharField(max_length=64,verbose_name='用户密码')
     agent_is_install = models.BooleanField(default=False,verbose_name='agent已安装')
     
+    type = models.IntegerField(default=1,verbose_name='资产类型')
     serial = models.CharField(max_length=64,null=True, blank=True,verbose_name='序列号')
     hostname = models.CharField(max_length=32,null=True,blank=True,verbose_name='主机名')
     public_ip = models.GenericIPAddressField(null=True, blank=True,verbose_name='公网IP')
@@ -35,10 +40,11 @@ class AssetHost(models.Model):
     kernel =models.CharField(max_length=64,null=True, blank=True,verbose_name='内核版本')
     machine_model = models.CharField(max_length=32,null=True, blank=True,verbose_name='机器型号')
     
+    verdor = models.CharField(max_length=64,null=True, blank=True,verbose_name='供应商')
     position = models.CharField(max_length=64,null=True, blank=True,verbose_name='位置信息')
     group = models.ForeignKey('HostGroup',on_delete=models.PROTECT,verbose_name='主机组')
     operate_status = models.IntegerField(choices=operate_status,null=True, blank=True,verbose_name='运营状态')
-    department = models.CharField(max_length=64,null=True, blank=True,verbose_name='使用部门')#20L
+    department = models.CharField(max_length=64,null=True, blank=True,verbose_name='使用部门')#21L
     owner = models.ForeignKey('SysUser')
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
     

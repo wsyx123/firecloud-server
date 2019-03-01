@@ -1,0 +1,353 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.bullhorn{
+	background-color:#d6e9c6;
+	padding:5px;
+	margin-bottom:20px;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="#">资产概览</a>
+				</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+			<!--<div class="row">
+				<div class="col-xs-12">
+					<div class="bullhorn center">
+						
+						<i class="red fa fa-bullhorn" aria-hidden="true"></i>
+						公告(站内信) :
+						<marquee width="50%">
+						<strong class="">
+						平台将于13日23:45分进行升级 
+						</strong>
+						</marquee>
+					</div>
+				</div>
+			</div> -->
+			<div class="row">
+				<div class="col-lg-2">
+					<div class="panel panel-primary">
+					    <div class="panel-heading">
+							<div class="row">
+								<div class="col-xs-6">
+									<i class="fa fa-server fa-2x" aria-hidden="true"></i>
+								</div>
+								<div class="col-xs-6 text-right">
+									<span style="font-size:20px;">2</span>
+								</div>
+								
+							</div>
+					    </div>
+					  
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>物理机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+								<span class="green">在线</span>
+							</div>
+						  </div>
+						</div>
+					  
+					</div>
+				</div>
+				  
+				  
+				<div class="col-lg-2">
+					<div class="panel panel-success">
+					    <div class="panel-heading">
+							<div class="row">
+								<div class="col-xs-6">
+									<i class="fa fa-server fa-2x" aria-hidden="true"></i>
+								</div>
+								<div class="col-xs-6 text-right">
+									<span style="font-size:20px;">2</span>
+								</div>
+								
+							</div>
+					    </div>
+					  
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>物理机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+								<span class="green">在线</span>
+							</div>
+						  </div>
+						</div>
+					  
+					</div>
+				</div>
+				  
+				<div class="col-lg-2">
+					<div class="panel panel-danger">
+					    <div class="panel-heading">
+							<div class="row">
+								<div class="col-xs-6">
+									<i class="fa fa-server fa-2x" aria-hidden="true"></i>
+								</div>
+								<div class="col-xs-6 text-right">
+									<span style="font-size:20px;">2</span>
+								</div>
+								
+							</div>
+					    </div>
+					  
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>物理机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+								<span class="green">离线</span>
+							</div>
+						  </div>
+						</div>
+					  
+					</div>
+				</div>
+				  
+				  
+				<div class="col-lg-2">
+					<div class="panel panel-primary">
+					    <div class="panel-heading">
+							<div class="row">
+								<div class="col-xs-6">
+									<i class="fa fa-window-restore fa-2x" aria-hidden="true"></i>
+								</div>
+								<div class="col-xs-6 text-right">
+									<span style="font-size:20px;">2</span>
+								</div>
+								
+							</div>
+					    </div>
+					  
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>虚拟机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+								<span class="green">总量</span>
+							</div>
+						  </div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-2">
+					<div class="panel panel-success">
+					    <div class="panel-heading">
+							<div class="row">
+								<div class="col-xs-6">
+									<i class="fa fa-window-restore fa-2x" aria-hidden="true"></i>
+								</div>
+								<div class="col-xs-6 text-right">
+									<span style="font-size:20px;">2</span>
+								</div>
+								
+							</div>
+					    </div>
+					  
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>虚拟机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+								<span class="green">在线</span>
+							</div>
+						  </div>
+						</div>
+					  
+					</div>
+				</div>
+				
+				<div class="col-lg-2">
+					<div class="panel panel-danger">
+					    <div class="panel-heading">
+							<div class="row">
+								<div class="col-xs-6">
+									<i class="fa fa-window-restore fa-2x" aria-hidden="true"></i>
+								</div>
+								<div class="col-xs-6 text-right">
+									<span style="font-size:20px;">2</span>
+								</div>
+								
+							</div>
+					    </div>
+					  
+						<div class="panel-footer announcement-bottom">
+						  <div class="row">
+							<div class="col-xs-6">
+								<strong>虚拟机</strong>
+							</div>
+							<div class="col-xs-6 text-right">
+								<span class="green">离线</span>
+							</div>
+						  </div>
+						</div>
+					  
+					</div>
+				</div>			
+				
+				<div class="col-xs-6">
+					<div class="panel">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>CPU TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>CPU使用率</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70%</td>
+										</tr>
+									</table>												
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+			
+				<div class="col-xs-6">
+					<div class="panel">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>内存 TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>内存使用率</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70%</td>
+										</tr>
+									</table>											
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+		
+				<div class="col-xs-6">
+					<div class="panel">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>存储 TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>存储使用率</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70%</td>
+										</tr>
+									</table>														
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+				
+				<div class="col-xs-6">
+					<div class="panel">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>磁盘IO TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>磁盘IO读写/秒</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70</td>
+										</tr>
+									</table>													
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+				
+				<div class="col-xs-12">
+					<div id="task-tab" class="tab-pane active">
+						<h4 class="smaller lighter green">
+							<i class="ace-icon fa fa-list"></i>
+							最近资产操作
+						</h4>
+
+						<ul id="tasks" class="item-list">
+							<li class="item-blue clearfix">
+								<label class="inline">
+									<input type="checkbox" class="ace" />
+									<span class="lbl"> Upgrading scripts used in template</span>
+								</label>
+							</li>
+
+							<li class="item-grey clearfix">
+								<label class="inline">
+									<input type="checkbox" class="ace" />
+									<span class="lbl"> Adding new skins</span>
+								</label>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+					
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+	
+</script>
+{% endblock %}

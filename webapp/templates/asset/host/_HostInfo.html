@@ -27,6 +27,29 @@
 		<td></td>
 		<td>
 			<div class="profile-info-row">
+				<div class="profile-info-name">供应商</div>
+				<div class="profile-info-value">
+					<span>{{detailhost.verdor}}</span>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="profile-info-row">
+				<div class="profile-info-name">资产类型</div>
+				<div class="profile-info-value">
+					{% ifequal detailhost.type 1 %}
+					<span>服务器</span>
+					{% else %}
+					<span>虚拟机</span>
+					{% endifequal %}
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div class="profile-info-row">
 				<div class="profile-info-name">代理状态</div>
 				<div class="profile-info-value">
 					<span class="editable">
@@ -93,6 +116,7 @@
 			</div>
 		</td>
 	</tr>
+	
 	<tr>
 		<td><div><strong>系统信息</strong></div></td>
 		<td></td>
