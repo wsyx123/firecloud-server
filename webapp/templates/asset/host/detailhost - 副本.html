@@ -62,7 +62,7 @@
 					资产管理
 				</li>
 				<li>
-					<a href="{% url 'hostmonitor' %}">主机列表</a>
+					<a href="{% url 'HostList' %}">主机列表</a>
 				</li>
 				<li>{{detailhost.private_ip}}</li>
 				
@@ -80,9 +80,15 @@
 							<li class="active">
 								<a data-toggle="tab" href="#monitor">监控视图</a>
 							</li>
-							
+							<li >
+								<a data-toggle="tab" href="#manager">主机信息</a>
+							</li>
+
 							<li>
 								<a data-toggle="tab" href="#agent">代理信息</a>
+							</li>
+							<li>
+								<a data-toggle="tab" href="#event">历史事件</a>
 							</li>
 						</ul>
 
@@ -91,7 +97,11 @@
 							<div id="monitor" class="tab-pane in active">
 								{% hostMonitorView %}
 							</div>
-																					
+							
+							<div id="manager" class="tab-pane">
+								{% hostInfoView detailhost DiskQuerySet EthQuerySet %}
+							</div>
+														
 							<div id="agent" class="tab-pane">
 								{% if detailhost.agent_is_install %}
 								<div class="profile-user-info profile-user-info-striped">
@@ -167,6 +177,37 @@
 								{% endif %}
 							</div>
 							
+							<div id="event" class="tab-pane">
+								<table class="table">
+									<thead>
+										<tr>
+											<th>结果</th>
+											<th>状态</th>
+											<th>类型</th>
+											<th>时间</th>
+											<th>详细信息</th>
+										</tr>
+									</thead>
+									<tbody>
+										
+										{% for event in EventQuerySet %}
+										<tr>
+											{% if event.is_succeeded %}
+											<td>成功</td>
+											<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+											{% else %}
+											<td>失败</td>
+											<td><span class="glyphicon glyphicon-remove-sign unhealth"></span></td>
+											{% endif %}
+											<td>{{event.get_action_display}}</td>
+											<td>{{event.time|date:"Y-m-d H:i:s"}}</td>
+											<td>{{event.content|default:'-------'}}</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+
 						</div>
 					</div>
 				  

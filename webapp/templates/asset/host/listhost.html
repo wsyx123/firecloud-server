@@ -69,7 +69,6 @@
 											<th>端口</th>
 											<th>主机组</th>
 											<th>SSH 状态</th>
-											<th>Agent 状态</th>
 											<th>资产类型</th>
 											<th>创建者</th>
 											<th class="hidden-xs">
@@ -90,28 +89,14 @@
 											<td>{{ host.group }}</td>
 											{% ifequal host.host_status 1 %}
 											<td>
-												<i class="fa fa-circle health" aria-hidden="true"></i>
 												<span class="label label-sm label-success">正常</span>
 											</td>
 											{% else %}
 											<td>
-												<i class="fa fa-plug unhealth" aria-hidden="true"></i>
 												<span class="label label-sm label-danger">离线</span>
 											</td>
 											{% endifequal %}
-											
-											{% ifequal host.agent_is_install 1 %}
-											<td>
-												<i class="fa fa-circle health" aria-hidden="true"></i>
-												<span class="label label-sm label-success">已安装</span>
-											</td>
-											{% else %}
-											<td>
-												<i class="fa fa-circle unhealth" aria-hidden="true"></i>
-												<span class="label label-sm label-danger">未安装</span>
-											</td>
-											{% endifequal %}
-											
+																						
 											{% ifequal host.type 1 %}
 											<td>物理机</td>
 											{% else %}
@@ -308,7 +293,7 @@
 			bAutoWidth: false,
 			"aoColumns": [
 			  { "bSortable": false },
-			  null, null,null, null, null,null,null,null,null,
+			  null, null,null, null, null,null,null,null,
 			  { "bSortable": false }
 			],
 			"aaSorting": [],

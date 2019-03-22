@@ -1,5 +1,3 @@
 - name: test 
   hosts: all
   tasks:
-    - name: LJ.bat
-      copy: src=/root/firecloud/static/upload/file/test/files/LJ.bat dest=/root/tmp

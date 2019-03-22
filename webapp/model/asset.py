@@ -26,9 +26,8 @@ class AssetHost(models.Model):
     host_status = models.IntegerField(choices=host_status,verbose_name='状态')
     remote_user = models.CharField(max_length=32,verbose_name='远程帐号')
     remote_passwd = models.CharField(max_length=64,verbose_name='用户密码')
-    agent_is_install = models.BooleanField(default=False,verbose_name='agent已安装')
     
-    type = models.IntegerField(default=1,verbose_name='资产类型')
+    type = models.IntegerField(choices=asset_type,null=True, blank=True,default=1,verbose_name='资产类型')
     serial = models.CharField(max_length=64,null=True, blank=True,verbose_name='序列号')
     hostname = models.CharField(max_length=32,null=True,blank=True,verbose_name='主机名')
     public_ip = models.GenericIPAddressField(null=True, blank=True,verbose_name='公网IP')

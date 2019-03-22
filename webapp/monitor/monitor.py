@@ -29,19 +29,12 @@ class HostMonitor(TemplateView):
     template_name = 'monitor/host/HostMonitor.html'
     def get_context_data(self, **kwargs):
         context = super(HostMonitor, self).get_context_data(**kwargs)
-        context['name'] = u'杨旭'
-        context['hostinfo'] = [
-        {'serial':'E5248D38-72C3','hostname':'192.168.130.103','cpu':'0.4/2 Cores','memory':'0.4/2 GiB','disk':'0.4/2 GiB','status':'','maintainer':'杨旭','email':'18508503875@139.com','tel':'18508503875'},
-        {'serial':'E5248D38-72C4','hostname':'192.168.130.104','cpu':'0.4/2 Cores','memory':'0.4/2 GiB','disk':'0.4/2 GiB','status':'','maintainer':'杨旭','email':'18508503875@139.com','tel':'18508503875'},
-                               ]
         return context
 
 class HostMonitorDetail(TemplateView):
     template_name = 'monitor/host/HostMonitorDetail.html'
     def get_context_data(self, **kwargs):
         context = super(HostMonitorDetail, self).get_context_data(**kwargs)
-        context['name'] = u'杨旭'
-        context['hostname'] = kwargs['hostname']
         return context
     
 class EventList(TemplateView):

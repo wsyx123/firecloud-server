@@ -17,7 +17,7 @@ class AssetHostForm(forms.ModelForm):
                    'host_status': forms.Select(attrs={'class':'form-control'}),
                    'remote_user': forms.TextInput(attrs={'class': 'width-100'}),
                    'remote_passwd': forms.TextInput(attrs={'class': 'width-100'}),
-                   'agent_is_install': forms.CheckboxInput(attrs={'class':'ace ace-checkbox-2'}),
+                   'type': forms.Select(attrs={'class':'form-control'}),
                    'serial': forms.TextInput(attrs={'class':'width-100'}),
                    'hostname': forms.TextInput(attrs={'class': 'width-100'}),
                    'public_ip': forms.TextInput(attrs={'class': 'width-100'}),
