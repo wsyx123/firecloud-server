@@ -1,0 +1,210 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.app-overview{
+  margin: 10px 0px;
+  border: 1px solid #ddd;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.app-overview h1{
+  margin: 10px;
+}
+
+.available{
+	color: #5cb85c;
+}
+.danger1{
+	color: #FFAA33;
+}
+
+.alert1{
+	color: #FF0000;
+}
+
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>监控告警</li>
+				<li class="active">接收组</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="clearfix">
+								<a href="{% url 'receivegroupadd' %}"><button class="btn btn-xs btn-info">添加组</button></a>
+								<a href="#"><button class="btn btn-xs btn-danger">删除组</button></a>
+								<div class="space-6"></div>
+							</div>
+							<div>
+								<table id="dynamic-table" class="table table-striped table-bordered table-hover">
+									<thead>
+										<tr>
+											<th class="center">
+												<label class="pos-rel">
+													<input type="checkbox" class="ace" />
+													<span class="lbl"></span>
+												</label>
+											</th>
+											<th class="hidden-xs">组名称</th>
+											<th>联系方式</th>
+											<th class="hidden-xs">成员</th>
+											<th></th>
+										</tr>
+									</thead>
+
+									<tbody>
+										<tr>
+											<td class="center">
+												<label class="pos-rel">
+													<input type="checkbox" class="ace" />
+													<span class="lbl"></span>
+												</label>
+											</td>
+											<td class="hidden-xs">test</td>
+											<td class="hidden-xs">邮件</td>
+											<td class="hidden-xs">3个</td>
+											<td>
+												<div class="action-buttons">
+													<a class="blue" href="#">
+														<i class="fa fa-files-o bigger-130" aria-hidden="true" title="复制"></i>
+													</a>
+													<a class="green" href="#">
+														<i class="ace-icon fa fa-pencil bigger-130" title="编辑"></i>
+													</a>
+												</div>
+											</td>
+										</tr>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					
+					<!-- PAGE CONTENT ENDS -->
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+	</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<!-- page specific plugin scripts -->
+
+<script src="/static/assets/js/jquery.dataTables.min.js"></script>
+<script src="/static/assets/js/jquery.dataTables.bootstrap.min.js"></script>
+<script src="/static/assets/js/dataTables.buttons.min.js"></script>
+<script src="/static/assets/js/buttons.flash.min.js"></script>
+<script src="/static/assets/js/buttons.html5.min.js"></script>
+<script src="/static/assets/js/buttons.print.min.js"></script>
+<script src="/static/assets/js/buttons.colVis.min.js"></script>
+<script src="/static/assets/js/dataTables.select.min.js"></script>
+
+
+
+<script type="text/javascript">
+	
+	jQuery(function($) {
+		//initiate dataTables plugin
+		var myTable = 
+		$('#dynamic-table')
+		//.wrap("<div class='dataTables_borderWrap' />")   //if you are applying horizontal scrolling (sScrollX)
+		.DataTable( {
+			bAutoWidth: false,
+			"aoColumns": [
+			  { "bSortable": false },
+			  null, null,null,
+			  { "bSortable": false }
+			],
+			"aaSorting": [],
+			"oLanguage": {
+			  "sLengthMenu": "显示 _MENU_ 条",
+			  "sSearch": "查找",
+			  "sInfo": "共 _TOTAL_ , 显示 (_START_ - _END_)",
+			  "oPaginate": {
+                       "sFirst":    "第一页",  
+                       "sPrevious": " 上一页 ",  
+                       "sNext":     " 下一页 ",  
+                       "sLast":     " 最后一页 "  
+                }  
+			},
+			
+			//"bProcessing": true,
+			//"bServerSide": true,
+			//"sAjaxSource": "http://127.0.0.1/table.php"	,
+	
+			//,
+			//"sScrollY": "200px",
+			//"bPaginate": false,
+	
+			//"sScrollX": "100%",
+			//"sScrollXInner": "120%",
+			//"bScrollCollapse": true,
+			//Note: if you are applying horizontal scrolling (sScrollX) on a ".table-bordered"
+			//you may want to wrap the table inside a "div.dataTables_borderWrap" element
+	
+			//"iDisplayLength": 50
+	
+	
+			/*select: {
+				style: 'multi'
+			}*/
+		} );
+	
+		
+		
+		$.fn.dataTable.Buttons.defaults.dom.container.className = 'dt-buttons btn-overlap btn-group btn-overlap';
+		
+		new $.fn.dataTable.Buttons( myTable, {
+			buttons: [
+			  {
+				"extend": "colvis",
+				"text": "<i class='fa fa-search bigger-110 blue'></i> <span class='hidden'>Show/hide columns</span>",
+				"className": "btn btn-white btn-primary btn-bold",
+				columns: ':not(:first):not(:last)'
+			  },
+			  {
+				"extend": "copy",
+				"text": "<i class='fa fa-copy bigger-110 pink'></i> <span class='hidden'>Copy to clipboard</span>",
+				"className": "btn btn-white btn-primary btn-bold"
+			  },
+			  {
+				"extend": "csv",
+				"text": "<i class='fa fa-file-excel-o bigger-110 green'></i> <span class='hidden'>Export to CSV</span>",
+				"className": "btn btn-white btn-primary btn-bold"
+			  },
+			  
+			  
+			  {
+				"extend": "print",
+				"text": "<i class='fa fa-print bigger-110 grey'></i> <span class='hidden'>Print</span>",
+				"className": "btn btn-white btn-primary btn-bold",
+				autoPrint: false,
+				message: 'This print was produced using the Print button for DataTables'
+			  }		  
+			]
+		} );
+	
+	});
+</script>
+{% endblock %}

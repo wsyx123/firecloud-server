@@ -1,0 +1,438 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style type="text/css">
+#mount,#download{
+	display: none;
+}
+.table{
+	margin-bottom: 0px;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					应用管理
+				</li>
+				<li>
+					<a href="{% url 'AppDockerList' %}">应用列表</a>
+				</li>
+				<li>创建应用</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="widget-box">
+						
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="fuelux-wizard-container">
+									<div>
+										<ul class="steps">
+											<li data-step="1" class="active">
+												<span class="step">1</span>
+												<span class="title">应用基本信息</span>
+											</li>
+
+											<li data-step="2">
+												<span class="step">2</span>
+												<span class="title">发布配置信息</span>
+											</li>
+
+											<li data-step="3">
+												<span class="step">3</span>
+												<span class="title">容器规格信息</span>
+											</li>
+
+											<li data-step="4">
+												<span class="step">4</span>
+												<span class="title">维护信息</span>
+											</li>
+
+											
+										</ul>
+									</div>
+
+									<hr />
+
+									<div class="step-content pos-rel">
+										<form class="form-horizontal" method="POST" id="assetForm">
+											<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
+											<div class="step-pane active" data-step="1">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">应用ID</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+						
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">应用描述</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<!--
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">URL上下文</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control" placeholder="需要唯一，建议使用应用ID">
+														</span>
+													</div>
+													<div class="col-sm-3">
+														如: http://nginx/web/, web 为访问前缀.
+													</div>
+												</div> -->
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">发包方式</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control" onchange="selectPubModel(this.options[this.options.selectedIndex].value);">
+																<option value="contain">镜像包含</option>
+																<option value="mount">卷挂载</option>
+															</select>
+														</span>
+													</div>
+												</div>
+												<div id="mount">
+													<div class="form-group">
+														<label class="col-xs-12 col-sm-3 control-label no-padding-right">程序包来源</label>
+														<div class="col-xs-12 col-sm-6">
+															<span class="block input-icon input-icon-right">
+																<select class="form-control" onchange="selectPackSource(this.options[this.options.selectedIndex].value);">
+																	<option value="local">本地上传</option>
+																	<option value="download">服务器下载</option>
+																	<option value="git">持续集成</option>
+																</select>
+															</span>
+														</div>
+													</div>
+													<div id="download">
+														<div class="form-group">
+															<label class="col-xs-12 col-sm-3 control-label no-padding-right">下载URL</label>
+															<div class="col-xs-12 col-sm-6">
+																<span class="block input-icon input-icon-right">
+																	<input type="" name="" class="form-control" placeholder="ftp://192.168.10.1/package/web.tar">
+																</span>
+															</div>
+														</div>
+														<div class="form-group">
+															<label class="col-xs-12 col-sm-3 control-label no-padding-right">下载用户名</label>
+															<div class="col-xs-12 col-sm-6">
+																<span class="block input-icon input-icon-right">
+																	<input type="" name="" class="form-control">
+																</span>
+															</div>
+														</div>
+														<div class="form-group">
+															<label class="col-xs-12 col-sm-3 control-label no-padding-right">下载密码</label>
+															<div class="col-xs-12 col-sm-6">
+																<span class="block input-icon input-icon-right">
+																	<input type="" name="" class="form-control">
+																</span>
+															</div>
+														</div>
+														
+													</div>
+												</div>
+							
+											</div>
+
+											<div class="step-pane" data-step="2" id="base-info">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">资源池</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control">
+																<option>GROUP BY</option>
+																<option>UNIQUE</option>
+															</select>
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">发布平台</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control">
+																<option>GROUP BY</option>
+																<option>UNIQUE</option>
+															</select>
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">分布策略</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control">
+																<option>GROUP BY</option>
+																<option>UNIQUE</option>
+															</select>
+														</span>
+													</div>
+												</div>
+												
+											</div>
+
+											<div class="step-pane" data-step="3">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">应用镜像</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">网络模式</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">运行用户</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">容器规格</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<table class="table table-bordered" style="font-size: 10px;">
+																<tr>
+																	<td>CPU(核)</td><td>内存(MB)</td><td>磁盘(MB)</td><td>实例数(个)</td>
+																</tr>
+																<tr>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																</tr>
+															</table>
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">端口映射</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<table class="table table-bordered" style="font-size: 10px;">
+																<tr>
+																	<td>主机端口</td><td>协议</td><td>容器端口</td>
+																</tr>
+																<tr>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																</tr>
+															</table>
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">卷映射</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<table class="table table-bordered" style="font-size: 10px;" id="volume">
+																<tr>
+																	<td>主机目录</td><td>读写模式</td><td>容器目录</td><td width="9.5%"><button type="button" class="btn btn-minier" onclick="addVolume();">添加</button></td>
+																</tr>
+																<tr>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><button class="btn btn-minier btn-danger" onclick="rmTr(this);">删除</button></td>
+																</tr>
+															</table>
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">环境变量</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<table class="table table-bordered" style="font-size: 10px;" id="env">
+																<tr>
+																	<td>键</td><td>值</td><td width="9.5%"><button type="button" class="btn btn-minier" onclick="addEnv();">添加</button></td>
+																</tr>
+																<tr>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td><input name="" style="width: 90%;"></td>
+																	<td width="9.5%"><button class="btn btn-minier btn-danger" onclick="rmTr(this);">删除</button></td>
+																</tr>
+															</table>
+														</span>
+													</div>
+												</div>
+												
+											</div>
+											<div class="step-pane" data-step="4">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">应用厂商</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">应用负责人</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">联系电话</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">邮箱地址</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+
+								<hr />
+								<div class="wizard-actions center">
+									<button class="btn btn-prev">
+										<i class="ace-icon fa fa-arrow-left"></i>
+										上一步
+									</button>
+
+									<button class="btn btn-success btn-next" data-last="完成">
+										下一步
+										<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+									</button>
+								</div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div>
+					
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+	if('ontouchstart' in document.documentElement) document.write("<script src='/static/assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+</script>
+
+
+<!-- page specific plugin scripts -->
+<script src="/static/assets/js/wizard.min.js"></script>
+<script src="/static/assets/js/jquery.validate.min.js"></script>
+<script src="/static/assets/js/jquery-additional-methods.min.js"></script>
+<script src="/static/assets/js/bootbox.js"></script>
+
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+	jQuery(function($) {
+		var $validation = false;
+		$('#fuelux-wizard-container')
+		.ace_wizard({
+			//step: 2 //optional argument. wizard will jump to step "2" at first
+			//buttons: '.wizard-actions:eq(0)'
+		})
+		//.on('changed.fu.wizard', function() {
+		//})
+		.on('finished.fu.wizard', function(e) {
+			bootbox.dialog({
+				title: "添加主机资产",
+				message: "是否确定添加主机资产？", 
+				buttons: {
+					"success" : {
+						"label" : "确定",
+						"className" : "btn-sm btn-primary",
+						"callback": function(){
+							$("#assetForm").submit();
+						}
+					},
+					"cancel": {
+						"label": "取消",
+						"className": "btn-sm btn-default"
+					}
+				}
+			});
+		}).on('stepclick.fu.wizard', function(e){
+			//e.preventDefault();//this will prevent clicking and selecting steps
+		});	
+	})
+
+function selectPubModel(v){
+	if(v == "mount"){
+		$("#mount").css("display","block");
+	}else{
+		$("#mount").css("display","none");
+	}
+}
+function selectPackSource(v){
+	console.log(v);
+	if(v == "download"){
+		$("#download").css("display","block");
+	}else if(v == "git"){
+		$("#git").css("display","block");
+	}else{
+		$("#download").css("display","none");
+		$("#git").css("display","none");
+	}
+}
+function addVolume(){
+	$("#volume").append("<tr>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><button class='btn btn-minier btn-danger' onclick='rmTr(this);''>删除</button></td>\
+						</tr>");
+}
+function addEnv(){
+	$("#env").append("<tr>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><button class='btn btn-minier btn-danger' onclick='rmTr(this);''>删除</button></td>\
+						</tr>");
+}
+function rmTr(obj){
+	$(obj).parent().parent().remove();
+}
+</script>
+{% endblock %}

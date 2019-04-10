@@ -6,7 +6,7 @@ Created on 2018��12��05��
 @author: yangxu
 记录脚本执行
 '''
-from webapp.models import TaskLog,TaskHost
+from taskcenter.models import TaskLog,TaskHost
 
 def log_task_execute(execute_result,host_account_var,task_type,script_file,owner_id):
     task_log_dict = {}

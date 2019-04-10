@@ -3,7 +3,7 @@
 
 from ansible.plugins.callback import CallbackBase 
 from datetime import datetime
-from webapp.models import AnsibleHost,FileHost
+from taskcenter.models import AnsibleHost,FileHost
 
 class CollectAssetInfoCallback(CallbackBase):
     def __init__(self,*args,**kwargs):

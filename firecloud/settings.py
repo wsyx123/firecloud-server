@@ -44,8 +44,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djcelery',
-    'webapp',
+    'djcelery', 
+    'asset',
+    'organization',
+    'taskcenter',
+    'paas',
+    'appmgt',
+    'monitor',
+    'store',
+    'sysmgt',
+    'taskschedule',
 #     'django_extensions',
     
 ]
@@ -66,7 +74,7 @@ ROOT_URLCONF = 'firecloud.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,"templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,6 +83,11 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries':{
+                'menu':'templatetags.menu',
+                'asset':'templatetags.asset',
+                'mesos':'templatetags.mesos'
+                }
         },
     },
 ]
@@ -98,7 +111,7 @@ DATABASES = {
         'NAME': 'firecloud',
         'USER':'root',
         'PASSWORD':'root',
-        'HOST':'192.168.10.1',
+        'HOST':'172.16.149.2',
         'PORT':'3306',
     }
 }
@@ -147,16 +160,18 @@ STATICFILES_DIRS = (
         os.path.join(BASE_DIR,"static"),
                     )
 
+'''
 TEMPLATES_DIRS = (
         os.path.join(BASE_DIR,"templates")
                   )
+'''
 
 '''
 celery 相关配置
 '''
 import djcelery
 djcelery.setup_loader()
-BROKER_URL = 'redis://192.168.10.1:6379/0'
+BROKER_URL = 'redis://172.16.149.2:6379/0'
 # BROKER_URL = 'redis://:密码@主机地址:端口号/数据库号'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 #计划任务

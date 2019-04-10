@@ -1,0 +1,169 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.bullhorn{
+	background-color:#d6e9c6;
+	padding:5px;
+	margin-bottom:20px;
+}
+.pagination{
+	margin: 20px 0 0 0;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>监控告警</li>
+				<li class="active"><a href="{% url 'thirdComponentList' %}">三方组件</a></li>
+				<li class="active">添加zabbix节点</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+			<div class="row">
+				<div class="col-xs-12">
+
+					<form class="form-horizontal" method="POST">
+						<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 center"><h4>Zabbix部署信息</h4></label>
+						</div>
+						
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">名称</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.name}}
+								</span>
+							</div>
+							<div class="col-xl-12 col-sm-3">
+								{{form.errors.name}}
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">标签</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.label}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">版本</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.version}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">主机</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									<select class="form-control" name="host">
+										<option>172.16.149.2</option>
+										<option>172.16.149.3</option>
+									</select>
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">端口</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.port}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">运行方式</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.run_model}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 center"><h4>Zabbix数据库信息</h4></label>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">DB地址</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.db_host}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">DB端口</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.db_port}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">数据名称</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.db_database}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">DB用户</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.db_user}}
+								</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">DB密码</label>
+							<div class="col-xs-12 col-sm-6">
+								<span class="block input-icon input-icon-right">
+									{{form.db_password}}
+								</span>
+							</div>
+						</div>
+						<hr />
+						<div class="center">
+							<div class="">
+								<button class="btn btn-info" type="submit">
+									<i class="ace-icon fa fa-check bigger-110"></i>
+									保存
+								</button>
+
+								&nbsp; &nbsp; &nbsp;
+								<button class="btn" type="reset">
+									<i class="ace-icon fa fa-undo bigger-110"></i>
+									重置
+								</button>
+							</div>
+						</div>
+					</form>
+
+				</div>
+				
+			</div>
+					
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+	
+</script>
+{% endblock %}

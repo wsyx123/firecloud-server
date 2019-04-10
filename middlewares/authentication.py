@@ -8,7 +8,7 @@ Created on 2018年10月25日
 
 from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import HttpResponseRedirect,HttpResponse
-from webapp.models import SysUser,Level2Menu,Menu_Role_rel
+from sysmgt.models import SysUser,Level2Menu,Menu_Role_rel
 
 class AuthLogin(MiddlewareMixin):
     def process_request(self,request):

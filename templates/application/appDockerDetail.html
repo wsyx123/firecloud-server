@@ -1,0 +1,250 @@
+{% extends "base/base.html" %}
+{% load menu %}
+{% block css %}
+<style>
+.gray{
+	color: #888888;
+}
+.progress {
+    height: 12px;
+	background-color: white;
+	margin-top: 5px;
+	margin-bottom: 0px;
+}
+.progress-bar-success {
+    background-color: #00CC66;
+	border-radius: 20px 0px 0px 20px;
+	
+}
+.progress-bar-danger {
+	/* border-radius: 0px 20px 20px 0px; */	
+}
+.progress-bar-inverse{
+	border-radius: 0px 20px 20px 0px;
+}
+.appStatus{
+	margin-left: 8px;
+	color: #A0A0A0;
+}
+.health::before{
+	color: #00AA00;
+}
+.unhealth::before{
+	color: #FF0000;
+}
+.unknown::before{
+	color:#000000;
+}
+.info-title{
+	font-weight: 700;
+}
+#container_btn{
+	display: inline-block;
+	border-bottom: 1px solid #1E90FF;
+	color: #1E90FF;
+	cursor: pointer;
+	
+}
+#event_btn{
+	display: inline-block;
+	margin-left: 20px;
+	cursor: pointer;
+	
+}
+#event_content{
+	display:none;
+}
+
+#event_content td{
+	border: none;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					应用管理
+				</li>
+				<li>
+					<a href="{% url 'AppDockerList' %}">应用列表</a>
+				</li>
+				<li>{{ appname }}</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div><span class="h3">{{ appname }}</span></div>
+					<div class="space-4"></div>
+					<div><span class="green">运行中...</span><span class="gray"> (6 of 6 instances)</span></div>
+					<div class="space-2"></div>
+					<div class="row">
+						<div class="col-xs-12 col-sm-2">
+							<div class="progress center">
+								<div class="progress-bar progress-bar-success" style="width: 60%;"></div>
+								<div class="progress-bar progress-bar-danger" style="width: 30%;"></div>
+								<div class="progress-bar progress-bar-inverse" style="width: 10%;"></div>
+							</div>
+						</div>
+						
+						<div class="col-xs-12 col-sm-3">
+							<span class="appStatus"><i class="fa fa-circle health" aria-hidden="true"></i> 3健康</span>
+							<span class="appStatus"><i class="fa fa-circle unhealth" aria-hidden="true"></i> 2非健康</span>
+							<span class="appStatus"><i class="fa fa-circle unknown" aria-hidden="true"></i> 1未知</span>
+						</div>
+					</div>
+					<div class="space-4"></div>
+					<div><span class="info-title">版本：</span> v1<div>
+					
+					<div class="space-4"></div>
+					<div><span class="info-title">镜像：</span> 192.168.10.3:5000/nginx:v1.0</div>
+					
+					<div class="space-4"></div>
+					<div><span class="info-title">容器规格：</span> ( CPU：0.5 / 内存：512MB / 磁盘：3000MB )</div>
+					
+					<div class="space-4"></div>
+					<div><span class="info-title">发布平台：</span> marathon01</div>
+					
+					<div class="space-4"></div>
+					<div><span class="info-title">发布时间：</span> 2018-08-15 23:55:21</div>
+					<div class="space-8"></div>
+					<div class="row">
+					{% optapp roleid %}
+					<!--
+						<div class="col-xs-12">
+							<button class="btn btn-mini btn-info"><i class="glyphicon glyphicon-file"></i> 发布</button>
+							<button class="btn btn-mini btn-info"><i class="glyphicon glyphicon-pause"></i> 暂停</button>
+							<button class="btn btn-mini btn-info"><i class="glyphicon glyphicon-play"></i> 启动</button>
+							<button class="btn btn-mini btn-info"><i class="glyphicon glyphicon-refresh"></i> 重启</button>
+							<div class="space-2 visible-xs"></div>
+							<button class="btn btn-mini btn-info"><i class="glyphicon glyphicon-fullscreen"></i> 扩容</button>
+							<button class="btn btn-mini btn-warning"><i class="fa fa-reply" aria-hidden="true"></i> 取消部署</button>
+						</div>
+					-->
+					</div>
+					<div class="space-8"></div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div style="border-bottom:1px solid #ddd;">
+								<span id="container_btn" onclick="container_event_switch('container')" >容器管理</span>
+								<span id="event_btn" onclick="container_event_switch('event')">事件查看</span>
+							</div>
+						</div>
+					</div>
+					<div class="space-4"></div>
+					<div class="row" id="container_content">
+						<div class="col-xs-12">
+							<table class="table table-bordered ">
+								<thead>
+									<tr>
+										<th>ID</th>
+										<th>主机</th>
+										<th>端口</th>
+										<th>启动时间</th>
+										<th>状态</th>
+										<th>管理操作</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>0242cffb7090</td>
+										<td>192.168.10.1</td>
+										<td>31923</td>
+										<td>2017-12-14 03:18:44</td>
+										<td><i class="fa fa-check-circle-o health" aria-hidden="true"></i></td>
+										<td><span>重启</span>|<span>连接</span>|<span>日志</span></td>
+									</tr>
+									<tr>
+										<td>0242cffb7090</td>
+										<td>192.168.10.1</td>
+										<td>31923</td>
+										<td>2017-12-14 03:18:44</td>
+										<td><i class="fa fa-check-circle-o health" aria-hidden="true"></i></td>
+										<td><span>重启</span>|<span>连接</span>|<span>日志</span></td>
+									</tr>
+									<tr>
+										<td>0242cffb7090</td>
+										<td>192.168.10.1</td>
+										<td>31923</td>
+										<td>2017-12-14 03:18:44</td>
+										<td><i class="fa fa-check-circle-o health" aria-hidden="true"></i></td>
+										<td><span>重启</span>|<span>连接</span>|<span>日志</span></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+					<div class="row" id="event_content">
+						<div class="col-xs-12">
+							<table class="table table-bordered ">
+								
+								<tbody>
+									<tr>
+										<td>成功</td>
+										<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+										<td>创建</td>
+										<td>2017-12-14 03:18:44</td>
+										<td>admin 成功创建了应用web01</td>
+									</tr>
+									<tr>
+										<td>成功</td>
+										<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+										<td>创建</td>
+										<td>2017-12-14 03:18:44</td>
+										<td>admin 成功创建了应用web01</td>
+									</tr>
+									<tr>
+										<td>成功</td>
+										<td><i class="fa fa-check-circle health" aria-hidden="true"></i></td>
+										<td>创建</td>
+										<td>2017-12-14 03:18:44</td>
+										<td>admin 成功创建了应用web01</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+function container_event_switch(name){
+	if(name == 'container'){
+		$("#event_content").css('display','none');
+		$("#event_btn").css('border-bottom','none');
+		$("#event_btn").css('color','black');
+		$("#container_content").css('display','block');
+		$("#container_btn").css('border-bottom','1px solid #1E90FF');
+		$("#container_btn").css('color','#1E90FF');
+	}else{
+		$("#event_content").css('display','block');
+		$("#event_btn").css('border-bottom','1px solid #1E90FF');
+		$("#event_btn").css('color','#1E90FF');
+		$("#container_btn").css('border-bottom','none');
+		$("#container_content").css('display','none');
+		$("#container_btn").css('color','black');
+	}
+	
+}
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+.bullhorn{
+	background-color:#d6e9c6;
+	padding:5px;
+	margin-bottom:20px;
+}
+.pagination{
+	margin: 20px 0 0 0;
+}
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>监控告警</li>
+				<li class="active">三方组件</li>
+			</ul><!-- /.breadcrumb -->
+
+			
+		</div>
+
+		<div class="page-content">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="tabbable">
+						<ul class="nav nav-tabs" id="myTab">
+							<li class="active">
+								<a data-toggle="tab" href="#zabbix">
+									<img src="/static/images/zabbix.ico" />
+									Zabbix
+								</a>
+							</li>
+
+							<li>
+								<a data-toggle="tab" href="#cacti">
+									<img src="/static/images/cacti.png" width="16px" height="16px" />
+									Cacti
+								</a>
+							</li>
+
+							<li>
+								<a data-toggle="tab" href="#nagios">
+									<img src="/static/images/nagios.ico" width="16px" height="16px" />
+									Nagios
+								</a>
+							</li>
+							<li>
+								<a data-toggle="tab" href="#prometheus">
+									<img src="/static/images/prometheus-16x16.png" width="16px" height="16px" />
+									Prometheus
+								</a>
+							</li>
+						</ul>
+
+						<div class="tab-content">
+							<div id="zabbix" class="tab-pane fade in active">
+								<a href="{% url 'zabbixAdd' %}" class="btn btn-xs btn-info btn-white">添加节点</a>
+								<button class="btn btn-xs btn-danger btn-white">删除节点</button>
+								<div class="space-6"></div>
+								<table class="table">
+									<tr>
+										<th><input type="checkbox" name="" onclick="allChecked(this);"></th>
+										<th>名称</th>
+										<th>标签</th>
+										<th>版本</th>
+										<th>信息</th>
+										<th>运行方式</th>
+										<th>状态</th>
+										<th>所有者</th>
+										<th class="hidden-xs">
+											<i class="ace-icon fa fa-clock-o bigger-110 hidden-480"></i>
+											创建时间
+										</th>
+										<th>操作</th>
+									</tr>
+									{% for ZabbixNode in ZabbixNodes%}
+									<tr>
+										<td><input type="checkbox" name=""></td>
+										<td><a href="{% url 'thirdComponentDetail' pk=ZabbixNode.id %}?nodeType=zabbix">{{ZabbixNode.name}}</a></td>
+										<td>
+											<span class="label">{{ZabbixNode.get_label_display}}</span>
+										</td>
+										<td>{{ZabbixNode.get_version_display}}</td>
+										<td>{{ZabbixNode.host}}:{{ZabbixNode.port}}</td>
+										<td>{{ZabbixNode.get_run_model_display}}</td>
+										{% ifequal ZabbixNode.status 1 %}
+										<td><span class="label">未部署</span></td>
+										{% endifequal %}
+										{% ifequal ZabbixNode.status 2 %}
+										<td><span class="label label-success">正常</span></td>
+										{% endifequal %}
+										{% ifequal ZabbixNode.status 3 %}
+										<td><span class="label label-danger">异常</span></td>
+										{% endifequal %}
+										<td>{{ZabbixNode.owner}}</td>
+										<td>{{ZabbixNode.create_time|date:"Y-m-d H:i:s"}}</td>
+										<td>
+											<div class="action-buttons">
+												<a href="#" class="green" onclick="deployZabbix(this);">
+													<i class="fa fa-telegram bigger-130" title="部署" data-toggle="modal" data-target="#mydeploy"></i>
+												</a>
+												<a href="#" class="blue">
+											        <i title="数据库信息" data-container="body" data-toggle="popover" 
+											           data-placement="left" data-content="<table class='table table-bordered'>
+		      <tr><th>DB主机:</th><td>{{ZabbixNode.db_host}}</td></tr>
+		      <tr><th>DB端口:</th><td>{{ZabbixNode.db_port}}</td></tr>
+		      <tr><th>数据库名:</th><td>{{ZabbixNode.db_database}}</td></tr>
+		      <tr><th>DB用户:</th><td>{{ZabbixNode.db_user}}</td></tr>
+		      <tr><th>DB密码:</th><td>{{ZabbixNode.db_password}}</td></tr>
+		      </table>" class="fa fa-info-circle bigger-130"></i>
+												</a>
+											</div>
+										</td>
+									</tr>
+									{% endfor %}
+								</table>
+								<div class="center">
+									<ul class="pagination">
+										<li><a href="#">首页</a></li>
+									    <li><a href="#">&laquo;上一页</a></li>
+									    <li><a href="#">1</a></li>
+									    <li><a href="#">下一页&raquo;</a></li>
+									    <li><a href="#">尾页</a></li>
+									</ul>
+								</div>
+							</div>
+
+							<div id="cacti" class="tab-pane fade">
+								<p>cacti</p>
+							</div>
+
+							<div id="nagios" class="tab-pane fade">
+								<p>nagios</p>
+							</div>
+
+							<div id="prometheus" class="tab-pane fade">
+								<p>prometheus</p>
+							</div>
+						</div>
+					</div>
+				</div><!-- /.col -->
+			</div>
+			<!-- 部署模态框 -->
+			<div class="modal fade" id="mydeploy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+								&times;
+							</button>
+							<h4>
+								<span>执行确认窗口</span>
+							</h4>
+						</div>
+						<div class="modal-body">
+							<div class="center">
+								<form action="/thirdComponent/deploy/" method="POST" id="deployNodeForm">
+									<input type="text" name="nodeName" value="" hidden />
+									<input type="text" name="nodeType" value="" hidden />
+									<label>确定部署<span id="nodeType"></span>节点:<strong id="nodeName" class="red"></strong> ?</label>
+								</form>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<div class="center">
+								<button type="button" class="btn btn-success" data-dismiss="modal" onclick="deployNodeAck();">
+									<i class="fa fa-telegram bigger-130">部署</i>
+								</button>
+							</div>
+						</div>
+					</div><!-- /.modal-content -->
+				</div><!-- /.modal -->
+			</div>	
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+function deployZabbix(obj){
+	var nodeName = $(obj).parent().parent().siblings().eq(1).text();
+	$("input[name='nodeName']").val(nodeName);
+	$("input[name='nodeType']").val("zabbix");
+	$("#nodeName").text(nodeName);
+	$("#nodeType").text("Zabbix");
+}
+function deployNodeAck(){
+	$("#deployNodeForm").submit();
+}
+function allChecked(obj){
+	if($(obj).is(':checked')){
+		$(obj).parent().parent().siblings().find("input[type='checkbox']").prop('checked','true');
+	}else{
+		$(obj).parent().parent().siblings().find("input[type='checkbox']").removeAttr('checked','true');
+	}
+	
+}
+$(function (){
+    $("[data-toggle='popover']").popover({
+    	html:true,
+    });
+});
+</script>
+{% endblock %}

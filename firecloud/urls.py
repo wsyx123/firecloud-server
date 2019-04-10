@@ -15,8 +15,20 @@ Including another URLconf
 """
 from django.conf.urls import url,include
 from django.contrib import admin
+from home.index import Index,login,logout
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'',include('webapp.urls')),
+    url(r'^$', Index.as_view(),name='dashboard'),
+    url(r'^login/$',login),
+    url(r'^logout/$',logout,name='logout'),
+    url(r'',include('asset.urls')),
+    url(r'',include('organization.urls')),
+    url(r'',include('taskcenter.urls')),
+    url(r'',include('paas.urls')),
+    url(r'',include('appmgt.urls')),
+    url(r'',include('monitor.urls')),
+    url(r'',include('store.urls')),
+    url(r'',include('sysmgt.urls')),
+    url(r'',include('taskschedule.urls')),
 ]

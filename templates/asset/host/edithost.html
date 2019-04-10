@@ -1,0 +1,415 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style>
+input[type=checkbox].ace.ace-checkbox-2:checked+.lbl::before, input[type=radio].ace.ace-checkbox-2:checked+.lbl::before {
+    background-color: #4169E1;
+    border-color: #4169E1;
+    color: #FFF;
+}
+.errorlist{
+	color:red;
+	margin:0px;
+}
+
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					资产管理
+				</li>
+				<li>
+					<a href="{% url 'HostList' %}">主机</a>
+				</li>
+				<li>编辑主机</li>
+		
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+
+					<div class="widget-box">
+						<div class="widget-header widget-header-blue widget-header-flat">
+							<div class="widget-toolbar">
+								<label>
+									<small class="green">
+										<b>自动录入</b>
+									</small>
+
+									<input id="skip-validation" type="checkbox" class="ace ace-switch ace-switch-4" />
+									<span class="lbl middle"></span>
+								</label>
+							</div>
+						</div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="fuelux-wizard-container">
+									<div>
+										<ul class="steps">
+											<li data-step="1" class="active">
+												<span class="step">1</span>
+												<span class="title">必填信息</span>
+											</li>
+
+											<li data-step="2">
+												<span class="step">2</span>
+												<span class="title">基本信息</span>
+											</li>
+
+											<li data-step="3">
+												<span class="step">3</span>
+												<span class="title">附加信息</span>
+											</li>
+
+											
+										</ul>
+									</div>
+
+									<hr />
+
+									<div class="step-content pos-rel">
+										<form class="form-horizontal" method="POST" id="assetForm">
+											<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
+											<div class="step-pane active" data-step="1">
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">目标主机</label>
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.private_ip}}
+														</span>
+													</div>
+													<div class="col-xl-12 col-sm-3">
+														{{form.errors.private_ip}}
+													</div>
+												</div>
+
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3 col-md-3 control-label no-padding-right">SSH端口</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.port}}
+														</span>
+													</div>
+													<div class="col-xl-12 col-sm-3">
+														{{form.errors.port}}
+													</div>
+												</div>
+
+												<div class="form-group">
+													<label for="inputSuccess" class="col-xs-12 col-sm-3 control-label no-padding-right">主机状态</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.host_status}}
+														</span>
+													</div>
+													<div class="col-xl-12 col-sm-3">
+														{{form.errors.host_status}}
+													</div>
+												</div>
+
+												<div class="form-group">
+													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">用户名</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.remote_user}}
+														</span>
+													</div>
+													<div class="col-xl-12 col-sm-3">
+														{{form.errors.remote_user}}
+													</div>
+												</div>
+
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">用户密码</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.remote_passwd}}
+														</span>
+													</div>
+													<div class="col-xl-12 col-sm-3">
+														{{form.errors.remote_passwd}}
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">资产类型</label>
+													<div class="col-xs-12 col-sm-5">
+														<span class="input-icon block input-icon-right">
+															{{form.type}}
+														</span>
+													</div>
+												</div>
+											</div>
+
+											<div class="step-pane" data-step="2">
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">序列号</label>
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.serial}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">主机名</label>
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.hostname}}
+														</span>
+													</div>
+												</div>
+
+												<div class="form-group">
+													<label for="inputError" class="col-xs-12 col-sm-3 col-md-3 control-label no-padding-right">公网IP</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.public_ip}}
+														</span>
+													</div>
+													
+												</div>
+
+												<div class="form-group">
+													<label for="inputSuccess" class="col-xs-12 col-sm-3 control-label no-padding-right">CPU核数</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.cpu_no}}
+														</span>
+													</div>
+												</div>
+
+												<div class="form-group">
+													<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">CPU型号</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.cpu_model}}
+														</span>
+													</div>
+												</div>
+
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">物理内存</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.memory}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">磁盘容量</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.disk}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">操作系统</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.os}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">内核版本</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.kernel}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">机器型号</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.machine_model}}
+														</span>
+													</div>
+												</div>
+											</div>
+
+											<div class="step-pane" data-step="3">
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">位置信息(机房-机柜-机架)</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.position}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">主机组</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.group}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">运营状态</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="input-icon block input-icon-right">
+															{{form.operate_status}}
+														</span>
+													</div>
+												</div>
+												
+												<div class="form-group">
+													<label for="inputError2" class="col-xs-12 col-sm-3 control-label no-padding-right">使用部门</label>
+
+													<div class="col-xs-12 col-sm-5">
+														<span class="block input-icon input-icon-right">
+															{{form.department}}
+														</span>
+													</div>
+												</div>	
+											</div>
+										</form>
+									</div>
+								</div>
+
+								<hr />
+								<div class="wizard-actions">
+									<button class="btn btn-prev">
+										<i class="ace-icon fa fa-arrow-left"></i>
+										上一步
+									</button>
+
+									<button class="btn btn-success btn-next" data-last="完成">
+										下一步
+										<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+									</button>
+								</div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+	if('ontouchstart' in document.documentElement) document.write("<script src='/static/assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+</script>
+
+
+<!-- page specific plugin scripts -->
+<script src="/static/assets/js/wizard.min.js"></script>
+<script src="/static/assets/js/jquery.validate.min.js"></script>
+<script src="/static/assets/js/jquery-additional-methods.min.js"></script>
+<script src="/static/assets/js/bootbox.js"></script>
+<script src="/static/assets/js/jquery.maskedinput.min.js"></script>
+<script src="/static/assets/js/select2.min.js"></script>
+
+
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+	jQuery(function($) {
+	
+
+		var $validation = false;
+		$('#fuelux-wizard-container')
+		.ace_wizard({
+			//step: 2 //optional argument. wizard will jump to step "2" at first
+			//buttons: '.wizard-actions:eq(0)'
+		})
+		//.on('changed.fu.wizard', function() {
+		//})
+		.on('finished.fu.wizard', function(e) {
+			var must_info = $('#must-info').serialize();
+			var base_info = $('#base-info').serialize();
+			var addition_info = $('#addition-info').serialize();
+			var datas = must_info+'&'+base_info+'&'+addition_info;
+			bootbox.dialog({
+				title: "更新主机资产",
+				message: "是否确定更新主机资产？", 
+				buttons: {
+					"success" : {
+						"label" : "确定",
+						"className" : "btn-sm btn-primary",
+						"callback": function(){
+							$("#assetForm").submit();
+						}
+					},
+					"cancel": {
+						"label": "取消",
+						"className": "btn-sm btn-default"
+					}
+				}
+			});
+		}).on('stepclick.fu.wizard', function(e){
+			//e.preventDefault();//this will prevent clicking and selecting steps
+		});
+	
+	
+		//jump to a step
+		/**
+		var wizard = $('#fuelux-wizard-container').data('fu.wizard')
+		wizard.currentStep = 3;
+		wizard.setState();
+		*/
+	
+		//determine selected step
+		//wizard.selectedItem().step
+	
+	
+	
+		//hide or show the other form which requires validation
+		//this is for demo only, you usullay want just one form in your application
+		$('#skip-validation').removeAttr('checked').on('click', function(){
+			$validation = this.checked;
+			if(this.checked) {
+				$('#base-info input').attr('disabled','disabled');
+				$('#base-info input').attr('placeholder','自动收集');
+			}
+			else {
+				$('#base-info input').removeAttr('disabled');
+				$('#base-info input').removeAttr('placeholder');
+			}
+		})
+	
+	
+	
+		
+	})
+</script>
+{% endblock %}

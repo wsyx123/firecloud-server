@@ -1,0 +1,4 @@
+JS:
+	1 获得控件句柄，读取修改控件属性，添加删除控件子节点（控件）
+
+	getElementById     getElementByTagName
