@@ -6,7 +6,7 @@ Created on 2018年10月19日
 @author: yangxu
 '''
 from django import forms
-from models import AssetHost,HostGroup
+from models import AssetHost,HostGroup,HostAgent
 
 class AssetHostForm(forms.ModelForm):
     class Meta:
@@ -31,7 +31,7 @@ class AssetHostForm(forms.ModelForm):
                    'position': forms.TextInput(attrs={'class': 'width-100'}),
                    'group': forms.Select(attrs={'class':'form-control'}),
                    'operate_status': forms.Select(attrs={'class':'form-control'}),
-                   'agent_status': forms.Select(attrs={'class':'form-control'}),
+                   'agent_is_install': forms.CheckboxInput(attrs={'class':'ace ace-checkbox-2'}),
                    'department': forms.TextInput(attrs={'class':'form-control'}), #20L
                    }
         help_texts = {
@@ -49,3 +49,8 @@ class HostGroupForm(forms.ModelForm):
                    'tel': forms.TextInput(attrs={'class': 'width-100'}),
                    'email': forms.EmailInput(attrs={'class': 'width-100'})
                    }
+    
+class HostAgentForm(forms.ModelForm):
+    class Meta:
+        model = HostAgent
+        fields = "__all__"

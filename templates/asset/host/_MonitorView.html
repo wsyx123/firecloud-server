@@ -1,0 +1,139 @@
+<div class="row">
+	<div class="col-xs-12">
+		<p style="font-size:20px;margin-bottom:20px;">主机运行情况</p>
+	</div>
+	<div class="col-xs-12 col-sm-3 center">
+		<div class="easy-pie-chart percentage" data-percent="0" data-color="#3497da" id="cpu-percent">
+			<span class="percent">
+				<span>CPU </span>
+				<span style="font-size:50px;" id="cpu-percent-span">N/A</span>%
+			</span>
+		</div>
+	</div><!-- /.col -->
+	
+	<div class="col-xs-12 col-sm-3 center">
+		<div class="easy-pie-chart percentage" data-percent="0" data-color="#3497da" id="mem-percent">
+			<span>内存 </span>
+			<span style="font-size:50px;" id="mem-percent-span">N/A</span>%
+		</div>
+	</div><!-- /.col -->
+	
+	<div class="col-xs-12 col-sm-3 center">
+		<div class="easy-pie-chart percentage" data-percent="0" data-color="#3497da" id="disk-percent">
+			<span>存储 </span>
+			<span style="font-size:50px;" id="disk-percent-span">N/A</span>%
+		</div>
+	</div><!-- /.col -->
+	
+	<div class="col-xs-12 col-sm-3 center">
+		<div class="easy-pie-chart percentage" data-percent="100" data-color="#3497da">
+			<p><span>运行</span><strong  id="uptime-span">N/A</strong></p>
+		</div>
+	</div><!-- /.col -->
+	
+	<div class="col-xs-12">
+		<p style="font-size:20px;margin:20px 0px;">主机运行指标</p>
+	</div>
+	
+	<div class="col-xs-12">
+		<ul class="pagination timeOptions">
+			<li class="active" onclick="select_time(60)" id="60">
+				<a>近1小时</a>
+			</li>
+			<li onclick="select_time(1440)" id="1440">
+				<a>近24小时</a>
+			</li>
+			<li onclick="select_time(10080)" id="10080">
+				<a>近7天</a>
+			</li>
+			<li onclick="select_time(43200)" id="43200">
+				<a>近1个月</a>
+			</li>
+		</ul>
+	</div>
+		
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="load">5分钟负载</div>
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="cpu">CPU</div>
+			<div style="padding-left:25px;">
+				
+			</div>
+		</div>
+		
+	</div>
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="mem">mem</div>
+			<div style="padding-left:25px;">
+				
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="disk-tps">disk-tps</div>
+			<div id="diskId" style="padding-left:25px;">
+				
+			</div>
+		</div>
+	</div>
+
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="disk-speed">disk-speed</div>
+			<div id="diskId" style="padding-left:25px;">
+				
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="diskU">disk-usage</div>
+			<div id="diskUd" style="padding-left:25px;">
+				
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="network">network</div>
+		</div>
+	</div>
+	
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="netstat">netstat</div>
+		</div>
+	</div>
+	
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="process">processes</div>
+		</div>
+	</div>
+	
+	<div class="col-xs-12 col-sm-6">
+		<div class="space-6"></div>
+		<div class="hostoverview">
+			<div id="thread">threads</div>
+		</div>
+	</div>
+	
+</div><!-- /.row -->

@@ -1,0 +1,386 @@
+{% extends "base/base.html" %}
+{% block css %}
+<style type="text/css">
+</style>
+{% endblock %}
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					应用商店
+				</li>
+				<li>
+					<a href="{% url 'WebList' %}">web层</a>
+				</li>
+				<li>新建Nginx</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="widget-box">
+						
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="fuelux-wizard-container">
+									<div>
+										<ul class="steps">
+											<li data-step="1" class="active">
+												<span class="step">1</span>
+												<span class="title">应用基本信息</span>
+											</li>
+
+											<li data-step="2">
+												<span class="step">2</span>
+												<span class="title">全局配置信息</span>
+											</li>
+
+											<li data-step="3">
+												<span class="step">3</span>
+												<span class="title">Events配置信息</span>
+											</li>
+											<li data-step="4">
+												<span class="step">4</span>
+												<span class="title">Http配置信息</span>
+											</li>
+
+											<li data-step="5">
+												<span class="step">5</span>
+												<span class="title">维护信息</span>
+											</li>
+
+											
+										</ul>
+									</div>
+
+									<hr />
+
+									<div class="step-content pos-rel">
+										<form class="form-horizontal" method="POST" id="assetForm">
+											<input name="owner" type='text' value="{{request.session.user_id}}" hidden>
+											<div class="step-pane active" data-step="1">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">名称</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+						
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">描述</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">部署主机</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+											</div>
+
+											<div class="step-pane" data-step="2" id="base-info">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">运行用户</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">worker进程数</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												
+											</div>
+
+											<div class="step-pane" data-step="3">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">模式</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<select class="form-control">
+																<option>epoll</option>
+															</select>
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">worker连接数</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												
+											</div>
+
+											<div class="step-pane" data-step="4">
+												<table class="table table-bordered">
+													<tr>
+														<td class="center" width="20%">全局部分</td>
+														<td>
+															<div class="form-group">
+																<label class="col-xs-12 col-sm-3 control-label no-padding-right">sendfile</label>
+																<div class="col-xs-12 col-sm-6">
+																	<span class="block input-icon input-icon-right">
+																		<select class="form-control">
+																			<option>on</option>
+																			<option>off</option>
+																		</select>
+																	</span>
+																</div>
+															</div>
+															<div class="form-group">
+																<label class="col-xs-12 col-sm-3 control-label no-padding-right">keepalive_timeout</label>
+																<div class="col-xs-12 col-sm-6">
+																	<span class="block input-icon input-icon-right">
+																		<input type="text" name="" class="form-control">
+																	</span>
+																</div>
+															</div>
+														</td>
+													</tr>
+												</table>
+												<table class="table table-bordered">
+													<tr>
+														<td class="center" width="20%">server块</td>
+														<td>
+															<div class="form-group">
+																<label class="col-xs-12 col-sm-3 control-label no-padding-right">listen</label>
+																<div class="col-xs-12 col-sm-6">
+																	<span class="block input-icon input-icon-right">
+																		<input type="" name="" class="form-control">
+																	</span>
+																</div>
+															</div>
+															<div class="form-group">
+																<label class="col-xs-12 col-sm-3 control-label no-padding-right">server_name</label>
+																<div class="col-xs-12 col-sm-6">
+																	<span class="block input-icon input-icon-right">
+																		<input type="text" name="" class="form-control">
+																	</span>
+																</div>
+															</div>
+															<div class="form-group">
+																<label class="col-xs-12 col-sm-3 control-label no-padding-right">location</label>
+																<div class="col-xs-12 col-sm-6">
+																	<span class="block input-icon input-icon-right">
+																		<input type="text" name="" class="form-control">
+																	</span>
+																	<table class="table table-bordered">
+																		<tr>
+																			<th>key</th><th>value</th>
+																			<th><button type="button" class="btn btn-minier" >添加</button></th>
+																		</tr>
+																		<tr>
+																			<td>root</td>
+																			<td><input type="" name="" class="width-100"></td>
+																			<td></td>
+																		</tr>
+																	</table>
+																</div>
+																<div class="col-xs-12 col-sm-3">
+																	<button class="btn btn-xs" type="button"> 添加location</button>
+																</div>
+															</div>
+															<div class="form-group">
+																<label class="col-xs-12 col-sm-3 control-label no-padding-right">location</label>
+																<div class="col-xs-12 col-sm-6">
+																	<span class="block input-icon input-icon-right">
+																		<input type="text" name="" class="form-control">
+																	</span>
+																	<table class="table table-bordered">
+																		<tr>
+																			<th>key</th><th>value</th>
+																			<th><button type="button" class="btn btn-minier" >添加</button></th>
+																		</tr>
+																		<tr>
+																			<td>root</td>
+																			<td><input type="" name="" class="width-100"></td>
+																			<td></td>
+																		</tr>
+																	</table>
+																</div>
+																<div class="col-xs-12 col-sm-3">
+																	<button class="btn btn-xs btn-danger" type="button"> 删除location</button>
+																</div>
+															</div>
+														</td>
+													</tr>
+												</table>
+												<div>
+													<button class="btn btn-sm" type="button" onclick="addStep(this);"><i class="fa fa-plus"></i> 添加server</button>
+												</div>
+											</div>
+
+											<div class="step-pane" data-step="5">
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">应用厂商</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">应用负责人</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">联系电话</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-xs-12 col-sm-3 control-label no-padding-right">邮箱地址</label>
+													<div class="col-xs-12 col-sm-6">
+														<span class="block input-icon input-icon-right">
+															<input type="text" name="" class="form-control">
+														</span>
+													</div>
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+
+								<hr />
+								<div class="wizard-actions center">
+									<button class="btn btn-prev">
+										<i class="ace-icon fa fa-arrow-left"></i>
+										上一步
+									</button>
+
+									<button class="btn btn-success btn-next" data-last="完成">
+										下一步
+										<i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+									</button>
+								</div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div>
+					
+				  
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+	if('ontouchstart' in document.documentElement) document.write("<script src='/static/assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+</script>
+
+
+<!-- page specific plugin scripts -->
+<script src="/static/assets/js/wizard.min.js"></script>
+<script src="/static/assets/js/jquery.validate.min.js"></script>
+<script src="/static/assets/js/jquery-additional-methods.min.js"></script>
+<script src="/static/assets/js/bootbox.js"></script>
+
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+	jQuery(function($) {
+		var $validation = false;
+		$('#fuelux-wizard-container')
+		.ace_wizard({
+			//step: 2 //optional argument. wizard will jump to step "2" at first
+			//buttons: '.wizard-actions:eq(0)'
+		})
+		//.on('changed.fu.wizard', function() {
+		//})
+		.on('finished.fu.wizard', function(e) {
+			bootbox.dialog({
+				title: "添加主机资产",
+				message: "是否确定添加主机资产？", 
+				buttons: {
+					"success" : {
+						"label" : "确定",
+						"className" : "btn-sm btn-primary",
+						"callback": function(){
+							$("#assetForm").submit();
+						}
+					},
+					"cancel": {
+						"label": "取消",
+						"className": "btn-sm btn-default"
+					}
+				}
+			});
+		}).on('stepclick.fu.wizard', function(e){
+			//e.preventDefault();//this will prevent clicking and selecting steps
+		});	
+	})
+
+function selectPubModel(v){
+	if(v == "mount"){
+		$("#mount").css("display","block");
+	}else{
+		$("#mount").css("display","none");
+	}
+}
+function selectPackSource(v){
+	console.log(v);
+	if(v == "download"){
+		$("#download").css("display","block");
+	}else if(v == "git"){
+		$("#git").css("display","block");
+	}else{
+		$("#download").css("display","none");
+		$("#git").css("display","none");
+	}
+}
+function addVolume(){
+	$("#volume").append("<tr>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><button class='btn btn-minier btn-danger' onclick='rmTr(this);''>删除</button></td>\
+						</tr>");
+}
+function addEnv(){
+	$("#env").append("<tr>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><input name='' style='width: 90%;''></td>\
+							<td><button class='btn btn-minier btn-danger' onclick='rmTr(this);''>删除</button></td>\
+						</tr>");
+}
+function rmTr(obj){
+	$(obj).parent().parent().remove();
+}
+</script>
+{% endblock %}

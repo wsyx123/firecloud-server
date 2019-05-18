@@ -16,7 +16,7 @@ def get_all_menu():
     ]
     '''
     menu_obj_list = []
-    Level1MenuObjs = Level1Menu.objects.all()
+    Level1MenuObjs = Level1Menu.objects.all().order_by('priority')
     for queryobj in Level1MenuObjs:
         Level2MenuObjs = Level2Menu.objects.filter(parent_name_id=queryobj.id).order_by('priority')
         menu_obj_list.append([queryobj,Level2MenuObjs])

@@ -94,3 +94,8 @@ class AppOpt_Role_rel(models.Model):
     
     def __unicode__(self):
         return '%s' %(self.role)
+    
+class WhiteList(models.Model):
+    url = models.CharField(max_length=32,unique=True)
+    comment = models.CharField(max_length=32)
+    enabled = models.BooleanField(default=False)

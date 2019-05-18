@@ -11,6 +11,7 @@ from views import AssetView,HostList,HostAdd,HostUpdate,HostDelete,host_import,H
 from views import AccountList
 from views import GroupList,GroupAdd,GroupUpdate,GroupDelete
 from views import asset_connect
+from views import AgentRegister,AgentHeartbeat,HostMonitor,HostStatus
 
 urlpatterns = [
     url(r'^asset/list/$', AssetView.as_view(),name='AssetView'),
@@ -28,4 +29,8 @@ urlpatterns = [
     url(r'^group/add/$', GroupAdd.as_view(),name='GroupAdd'),
     url(r'^group/update/(?P<pk>.+)$', GroupUpdate.as_view(),name='GroupUpdate'),
     url(r'^group/delete/(?P<pk>.+)$', GroupDelete.as_view(),name='GroupDelete'),
+    url(r'^agent/register/$',AgentRegister.as_view()),
+    url(r'^agent/heartbeat/$',AgentHeartbeat.as_view()),
+    url(r'^host/monitor/$',HostMonitor.as_view()),
+    url(r'^host/status/$',HostStatus.as_view())
     ]

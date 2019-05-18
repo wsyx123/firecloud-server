@@ -10,6 +10,7 @@ from django.views.generic import TemplateView
 from django.shortcuts import HttpResponseRedirect,render
 from get_home_page import get_home_page
 import time
+import json
 
 class Index(TemplateView):
     def get(self, request, *args, **kwargs):
@@ -31,6 +32,7 @@ def login(request):
     if  request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
+    
         res_name_auth = SysUser.objects.filter(username=username)
         if len(res_name_auth) == 0:
             error_messages = '{} 用户不存在!'.format(username)

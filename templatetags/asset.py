@@ -8,10 +8,14 @@ from django import template
 
 register = template.Library()
 
-@register.inclusion_tag('asset/host/_HostMonitor.html')
+@register.inclusion_tag('asset/host/_MonitorView.html')
 def hostMonitorView():
     return
 
 @register.inclusion_tag('asset/host/_HostInfo.html')
 def hostInfoView(detailhost,DiskQuerySet,EthQuerySet):
     return {'detailhost':detailhost,'DiskQuerySet':DiskQuerySet,'EthQuerySet':EthQuerySet}
+
+@register.inclusion_tag('asset/host/_AgentInfo.html')
+def AgentInfoView(agent_is_install,agent_status):
+    return {'agent_is_install':agent_is_install,'agent_status':agent_status}

@@ -1,0 +1,189 @@
+{% if agent_is_install %}
+	<div class="row">
+		<div class="=col-xs-12 col-sm-5">
+			<div class="profile-user-info profile-user-info-striped">
+				<div class="profile-info-row">
+					<div class="profile-info-name">当前状态</div>
+					<div class="profile-info-value">
+						{% if agent_status.is_online %}
+							<span class="label label-sm label-success">可用的</span>
+						{% else %}
+							<span class="label label-sm label-danger">不可用</span>
+						{% endif %}
+					</div>
+				</div>
+				<div class="profile-info-row">
+					<div class="profile-info-name">进程ID</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.pid}}</span>
+					</div>
+				</div>
+				<div class="profile-info-row">
+					<div class="profile-info-name">Agent端口</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.port}}</span>
+					</div>
+				</div>
+				<div class="profile-info-row">
+					<div class="profile-info-name">采集频率</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.collect_interval}}秒</span>
+					</div>
+				</div>
+				<div class="profile-info-row">
+					<div class="profile-info-name">部署目录</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.install_path}}</span>
+					</div>
+				</div>
+				<div class="profile-info-row">
+					<div class="profile-info-name">日志文件</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.log_full_file}}</span>
+					</div>
+				</div>
+				
+				<div class="profile-info-row">
+					<div class="profile-info-name">部署时间</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.install_time|date:"Y-m-d H:i:s"}}</span>
+					</div>
+				</div>
+				<div class="profile-info-row">
+					<div class="profile-info-name">心跳包时间</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.heartbeat_time|date:"Y-m-d H:i:s"}}</span>
+					</div>
+				</div>
+				<div class="profile-info-row">
+					<div class="profile-info-name">启动命令</div>
+					<div class="profile-info-value">
+						<span>{{agent_status.start_cmd}}</span>
+					</div>
+				</div>
+			</div>
+			<h4 class="smaller lighter blue"></h4>
+			<div class="center">
+				<button class="btn btn-info">一键重装 Agent</button>
+			</div>
+		</div>
+		<div class="col-xs-12 col-sm-7">
+			<div>
+				<select class="form-control">
+					<option>部署日志</option>
+					<option>代理日志</option>
+				</select>
+				<div id="logDisplay">
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+					<p>日志信息</p>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+	
+
+	{% else %}
+
+	<div class="row">
+		<div class="col-xs-12">
+			<div id="manual-install">
+				<div class="center">代理未安装,请按照如下步骤安装代理:</div>
+				<h4 class="header smaller lighter blue">手动安装</h4>
+				<div class="col-xs-12">
+					<div class="content-title">
+						<div class="col-xs-12 col-sm-2 number">1</div>
+						<div class="col-xs-12 col-sm-10"><span style="line-height: 28px;font-size: 19px;">下载 Agent 安装包</span></div>
+					</div>
+					<div style="margin-left:20px;">
+						<p></p>
+						<p><a href="#">点击下载</a></p>
+						<p>备注：下载后上传到目标主机</p>
+					</div>
+				</div>
+				<div class="col-xs-12">
+					<div class="content-title">
+						<div class="col-xs-12 col-sm-2 number">2</div>
+						<div class="col-xs-12 col-sm-10">配置 Agent</div>
+					</div>
+					<div style="margin-left:20px;">
+						<p></p>
+						<pre>./agent -master=192.168.10.3:9000</pre>
+						<p>注意：-master即指明master主机</p>
+					</div>
+				</div>
+				<div class="col-xs-12">
+					<div class="content-title">
+						<div class="col-xs-12 col-sm-2 number">3</div>
+						<div class="col-xs-12 col-sm-10">运行 Agent</div>
+					</div>
+					<div style="margin-left:20px;">
+						<p></p>
+						<pre>./agent -master=192.168.10.3:9000</pre>
+						<p>注意：-master即指明master主机</p>
+					</div>
+				</div>
+			</div>
+			<h4 class="header smaller lighter blue">自动安装</h4>
+			<div class="center" id="auto-install-btn">
+				<button class="btn btn-info" onclick="agentInstall();">一键自动安装 Agent</button>
+			</div>
+			<div id="auto-install-form">
+				<form class="form-horizontal" method="POST" id="assetForm">
+					<div class="form-group">
+						<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">部署目录</label>
+						<div class="col-xs-12 col-sm-6">
+							<span class="block input-icon input-icon-right">
+								<input type="text" name="" class="form-control">
+							</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">Agent端口</label>
+						<div class="col-xs-12 col-sm-6">
+							<span class="block input-icon input-icon-right">
+								<input type="text" name="" class="form-control">
+							</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputWarning" class="col-xs-12 col-sm-3 control-label no-padding-right">采集频率</label>
+						<div class="col-xs-12 col-sm-6">
+							<span class="block input-icon input-icon-right">
+								<select class="form-control">
+									<option>30s</option>
+									<option>60s</option>
+									<option>90s</option>
+									<option>120s</option>
+									<option>180s</option>
+									<option>300s</option>
+								</select>
+							</span>
+						</div>
+					</div>
+					<div class="center">
+						<button type="button" class="btn btn-info" onclick="startInstall();"><i class="glyphicon glyphicon-cog"></i>部署</button>
+						<button type="button" class="btn btn-danger" onclick="cancelInstall();"><i class="fa fa-close"></i>取消</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+{% endif %}

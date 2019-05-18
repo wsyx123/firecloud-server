@@ -81,19 +81,20 @@
 											<td hidden>{{ host.id }}</td>
 											<td>{{ host.hostname }}</td>
 											<td><a href="{% url 'HostDetail' pk=host.id %}">{{ host.private_ip }}</a></td>
-											<td>{{ host.port }}</td>
-											{% ifequal host.agent_status 1 %}
-											<td><span class="label label-sm label-danger">未安装</span></td>
-											{% endifequal %}
-											{% ifequal host.agent_status 2 %}
-											<td><span class="label label-sm label-success">可用的</span></td>
-											{% endifequal %}
-											{% ifequal host.agent_status 3 %}
-											<td><span class="label label-sm label-danger">不可用</span></td>
-											{% endifequal %}
+											<td>{{ host.port}}</td>
+											{% if host.agent_is_install and host.agent_status.is_online %}
+												<td><span class="label label-sm label-success">可用的</span></td>
+											{% else %}
+												{% ifequal host.agent_is_install 1 %}
+													<td><span class="label label-sm label-danger">不可用</span></td>
+												{% else %}
+													<td><span class="label label-sm">未安装</span></td>
+												{% endifequal %}
+											{% endif %}
+	
 											{% ifequal host.host_status 1 %}
 											<td>
-												<span class="label label-sm label-success">正常</span>
+												<span class="label label-sm label-success">在线</span>
 											</td>
 											{% else %}
 											<td>

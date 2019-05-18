@@ -1,6 +1,6 @@
 jQuery(function($){
 
-socket = new WebSocket('ws://192.168.10.1:9000/hostLogin/');
+socket = new WebSocket('ws://172.16.149.2:9000/host/ssh');
 term = new Terminal({
   cursorBlink: true,
   rows: 32,
@@ -34,10 +34,10 @@ socket.onclose = function(e) {
 });
 
 function reconnect(){
-	var host = '20.26.25.153'
+	var host = '172.16.149.2'
 	$("#connect-notify").html('正在远程使用<span>'+host+'...</span>');
 	$("#connect-button").html('<button onclick="close_connect();" class="btn btn-danger">关闭连接</button>');
-	socket = new WebSocket('ws://192.168.10.1:9000/asset/host/20.26.25.153');
+	socket = new WebSocket('ws://172.16.149.2:9000/host/ssh/172.16.149.2');
 	term = new Terminal({
 	  cursorBlink: true,
 	  rows: 25,

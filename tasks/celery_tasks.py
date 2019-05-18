@@ -46,7 +46,7 @@ def get_assets_data(full_filename):
             asset['remote_user'] = override_ceel_value(sheet.cell(i,3).value, str)
             asset['remote_passwd'] = override_ceel_value(sheet.cell(i,4).value, str)
             asset['group_id'] = override_ceel_value(sheet.cell(i,5).value, int)
-#             asset['agent_is_install'] = override_ceel_value(sheet.cell(i,6).value, int)
+            asset['agent_is_install'] = override_ceel_value(sheet.cell(i,6).value, int)
             asset['serial'] = override_ceel_value(sheet.cell(i,7).value, str)
             asset['hostname'] = override_ceel_value(sheet.cell(i,8).value, str)
             asset['public_ip'] = override_ceel_value(sheet.cell(i,9).value, str)

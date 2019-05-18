@@ -1,10 +1,12 @@
 from django.conf.urls import url
-from views import ListWeb,ListLogic,ListStorage
+from views import WebList,WebCreate,WebDetail,LogicList,StorageList
 
 urlpatterns = [
-    url(r'^web/$', ListWeb.as_view(),name='listweb'),
-    url(r'^logic/$', ListLogic.as_view(),name='listlogic'),
-    url(r'^storage/$', ListStorage.as_view(),name='liststorage'),    
+    url(r'^web/list/$', WebList.as_view(),name='WebList'),
+    url(r'^web/create/$', WebCreate.as_view(),name='WebCreate'),
+    url(r'^web/detail/$', WebDetail.as_view(),name='WebDetail'),
+    url(r'^logic/list/$', LogicList.as_view(),name='LogicList'),
+    url(r'^storage/list/$', StorageList.as_view(),name='StorageList'),    
     
    
 ]

@@ -8,17 +8,18 @@ Created on 2018年7月28日
 from dwebsocket import accept_websocket
 from models import AssetHost,HostGroup,HostImport,HostEvent,HostAccount,HostDisk,HostEth
 from sysmgt.models import SysUser
-from forms import AssetHostForm,HostGroupForm
+from forms import AssetHostForm,HostGroupForm,HostAgentForm
 from ssh_client.client import connect
 from django.shortcuts import render_to_response,HttpResponse
 from django.views.generic import TemplateView,ListView,FormView,DeleteView,DetailView,UpdateView
 from django.urls import reverse_lazy
 from django.db.models import ProtectedError
-import json
-import xlrd
+import json,xlrd,os,sys,datetime,urllib2
 from tasks.celery_tasks import process_asset_import_task,collect_host_info_task
-import os,sys
 from django.http.response import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
+from asset.models import HostAgent
+from utils.elasticsearch.es_api import IndexApi,DocumentApi
 root_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 class AssetView(ListView):
@@ -201,5 +202,129 @@ class GroupDelete(DeleteView):
             return HttpResponse(json.dumps({'status':False,'err_msg':err_msg}),content_type="application/json")
         else:
             return HttpResponse(json.dumps({'status':True}),content_type="application/json")
-    
+
+class AgentRegister(TemplateView):
+    def post(self,request):
+        if request.method == 'POST':
+            jsonData = json.loads(request.body)
+            assetData = jsonData["asset"]
+            startInfo = jsonData["agent"]
+            assetData["owner"] = 1
+            private_ip = assetData["private_ip"]
+           
+            #每次注册都检查资产记录,如果存在就更新
+            try:
+                AssetHost.objects.get(private_ip=private_ip)
+            except ObjectDoesNotExist:
+                AssetHost.objects.create(**assetData)#有可能创建失败
+            else:
+                AssetHost.objects.filter(private_ip=private_ip).update(**assetData)
+            #每次注册都检查agent记录,如果存在就更新    
+            try:
+                HostAgent.objects.get(host=private_ip)
+            except ObjectDoesNotExist:
+                HostAgent.objects.create(**startInfo)#有可能创建失败
+            else:
+                HostAgent.objects.filter(host=private_ip).update(**startInfo)
+        return JsonResponse({"code":702,"type":"register"})
+
+class AgentHeartbeat(TemplateView):
+    def post(self,request):
+        if request.method == 'POST':
+            jsonData = json.loads(request.body)
+            host = jsonData["host"]
+            try:
+                #需要资产表,agent表中都有此ip记录才是正常
+                AssetHost.objects.get(private_ip=host)
+                HostAgent.objects.get(host=host)
+            except Exception as e:
+                return JsonResponse({"code":704,"type":"heartbeat","msg":e.message})
+            else:
+                HostAgent.objects.update(host=jsonData["host"],heartbeat_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                return JsonResponse({"code":702,"type":"heartbeat"})
+
+def gen_monitor_data(indexObj,index,doc_type,host,interval,*args):
+    data_dict = {"collect_time":[]}
+    for arg in args:
+        data_dict[arg] = []
+    data = indexObj.search(index,doc_type,host,interval)
+    data = json.loads(data["result"])
+    for hit in data["hits"]["hits"]:
+        data_dict["collect_time"].append(hit["_source"]["collect_time"][5:])
+        for arg in args:
+            data_dict[arg].append(hit["_source"][arg])
+    for arg in args:
+        data_dict[arg].reverse()
+    data_dict["collect_time"].reverse()
+    return data_dict
+
+#通过agent api 获取主机运行情况
+def get_host_status(host):
+    agentObj = HostAgent.objects.get(host=host)
+    port = agentObj.port
+    url = "http://{}:{}/status".format(host,port)
+    req = urllib2.Request(url)
+    try:
+        res = urllib2.urlopen(req)
+    except urllib2.URLError:
+        print("{}连接失败".format(url))
+        return {"status":False}
+    else:
+        return {"status":True,"data":res.read()}
+
+class HostStatus(TemplateView):
+    def post(self,request):
+        if request.method == 'POST':
+            host = request.POST.get("host")
+            res = get_host_status(host)
+            if res["status"]:
+                return JsonResponse(json.loads(res["data"]))
+            else:
+                return JsonResponse({"code":400})
+        
+class HostMonitor(TemplateView):
+    def post(self,request):
+        if request.method == 'POST':
+            esObj = DocumentApi("172.16.149.10",9200)
+            host = request.POST.get("host")
+            interval = int(request.POST.get("time_value"))
+            #cpu-load
+            cpuLoadItem = ["load1","load5","load15"]
+            cpuLoadData = gen_monitor_data(esObj, "cpu-load-2019-05", "cpu-load", host, interval,*cpuLoadItem)
+            #cpu-usage
+            cpuUsageItem = ["idle","iowait","user","system"]
+            cpuUsageData = gen_monitor_data(esObj, "cpu-usage-2019-05", "cpu-usage", host, interval,*cpuUsageItem)
+            #mem-usage
+            memUsageItem = ["virt_available","virt_used","swap_available","swap_used"]
+            memUsageData = gen_monitor_data(esObj,"mem-usage-2019-05", "mem-usage", host, interval,*memUsageItem)
+            #disk-tps
+            diskTpsItem = ["tps"]
+            diskTpsData = gen_monitor_data(esObj, "disk-io-2019-05", "disk-io", host, interval,*diskTpsItem)
+            #disk-speed
+            diskSpeedItem = ["blks"]
+            diskSpeedData = gen_monitor_data(esObj, "disk-io-2019-05", "disk-io", host, interval,*diskSpeedItem)
+            #disk-usage
+            diskUsageItem = ["available","used"]
+            diskUsageData = gen_monitor_data(esObj, "disk-usage-2019-05", "disk-usage", host, interval,*diskUsageItem)
+            #network
+            networkItem = ["kb_recv","kb_sent"]
+            networkData = gen_monitor_data(esObj, "net-io-2019-05", "net-io", host, interval,*networkItem)
+            #netstat
+            netstatItem = ["ESTABLISHED","LISTEN"]
+            netstatData = gen_monitor_data(esObj, "net-conn-2019-05", "net-conn", host, interval,*netstatItem)
+            #process
+            processItem = ["processes","threads"]
+            processData = gen_monitor_data(esObj, "process-thread-2019-05", "process-thread", host, interval,*processItem)
+            
+        return JsonResponse({"code":200,
+                             "cpuload":cpuLoadData,
+                             "cpuusage":cpuUsageData,
+                             "memusage":memUsageData,
+                             "disktps":diskTpsData,
+                             "diskspeed":diskSpeedData,
+                             "diskusage":diskUsageData,
+                             "network":networkData,
+                             "netstat":netstatData,
+                             "process":processData
+                             })
     

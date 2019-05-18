@@ -23,7 +23,7 @@
 		</div>
 
 		<div class="page-content">
-			<div class="row">
+			<!--<div class="row">
 				<div class="col-xs-12">
 					<div class="bullhorn center">
 						
@@ -36,178 +36,63 @@
 						</marquee>
 					</div>
 				</div>
-			</div>
+			</div> -->
 			<div class="row">
-				<div class="col-lg-2">
-					<div class="panel panel-info">
-					  <div class="panel-heading">
-						<div class="row">
-						  <div class="col-xs-6">
-							<i class="fa fa-dashboard bigger-230"></i>
-						  </div>
-						  <div class="col-xs-6 text-right">
-							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.serTotal }}</strong></p>
-							<p class="announcement-text">Total</p>
-						  </div>
-						</div>
-					  </div>
-					  <a href="#">
-						<div class="panel-footer announcement-bottom">
-						  <div class="row">
-							<div class="col-xs-6">
-								<strong>宿主机</strong>
-							</div>
-							<div class="col-xs-6 text-right">
-							  <i class="fa fa-arrow-right"></i>
-							</div>
-						  </div>
-						</div>
-					  </a>
-					</div>
+				<div class="col-sm-3">
+					<div id="total"></div>
 				</div>
-				  
-				  
-				<div class="col-lg-2">
-					<div class="panel panel-success">
-					  <div class="panel-heading">
-						<div class="row">
-						  <div class="col-xs-6">
-							<i class="fa fa-ok bigger-230"></i>
-						  </div>
-						  <div class="col-xs-6 text-right">
-							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.serRun }}</strong></p>
-							<p class="announcement-text">Connect</p>
-						  </div>
+				<div class="col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat widget-header-small">
+							<h5 class="widget-title">
+								<i class="ace-icon fa fa-signal"></i>
+								资产类型统计
+							</h5>
 						</div>
-					  </div>
-					  <a href="#">
-						<div class="panel-footer announcement-bottom">
-						  <div class="row">
-							<div class="col-xs-6">
-								<strong>宿主机</strong>
-							</div>
-							<div class="col-xs-6 text-right">
-							  <i class="fa fa-arrow-right"></i>
-							</div>
-						  </div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="piechart-placeholder"></div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div><!-- /.widget-box -->
+				</div><!-- /.col -->
+				<div class="col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat widget-header-small">
+							<h5 class="widget-title">
+								<i class="ace-icon fa fa-signal"></i>
+								Agent状态统计
+							</h5>
 						</div>
-					  </a>
-					</div>
-				</div>
-				  
-				<div class="col-lg-2">
-					<div class="panel panel-danger">
-					  <div class="panel-heading">
-						<div class="row">
-						  <div class="col-xs-6">
-							<i class="icon-remove bigger-230"></i>
-						  </div>
-						  <div class="col-xs-6 text-right">
-							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.serStop }}</strong></p>
-							<p class="announcement-text">Disconnect</p>
-						  </div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="agent"></div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div><!-- /.widget-box -->
+				</div><!-- /.col -->
+				<div class="col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat widget-header-small">
+							<h5 class="widget-title">
+								<i class="ace-icon fa fa-signal"></i>
+								SSH状态统计
+							</h5>
 						</div>
-					  </div>
-					  <a href="#">
-						<div class="panel-footer announcement-bottom">
-						  <div class="row">
-							<div class="col-xs-6">
-								<strong>宿主机</strong>
-							</div>
-							<div class="col-xs-6 text-right">
-							  <i class="fa fa-arrow-right"></i>
-							</div>
-						  </div>
-						</div>
-					  </a>
-					</div>
-				</div>
-				  
-				  
-				<div class="col-lg-2">
-					<div class="panel panel-info">
-					  <div class="panel-heading">
-						<div class="row">
-						  <div class="col-xs-6">
-							<i class="icon-globe bigger-230"></i>
-						  </div>
-						  <div class="col-xs-6 text-right">
-							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.vmTotal }}</strong></p>
-							<p class="announcement-text">Total</p>
-						  </div>
-						</div>
-					  </div>
-					  <a href="#">
-						<div class="panel-footer announcement-bottom">
-						  <div class="row">
-							<div class="col-xs-6">
-								<strong>虚拟主机</strong>
-							</div>
-							<div class="col-xs-6 text-right">
-							  <i class="icon-arrow-right"></i>
-							</div>
-						  </div>
-						</div>
-					  </a>
-					</div>
-				</div>
-				<div class="col-lg-2">
-					<div class="panel panel-success">
-					  <div class="panel-heading">
-						<div class="row">
-						  <div class="col-xs-6">
-							<i class="icon-play-circle bigger-230"></i>
-						  </div>
-						  <div class="col-xs-6 text-right">
-							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.vmRun }}</strong></p>
-							<p class="announcement-text">Running</p>
-						  </div>
-						</div>
-					  </div>
-					  <a href="#">
-						<div class="panel-footer announcement-bottom">
-						  <div class="row">
-							<div class="col-xs-6">
-								<strong>虚拟主机</strong>
-							</div>
-							<div class="col-xs-6 text-right">
-							  <i class="icon-arrow-right"></i>
-							</div>
-						  </div>
-						</div>
-					  </a>
-					</div>
-				</div>
-				<div class="col-lg-2">
-					<div class="panel panel-danger">
-					  <div class="panel-heading">
-						<div class="row">
-						  <div class="col-xs-6">
-							<i class="icon-stop bigger-230"></i>
-						  </div>
-						  <div class="col-xs-6 text-right">
-							<p class="announcement-heading" id="cpu_per"><strong>{{ totalInfo.vmStop }}</strong></p>
-							<p class="announcement-text">Stop</p>
-						  </div>
-						</div>
-					  </div>
-					  <a href="#">
-						<div class="panel-footer announcement-bottom">
-						  <div class="row">
-							<div class="col-xs-6">
-								<strong>虚拟主机</strong>
-							</div>
-							<div class="col-xs-6 text-right">
-							  <i class="icon-arrow-right"></i>
-							</div>
-						  </div>
-						</div>
-					  </a>
-					</div>
-				</div>
-			
-			
-				<div class="col-xs-12">
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="ssh"></div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div><!-- /.widget-box -->
+				</div><!-- /.col -->
+			</div>
+				
+			<div class="row">	
+				<div class="col-xs-6">
 					<div class="panel">
 						<div class="widget-box">
 							<div class="widget-header">
@@ -216,14 +101,25 @@
 
 							<div class="widget-body">
 								<div class="widget-main">
-									<p>keystone 内存使用</p>														
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>CPU使用率</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70%</td>
+										</tr>
+									</table>												
 								</div>
 							</div>
 						</div>
 					</div>										
 				</div>
 			
-				<div class="col-xs-12">
+				<div class="col-xs-6">
 					<div class="panel">
 						<div class="widget-box">
 							<div class="widget-header">
@@ -232,15 +128,26 @@
 
 							<div class="widget-body">
 								<div class="widget-main">
-									<p>keystone 内存使用</p>													
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>内存使用率</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70%</td>
+										</tr>
+									</table>											
 								</div>
 							</div>
 						</div>
 					</div>										
 				</div>
 		
-				<div class="col-xs-12">
-					<div>
+				<div class="col-xs-6">
+					<div class="panel">
 						<div class="widget-box">
 							<div class="widget-header">
 								<h4>存储 TOP 5</h4>
@@ -248,20 +155,297 @@
 
 							<div class="widget-body">
 								<div class="widget-main">
-									<p>keystone 内存使用</p>														
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>存储使用率</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70%</td>
+										</tr>
+									</table>														
 								</div>
 							</div>
 						</div>
 					</div>										
 				</div>
+				
+				<div class="col-xs-6">
+					<div class="panel">
+						<div class="widget-box">
+							<div class="widget-header">
+								<h4>磁盘IO TOP 5</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main">
+									<table class="table">
+										<tr>
+											<th>主机</th>
+											<th>资产类型</th>
+											<th>磁盘IO读写/秒</th>
+										</tr>
+										<tr>
+											<td>192.168.10.3</td>
+											<td>服务器</td>
+											<td>70</td>
+										</tr>
+									</table>													
+								</div>
+							</div>
+						</div>
+					</div>										
+				</div>
+				
+				<div class="col-xs-12">
+					<div id="task-tab" class="tab-pane active">
+						<h4 class="smaller lighter green">
+							<i class="ace-icon fa fa-list"></i>
+							最近资产操作
+						</h4>
+
+						<ul id="tasks" class="item-list">
+							<li class="item-blue clearfix">
+								<label class="inline">
+									<input type="checkbox" class="ace" />
+									<span class="lbl"> Upgrading scripts used in template</span>
+								</label>
+							</li>
+
+							<li class="item-grey clearfix">
+								<label class="inline">
+									<input type="checkbox" class="ace" />
+									<span class="lbl"> Adding new skins</span>
+								</label>
+							</li>
+						</ul>
+					</div>
+				</div>
 			</div>
+					
 		</div><!-- /.page-content -->
 	</div>
 </div><!-- /.main-content -->
 {% endblock %}
 
 {% block js %}
+<script src="/static/js/echarts.min.js"></script>
 <script type="text/javascript">
+
+	function draw_total(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		totalChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#3398DB'],
+		    tooltip: {
+		        trigger: 'item',
+		        formatter: "{c}"
+		    },
+		    
+		    series: [
+		        {
+		            name:'访问来源',
+		            type:'pie',
+		            radius: ['100%', '70%'],
+		            label: {
+		                normal: {
+		                    show: true,
+		                    formatter:'{b} : {c}',
+		                    position: 'center'
+		                },
+		            },
+		            data:[
+		                {value:335, name:'资产总数'},
+		            ]
+		        }
+		    ]
+		};
+
+		totalChart.setOption(option); 
+		
+	}
+
+	function draw_asset(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		assetChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#3398DB','#ddd'],
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:['已安装agent','未安装agent']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ['物理机','虚拟机']
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'已安装agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[40, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        {
+		            name:'未安装agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[60, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        
+		    ]
+		};
+
+		assetChart.setOption(option); 
+		
+	}
+
+	function draw_agent(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		agentChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#00CC33','#FF3333'],
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:['可用agent','不可用agent']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ['物理机','虚拟机']
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'可用agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[30, 45],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        {
+		            name:'不可用agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[10, 5],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        
+		    ]
+		};
+
+		agentChart.setOption(option); 
+		
+	}
+
+	function draw_ssh(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		sshChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#5cb85c','#D15B47'],
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:['可达ssh','不可达ssh']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ['物理机','虚拟机']
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'可达ssh',
+		            type:'bar',
+		            stack: '广告',
+		            data:[40, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        {
+		            name:'不可达ssh',
+		            type:'bar',
+		            stack: '广告',
+		            data:[60, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        
+		    ]
+		};
+
+		sshChart.setOption(option); 
+		
+	}
+	
+	$(document).ready(function(){
+		draw_total('total','100%','220px','60');
+		draw_asset('piechart-placeholder','100%','220px','60');
+		draw_agent('agent','100%','220px','60');
+		draw_ssh('ssh','100%','220px','60');
+	});
+	$(window).resize(function() {
+		/* var width = $(".widget-main").width();
+		draw_resource('piechart-placeholder',width,'180px','60'); */
+		totalChart.resize();
+		assetChart.resize();
+		agentChart.resize();
+		sshChart.resize();
+	});
+	
+	
 	
 </script>
 {% endblock %}

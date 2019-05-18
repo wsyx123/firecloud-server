@@ -14,22 +14,18 @@ class AssetHost(models.Model):
                    (2,u'离线'),
                    )
     operate_status = (
-                      (1,u'运营中'),
-                      (2,u'维护中'),
-                      (3,u'已下线')
-                      )
-    agent_status = (
-                      (1,u'未安装,选择安装'),
-                      (1,u'可用的,已安装'),
-                      (2,u'不可用,已安装')
+                      (1,u'待上线'),
+                      (2,u'运营中'),
+                      (3,u'维护中'),
+                      (4,u'已下线')
                       )
     asset_type = (
                   (1,'物理机'),
                   (2,'虚拟机')
                   )
     private_ip = models.GenericIPAddressField(unique=True,verbose_name='私网IP')#1L
-    port = models.IntegerField(verbose_name='端口')
-    host_status = models.IntegerField(choices=host_status,verbose_name='状态')
+    port = models.IntegerField(verbose_name='端口',default=22)
+    host_status = models.IntegerField(choices=host_status,null=True, blank=True,default=1,verbose_name='状态')
     remote_user = models.CharField(max_length=32,verbose_name='远程帐号')
     remote_passwd = models.CharField(max_length=64,verbose_name='用户密码')
     
@@ -47,18 +43,38 @@ class AssetHost(models.Model):
     
     vendor = models.CharField(max_length=128,null=True, blank=True,verbose_name='供应商')
     position = models.CharField(max_length=64,null=True, blank=True,verbose_name='位置信息')
-    group = models.ForeignKey('HostGroup',on_delete=models.PROTECT,verbose_name='主机组')
-    operate_status = models.IntegerField(choices=operate_status,null=True, blank=True,verbose_name='运营状态')
+    group = models.ForeignKey('HostGroup',on_delete=models.PROTECT,null=True, blank=True,default=1,verbose_name='主机组')
+    operate_status = models.IntegerField(choices=operate_status,null=True, blank=True,default=1,verbose_name='运营状态')
     department = models.CharField(max_length=64,null=True, blank=True,verbose_name='使用部门')#21L
     owner = models.ForeignKey(SysUser)
-    agent_status = models.IntegerField(choices=agent_status,default=0)
+    agent_is_install = models.BooleanField(default=False)
+    register_time = models.DateTimeField(auto_now_add=True,verbose_name='注册时间')
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
     
     def get_maintainer(self):
         return HostGroup.objects.get(id=self.group_id).maintainer
     
+    def agent_status(self):
+        if self.agent_is_install:
+            return HostAgent.objects.get(host=self.private_ip)
+            
+    
     def __unicode__(self):
         return '%s' %(self.private_ip)
+
+class HostAgent(models.Model):
+    host = models.GenericIPAddressField()
+    is_online = models.BooleanField(default=True)
+    start_cmd = models.CharField(max_length=255)
+    port = models.IntegerField()
+    pid = models.IntegerField()
+    install_path = models.CharField(max_length=128)
+    log_full_file = models.CharField(max_length=128)
+    collect_interval = models.IntegerField()
+    heartbeat_interval = models.IntegerField()
+    install_time = models.DateTimeField(auto_now_add=True,verbose_name='安装时间')
+    heartbeat_time = models.DateTimeField(auto_now=True,verbose_name='上一次心跳包时间')
+    
     
 class HostDisk(models.Model):
     host = models.ForeignKey(AssetHost)

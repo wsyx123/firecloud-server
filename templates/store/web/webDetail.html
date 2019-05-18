@@ -1,0 +1,111 @@
+{% extends "base/base.html" %}
+
+{% block main %}
+<div class="main-content">
+	<div class="main-content-inner">
+		<div class="breadcrumbs ace-save-state" id="breadcrumbs">
+			<ul class="breadcrumb">
+				<li>
+					<i class="ace-icon fa fa-home home-icon"></i>
+					<a href="{% url 'dashboard' %}">Home</a>
+				</li>
+
+				<li>
+					应用商店
+				</li>
+				<li>
+					<a href="{% url 'WebList' %}">web层</a>
+				</li>
+				<li>Nginx</li>
+				
+			</ul><!-- /.breadcrumb -->
+
+		</div>
+
+		<div class="page-content">
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div id="user-profile-1" class="user-profile row">
+						<div class="col-xs-12 col-sm-3 center">
+							<div class="space-12"></div>
+							<div>
+								<div><h2>Logo</h2></div>
+								<div class="space-4"></div>
+								<span class="profile-picture">
+									<img id="avatar" class="editable img-responsive" alt="添加头像" src="/static/images/store/nginx.png" />
+								</span>
+
+								<div class="space-4"></div>
+							</div>
+
+						
+						</div>
+
+						<div class="col-xs-12 col-sm-9">
+							
+
+							<div class="space-12"></div>
+
+							<div class="profile-user-info profile-user-info-striped">
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 应用名 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">Nginx</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 描述 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">web服务器</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 版本 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">1.6</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> logo地址 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">/static/images/store/nginx.png</span>
+									</div>
+								</div>
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 资源形势 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="username">docker</span>
+									</div>
+								</div>
+
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 资源地址 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="country">192.168.10.3:5050/nginx:1.6</span>
+									</div>
+								</div>
+
+								<div class="profile-info-row">
+									<div class="profile-info-name"> 创建时间 </div>
+
+									<div class="profile-info-value">
+										<span class="editable" id="age">2019-4-11 16:23:12</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div><!-- /.col -->
+			</div><!-- /.row -->
+		</div><!-- /.page-content -->
+	</div>
+</div><!-- /.main-content -->
+{% endblock %}
+

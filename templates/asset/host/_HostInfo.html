@@ -50,14 +50,14 @@
 		<td></td>
 		<td>
 			<div class="profile-info-row">
-				<div class="profile-info-name">代理状态</div>
+				<div class="profile-info-name">SSH状态</div>
 				<div class="profile-info-value">
 					<span class="editable">
-						{% if detailhost.host_status == 1 %}
-							 <span class="label label-success arrowed">在线</span>
+						{% ifequal detailhost.host_status 1 %}
+							<span class="label label-sm label-success">在线</span>
 						{% else %}
-							 <span class="label label-danger arrowed-in">离线</span>
-						{% endif %}														
+							<span class="label label-sm label-danger">离线</span>
+						{% endifequal %}											
 					</span>
 				</div>
 			</div>
@@ -67,11 +67,18 @@
 				<div class="profile-info-name">运营状态</div>
 				<div class="profile-info-value">
 					<span class="editable">
-						{% if detailhost.operate_status == 1 %}
+						{% ifequal detailhost.operate_status  1 %}
+							 <span class="label label arrowed">待上线</span>
+						{% endifequal %}
+						{% ifequal detailhost.operate_status  2 %}
 							 <span class="label label-success arrowed">运营中</span>
-						{% else %}
-							 <span class="label label-default arrowed">未知</span>
-						{% endif %}														
+						{% endifequal %}
+						{% ifequal detailhost.operate_status  3 %}
+							 <span class="label label-warning arrowed">维护中</span>
+						{% endifequal %}
+						{% ifequal detailhost.operate_status  4 %}
+							 <span class="label label-danger arrowed">已下线</span>
+						{% endifequal %}											
 					</span>
 				</div>
 			</div>

@@ -1,0 +1,61 @@
+.header {
+    margin-top:0px;
+}
+
+.hostoverview{
+	border: 1px solid  	#D3D3D3;
+	padding-top: 5px;
+}
+
+.mounts .profile-info-name,.ethernet .profile-info-name{
+	width:100%;
+}
+
+.table > tbody > tr > td{
+	padding:2px;
+	border-top: none;
+}
+
+.table > tbody > tr > th{
+	padding:2px;
+	border-top: none;
+}
+
+.pagination{
+	margin: 0px;
+}
+
+#auto-install-form{
+	display: none;
+}
+
+.content-title {
+    height: 28px;
+    line-height: 28px;
+    font-size: 19px;
+}
+.number {
+    color: #666;
+    border: 2px solid #666;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    width: 32px;
+    text-align: center;
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: -2px;
+}
+#logDisplay{
+	margin-left: 2px;
+	background-color:#DDDDDD;
+	max-height: 275px;
+	padding-left: 10px;
+	overflow-y: scroll; 
+}
+
+.timeOptions li a {
+	cursor:pointer;
+}
+ 
+ 

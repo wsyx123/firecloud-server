@@ -38,145 +38,60 @@
 				</div>
 			</div> -->
 			<div class="row">
-				<div class="col-lg-2">
-					<div class="panel panel-primary">
-					    <div class="panel-heading">
-							<div class="row">
-								<div class="col-xs-6">
-									<strong>总量</strong>
-								</div>
-								<div class="col-xs-6 text-right">
-									<span style="font-size:20px;">2</span>
-								</div>
-								
-							</div>
-					    </div>
-					  
-						<div class="panel-footer announcement-bottom">
-							<div class="center">
-								<i class="fa fa-server fa-lg grey" aria-hidden="true"></i><span> 物理机</span>
-							</div>
-						</div>
-					  
-					</div>
+				<div class="col-sm-3">
+					<div id="total"></div>
 				</div>
-				  
-				  
-				<div class="col-lg-2">
-					<div class="panel panel-success">
-					    <div class="panel-heading">
-							<div class="row">
-								<div class="col-xs-6">
-									<strong>在线</strong>
-								</div>
-								<div class="col-xs-6 text-right">
-									<span style="font-size:20px;">2</span>
-								</div>
-								
-							</div>
-					    </div>
-					  
-						<div class="panel-footer announcement-bottom">
-							<div class="center">
-								<i class="fa fa-server fa-lg grey" aria-hidden="true"></i><span> 物理机</span>
-							</div>
+				<div class="col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat widget-header-small">
+							<h5 class="widget-title">
+								<i class="ace-icon fa fa-signal"></i>
+								资产类型统计
+							</h5>
 						</div>
-					  
-					</div>
-				</div>
-				  
-				<div class="col-lg-2">
-					<div class="panel panel-danger">
-					    <div class="panel-heading">
-							<div class="row">
-								<div class="col-xs-6">
-									<strong>离线</strong>
-								</div>
-								<div class="col-xs-6 text-right">
-									<span style="font-size:20px;">2</span>
-								</div>
-								
-							</div>
-					    </div>
-					  
-						<div class="panel-footer announcement-bottom">
-							<div class="center">
-								<i class="fa fa-server fa-lg grey" aria-hidden="true"></i><span> 物理机</span>
-							</div>
-						</div>
-					  
-					</div>
-				</div>
-				
-				<div class="col-lg-2">
-					<div class="panel panel-primary">
-					    <div class="panel-heading">
-							<div class="row">
-								<div class="col-xs-6">
-									<strong>总量</strong>
-								</div>
-								<div class="col-xs-6 text-right">
-									<span style="font-size:20px;">2</span>
-								</div>
-								
-							</div>
-					    </div>
-					  
-						<div class="panel-footer announcement-bottom">
-							<div class="center">
-								<i class="fa fa-window-restore fa-lg light-orange" aria-hidden="true"></i><span> 虚拟机</span>
-							</div>
-						</div>
-					  
-					</div>
-				</div>
-				
-				<div class="col-lg-2">
-					<div class="panel panel-success">
-					    <div class="panel-heading">
-							<div class="row">
-								<div class="col-xs-6">
-									<strong>在线</strong>
-								</div>
-								<div class="col-xs-6 text-right">
-									<span style="font-size:20px;">2</span>
-								</div>
-								
-							</div>
-					    </div>
-					  
-						<div class="panel-footer announcement-bottom">
-							<div class="center">
-								<i class="fa fa-window-restore fa-lg light-orange" aria-hidden="true"></i><span> 虚拟机</span>
-							</div>
-						</div>
-					  
-					</div>
-				</div>
 
-				<div class="col-lg-2">
-					<div class="panel panel-danger">
-					    <div class="panel-heading">
-							<div class="row">
-								<div class="col-xs-6">
-									<strong>离线</strong>
-								</div>
-								<div class="col-xs-6 text-right">
-									<span style="font-size:20px;">2</span>
-								</div>
-								
-							</div>
-					    </div>
-					  
-						<div class="panel-footer announcement-bottom">
-							<div class="center">
-								<i class="fa fa-window-restore fa-lg light-orange" aria-hidden="true"></i><span> 虚拟机</span>
-							</div>
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="piechart-placeholder"></div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div><!-- /.widget-box -->
+				</div><!-- /.col -->
+				<div class="col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat widget-header-small">
+							<h5 class="widget-title">
+								<i class="ace-icon fa fa-signal"></i>
+								Agent状态统计
+							</h5>
 						</div>
-					  
-					</div>
-				</div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="agent"></div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div><!-- /.widget-box -->
+				</div><!-- /.col -->
+				<div class="col-sm-3">
+					<div class="widget-box">
+						<div class="widget-header widget-header-flat widget-header-small">
+							<h5 class="widget-title">
+								<i class="ace-icon fa fa-signal"></i>
+								SSH状态统计
+							</h5>
+						</div>
+
+						<div class="widget-body">
+							<div class="widget-main">
+								<div id="ssh"></div>
+							</div><!-- /.widget-main -->
+						</div><!-- /.widget-body -->
+					</div><!-- /.widget-box -->
+				</div><!-- /.col -->
+			</div>
 				
+			<div class="row">	
 				<div class="col-xs-6">
 					<div class="panel">
 						<div class="widget-box">
@@ -317,7 +232,220 @@
 {% endblock %}
 
 {% block js %}
+<script src="/static/js/echarts.min.js"></script>
 <script type="text/javascript">
+
+	function draw_total(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		totalChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#3398DB'],
+		    tooltip: {
+		        trigger: 'item',
+		        formatter: "{c}"
+		    },
+		    
+		    series: [
+		        {
+		            name:'访问来源',
+		            type:'pie',
+		            radius: ['100%', '70%'],
+		            label: {
+		                normal: {
+		                    show: true,
+		                    formatter:'{b} : {c}',
+		                    position: 'center'
+		                },
+		            },
+		            data:[
+		                {value:335, name:'资产总数'},
+		            ]
+		        }
+		    ]
+		};
+
+		totalChart.setOption(option); 
+		
+	}
+
+	function draw_asset(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		assetChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#3398DB','#ddd'],
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:['已安装agent','未安装agent']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ['物理机','虚拟机']
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'已安装agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[40, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        {
+		            name:'未安装agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[60, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        
+		    ]
+		};
+
+		assetChart.setOption(option); 
+		
+	}
+
+	function draw_agent(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		agentChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#00CC33','#FF3333'],
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:['可用agent','不可用agent']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ['物理机','虚拟机']
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'可用agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[30, 45],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        {
+		            name:'不可用agent',
+		            type:'bar',
+		            stack: '广告',
+		            data:[10, 5],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        
+		    ]
+		};
+
+		agentChart.setOption(option); 
+		
+	}
+
+	function draw_ssh(id,width,height,barwidth){
+		$('#'+id).css({'width': width , 'min-height':height});
+		sshChart = echarts.init(document.getElementById(id));
+		option = {
+			color: ['#5cb85c','#D15B47'],
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:['可达ssh','不可达ssh']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ['物理机','虚拟机']
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'可达ssh',
+		            type:'bar',
+		            stack: '广告',
+		            data:[40, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        {
+		            name:'不可达ssh',
+		            type:'bar',
+		            stack: '广告',
+		            data:[60, 50],
+		            itemStyle: {normal: {label:{show:true}}}
+		        },
+		        
+		    ]
+		};
+
+		sshChart.setOption(option); 
+		
+	}
+	
+	$(document).ready(function(){
+		draw_total('total','100%','220px','60');
+		draw_asset('piechart-placeholder','100%','220px','60');
+		draw_agent('agent','100%','220px','60');
+		draw_ssh('ssh','100%','220px','60');
+	});
+	$(window).resize(function() {
+		/* var width = $(".widget-main").width();
+		draw_resource('piechart-placeholder',width,'180px','60'); */
+		totalChart.resize();
+		assetChart.resize();
+		agentChart.resize();
+		sshChart.resize();
+	});
+	
+	
 	
 </script>
 {% endblock %}

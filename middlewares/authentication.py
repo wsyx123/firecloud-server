@@ -8,12 +8,14 @@ Created on 2018年10月25日
 
 from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import HttpResponseRedirect,HttpResponse
-from sysmgt.models import SysUser,Level2Menu,Menu_Role_rel
+from sysmgt.models import SysUser,Level2Menu,Menu_Role_rel,WhiteList
 
 class AuthLogin(MiddlewareMixin):
     def process_request(self,request):
+        if white_list(request.path):
+            pass
         #未登录 请求其它页面( no session and  other url ) ->  转到login页面
-        if not request.session.has_key('_user_id') and 'login' not in request.path:
+        elif not request.session.has_key('_user_id') and 'login' not in request.path:
             return HttpResponseRedirect('/login/')
         
         #已登录  请求登录页面( have session and login url ) ->  转到index    
@@ -21,7 +23,7 @@ class AuthLogin(MiddlewareMixin):
             return HttpResponseRedirect('/')
         
         #已登录 请求其它页面( have session and other url ) ->  url 判断->  (pass or denied)
-        if request.session.has_key('_user_id') and 'logout' not in request.path:
+        elif request.session.has_key('_user_id') and 'logout' not in request.path:
             # url 判断
             if request.path == '/':
                 pass
@@ -41,6 +43,13 @@ class AuthLogin(MiddlewareMixin):
 
     def process_response(self, request, response):
         return response
+
+def white_list(url):
+    white_obj = WhiteList.objects.filter(url=url)
+    if len(white_obj) == 1 and white_obj[0].enabled:
+        return True
+    else:
+        return False
 
 def url_acl(url,userid):
     url_list = url.split('/')
